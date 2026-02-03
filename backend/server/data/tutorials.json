@@ -1,0 +1,58 @@
+[
+    {
+        "id": "complexity",
+        "title": "Big O Complexity",
+        "description": "Learn how to analyze algorithm efficiency using Big O notation.",
+        "content": "# Big O Notation\n\nBig O notation is used to describe the performance or complexity of an algorithm. It specifically describes the worst-case scenario.\n\n## Common Complexities\n\n- **O(1)** - Constant time\n- **O(log n)** - Logarithmic time\n- **O(n)** - Linear time\n- **O(n log n)** - Linearithmic time\n- **O(n²)** - Quadratic time\n- **O(2ⁿ)** - Exponential time",
+        "quiz": [
+            {
+                "question": "What is the time complexity of accessing an element by index in an array?",
+                "options": [
+                    "O(1)",
+                    "O(n)",
+                    "O(log n)",
+                    "O(n²)"
+                ],
+                "answer": 0
+            },
+            {
+                "question": "Binary search has what time complexity?",
+                "options": [
+                    "O(n)",
+                    "O(log n)",
+                    "O(n log n)",
+                    "O(1)"
+                ],
+                "answer": 1
+            }
+        ]
+    },
+    {
+        "id": "flow",
+        "title": "Recursion Flow",
+        "description": "Understand how the call stack works with recursive functions.",
+        "content": "# Recursion and the Call Stack\n\nRecursion is when a function calls itself. Each call adds a new frame to the call stack.\n\n## Key Concepts\n\n- **Base Case** - The condition that stops recursion\n- **Recursive Case** - Where the function calls itself\n- **Call Stack** - Memory structure that tracks function calls\n- **Stack Overflow** - When recursion goes too deep",
+        "quiz": [
+            {
+                "question": "What is the space complexity of a recursive factorial function?",
+                "options": [
+                    "O(1)",
+                    "O(n)",
+                    "O(log n)",
+                    "O(n²)"
+                ],
+                "answer": 1
+            },
+            {
+                "question": "What happens if a recursive function has no base case?",
+                "options": [
+                    "Returns 0",
+                    "Stack overflow",
+                    "Returns undefined",
+                    "Runs forever"
+                ],
+                "answer": 1
+            }
+        ]
+    }
+]

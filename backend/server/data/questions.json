@@ -1,0 +1,1798 @@
+[
+    {
+        "id": "two-sum",
+        "title": "Two Sum",
+        "topic": "hashing",
+        "difficulty": "Easy",
+        "description": "Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.\n\nYou may assume that each input would have exactly one solution, and you may not use the same element twice.",
+        "examples": [
+            {
+                "input": "nums = [2,7,11,15], target = 9",
+                "output": "[0,1]",
+                "explanation": "Because nums[0] + nums[1] == 9"
+            },
+            {
+                "input": "nums = [3,2,4], target = 6",
+                "output": "[1,2]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function twoSum(nums, target) {\n  // Your code here\n}",
+            "python": "def two_sum(nums, target):\n    # Your code here\n    pass",
+            "cpp": "vector<int> twoSum(vector<int>& nums, int target) {\n    // Your code here\n}"
+        },
+        "hints": [
+            "Consider using a hash map to store values you've already seen.",
+            "For each number, what other number would you need to find?",
+            "Can you do this in one pass through the array?"
+        ]
+    },
+    {
+        "id": "contains-duplicate",
+        "title": "Contains Duplicate",
+        "topic": "hashing",
+        "difficulty": "Easy",
+        "description": "Given an integer array `nums`, return `true` if any value appears at least twice in the array, and return `false` if every element is distinct.",
+        "examples": [
+            {
+                "input": "nums = [1,2,3,1]",
+                "output": "true"
+            },
+            {
+                "input": "nums = [1,2,3,4]",
+                "output": "false"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function containsDuplicate(nums) {\n  // Your code here\n}",
+            "python": "def contains_duplicate(nums):\n    pass",
+            "cpp": "bool containsDuplicate(vector<int>& nums) {\n}"
+        },
+        "hints": [
+            "Use a hash set to track seen elements.",
+            "What's the time complexity of checking set membership?"
+        ]
+    },
+    {
+        "id": "first-unique-char",
+        "title": "First Unique Character",
+        "topic": "hashing",
+        "difficulty": "Easy",
+        "description": "Given a string `s`, find the first non-repeating character in it and return its index. If it does not exist, return -1.",
+        "examples": [
+            {
+                "input": "s = \"leetcode\"",
+                "output": "0"
+            },
+            {
+                "input": "s = \"aabb\"",
+                "output": "-1"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function firstUniqChar(s) {\n  // Your code here\n}",
+            "python": "def first_uniq_char(s):\n    pass",
+            "cpp": "int firstUniqChar(string s) {\n}"
+        },
+        "hints": [
+            "Count the frequency of each character.",
+            "Iterate again to find the first char with frequency 1."
+        ]
+    },
+    {
+        "id": "group-anagrams",
+        "title": "Group Anagrams",
+        "topic": "hashing",
+        "difficulty": "Medium",
+        "description": "Given an array of strings `strs`, group the anagrams together. You can return the answer in any order.",
+        "examples": [
+            {
+                "input": "strs = [\"eat\",\"tea\",\"tan\",\"ate\",\"nat\",\"bat\"]",
+                "output": "[[\"bat\"],[\"nat\",\"tan\"],[\"ate\",\"eat\",\"tea\"]]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function groupAnagrams(strs) {\n  // Your code here\n}",
+            "python": "def group_anagrams(strs):\n    pass",
+            "cpp": "vector<vector<string>> groupAnagrams(vector<string>& strs) {\n}"
+        },
+        "hints": [
+            "What property do anagrams share?",
+            "Sort each string and use it as a key."
+        ]
+    },
+    {
+        "id": "lru-cache",
+        "title": "LRU Cache",
+        "topic": "hashing",
+        "difficulty": "Medium",
+        "description": "Design a data structure that follows the constraints of a Least Recently Used (LRU) cache.",
+        "examples": [
+            {
+                "input": "operations = [\"LRUCache\", \"put\", \"get\", \"put\", \"get\"]",
+                "output": "[null, null, 1, null, -1]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "class LRUCache {\n  constructor(capacity) {\n  }\n  get(key) {\n  }\n  put(key, value) {\n  }\n}",
+            "python": "class LRUCache:\n    def __init__(self, capacity: int):\n        pass\n    def get(self, key: int) -> int:\n        pass\n    def put(self, key: int, value: int) -> None:\n        pass",
+            "cpp": "class LRUCache {\npublic:\n    LRUCache(int capacity) {}\n    int get(int key) {}\n    void put(int key, int value) {}\n};"
+        },
+        "hints": [
+            "Combine a hash map with a doubly linked list.",
+            "Hash map gives O(1) access, linked list maintains order."
+        ]
+    },
+    {
+        "id": "longest-consecutive",
+        "title": "Longest Consecutive Sequence",
+        "topic": "hashing",
+        "difficulty": "Medium",
+        "description": "Given an unsorted array of integers `nums`, return the length of the longest consecutive elements sequence.",
+        "examples": [
+            {
+                "input": "nums = [100,4,200,1,3,2]",
+                "output": "4",
+                "explanation": "The longest consecutive sequence is [1, 2, 3, 4]."
+            }
+        ],
+        "starterCode": {
+            "javascript": "function longestConsecutive(nums) {\n}",
+            "python": "def longest_consecutive(nums):\n    pass",
+            "cpp": "int longestConsecutive(vector<int>& nums) {\n}"
+        },
+        "hints": [
+            "Use a hash set for O(1) lookups.",
+            "Only start counting from sequence starts (num-1 not in set)."
+        ]
+    },
+    {
+        "id": "subarray-sum-k",
+        "title": "Subarray Sum Equals K",
+        "topic": "hashing",
+        "difficulty": "Medium",
+        "description": "Given an array of integers `nums` and an integer `k`, return the total number of subarrays whose sum equals to `k`.",
+        "examples": [
+            {
+                "input": "nums = [1,1,1], k = 2",
+                "output": "2"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function subarraySum(nums, k) {\n}",
+            "python": "def subarray_sum(nums, k):\n    pass",
+            "cpp": "int subarraySum(vector<int>& nums, int k) {\n}"
+        },
+        "hints": [
+            "Use prefix sums.",
+            "Store prefix sum counts in a hash map."
+        ]
+    },
+    {
+        "id": "top-k-frequent",
+        "title": "Top K Frequent Elements",
+        "topic": "hashing",
+        "difficulty": "Medium",
+        "description": "Given an integer array `nums` and an integer `k`, return the `k` most frequent elements.",
+        "examples": [
+            {
+                "input": "nums = [1,1,1,2,2,3], k = 2",
+                "output": "[1,2]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function topKFrequent(nums, k) {\n}",
+            "python": "def top_k_frequent(nums, k):\n    pass",
+            "cpp": "vector<int> topKFrequent(vector<int>& nums, int k) {\n}"
+        },
+        "hints": [
+            "Count frequencies with a hash map.",
+            "Use bucket sort or a heap for top k."
+        ]
+    },
+    {
+        "id": "valid-anagram",
+        "title": "Valid Anagram",
+        "topic": "hashing",
+        "difficulty": "Easy",
+        "description": "Given two strings `s` and `t`, return `true` if `t` is an anagram of `s`, and `false` otherwise.",
+        "examples": [
+            {
+                "input": "s = \"anagram\", t = \"nagaram\"",
+                "output": "true"
+            },
+            {
+                "input": "s = \"rat\", t = \"car\"",
+                "output": "false"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function isAnagram(s, t) {\n}",
+            "python": "def is_anagram(s, t):\n    pass",
+            "cpp": "bool isAnagram(string s, string t) {\n}"
+        },
+        "hints": [
+            "Count character frequencies.",
+            "Compare the frequency maps."
+        ]
+    },
+    {
+        "id": "isomorphic-strings",
+        "title": "Isomorphic Strings",
+        "topic": "hashing",
+        "difficulty": "Easy",
+        "description": "Given two strings `s` and `t`, determine if they are isomorphic. Two strings are isomorphic if the characters in `s` can be replaced to get `t`.",
+        "examples": [
+            {
+                "input": "s = \"egg\", t = \"add\"",
+                "output": "true"
+            },
+            {
+                "input": "s = \"foo\", t = \"bar\"",
+                "output": "false"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function isIsomorphic(s, t) {\n}",
+            "python": "def is_isomorphic(s, t):\n    pass",
+            "cpp": "bool isIsomorphic(string s, string t) {\n}"
+        },
+        "hints": [
+            "Use two hash maps for bidirectional mapping.",
+            "Check both s→t and t→s mappings."
+        ]
+    },
+    {
+        "id": "binary-search-target",
+        "title": "Binary Search",
+        "topic": "searching",
+        "difficulty": "Easy",
+        "description": "Given an array of integers `nums` sorted in ascending order, and an integer `target`, return the index if the target is found. If not, return -1.",
+        "examples": [
+            {
+                "input": "nums = [-1,0,3,5,9,12], target = 9",
+                "output": "4"
+            },
+            {
+                "input": "nums = [-1,0,3,5,9,12], target = 2",
+                "output": "-1"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function search(nums, target) {\n}",
+            "python": "def search(nums, target):\n    pass",
+            "cpp": "int search(vector<int>& nums, int target) {\n}"
+        },
+        "hints": [
+            "Use two pointers: left and right.",
+            "Calculate mid and compare with target."
+        ]
+    },
+    {
+        "id": "search-insert",
+        "title": "Search Insert Position",
+        "topic": "searching",
+        "difficulty": "Easy",
+        "description": "Given a sorted array and a target value, return the index if the target is found. If not, return the index where it would be inserted.",
+        "examples": [
+            {
+                "input": "nums = [1,3,5,6], target = 5",
+                "output": "2"
+            },
+            {
+                "input": "nums = [1,3,5,6], target = 2",
+                "output": "1"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function searchInsert(nums, target) {\n}",
+            "python": "def search_insert(nums, target):\n    pass",
+            "cpp": "int searchInsert(vector<int>& nums, int target) {\n}"
+        },
+        "hints": [
+            "Binary search variant.",
+            "When not found, left pointer is the insert position."
+        ]
+    },
+    {
+        "id": "first-bad-version",
+        "title": "First Bad Version",
+        "topic": "searching",
+        "difficulty": "Easy",
+        "description": "You are given an API `isBadVersion(version)` which returns whether version is bad. Find the first bad version.",
+        "examples": [
+            {
+                "input": "n = 5, bad = 4",
+                "output": "4"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function solution(isBadVersion) {\n  return function(n) {\n  };\n}",
+            "python": "def first_bad_version(n):\n    pass",
+            "cpp": "int firstBadVersion(int n) {\n}"
+        },
+        "hints": [
+            "Classic binary search problem.",
+            "Find the leftmost bad version."
+        ]
+    },
+    {
+        "id": "peak-element",
+        "title": "Find Peak Element",
+        "topic": "searching",
+        "difficulty": "Medium",
+        "description": "A peak element is an element that is strictly greater than its neighbors. Find a peak element and return its index.",
+        "examples": [
+            {
+                "input": "nums = [1,2,3,1]",
+                "output": "2"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function findPeakElement(nums) {\n}",
+            "python": "def find_peak_element(nums):\n    pass",
+            "cpp": "int findPeakElement(vector<int>& nums) {\n}"
+        },
+        "hints": [
+            "You can use binary search.",
+            "Move towards the larger neighbor."
+        ]
+    },
+    {
+        "id": "search-rotated",
+        "title": "Search in Rotated Sorted Array",
+        "topic": "searching",
+        "difficulty": "Medium",
+        "description": "Search for a target in a rotated sorted array. Return the index if found, otherwise return -1.",
+        "examples": [
+            {
+                "input": "nums = [4,5,6,7,0,1,2], target = 0",
+                "output": "4"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function search(nums, target) {\n}",
+            "python": "def search(nums, target):\n    pass",
+            "cpp": "int search(vector<int>& nums, int target) {\n}"
+        },
+        "hints": [
+            "One half is always sorted.",
+            "Determine which half contains target."
+        ]
+    },
+    {
+        "id": "find-minimum-rotated",
+        "title": "Find Minimum in Rotated Sorted Array",
+        "topic": "searching",
+        "difficulty": "Medium",
+        "description": "Find the minimum element in a rotated sorted array.",
+        "examples": [
+            {
+                "input": "nums = [3,4,5,1,2]",
+                "output": "1"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function findMin(nums) {\n}",
+            "python": "def find_min(nums):\n    pass",
+            "cpp": "int findMin(vector<int>& nums) {\n}"
+        },
+        "hints": [
+            "Binary search to find rotation point.",
+            "Compare mid with right to determine direction."
+        ]
+    },
+    {
+        "id": "search-2d-matrix",
+        "title": "Search a 2D Matrix",
+        "topic": "searching",
+        "difficulty": "Medium",
+        "description": "Search for a target value in an m x n integer matrix. Integers in each row are sorted.",
+        "examples": [
+            {
+                "input": "matrix = [[1,3,5,7],[10,11,16,20]], target = 3",
+                "output": "true"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function searchMatrix(matrix, target) {\n}",
+            "python": "def search_matrix(matrix, target):\n    pass",
+            "cpp": "bool searchMatrix(vector<vector<int>>& matrix, int target) {\n}"
+        },
+        "hints": [
+            "Treat it as a flattened sorted array.",
+            "Use binary search with index conversion."
+        ]
+    },
+    {
+        "id": "find-first-last",
+        "title": "Find First and Last Position",
+        "topic": "searching",
+        "difficulty": "Medium",
+        "description": "Find the starting and ending position of a given target value in a sorted array.",
+        "examples": [
+            {
+                "input": "nums = [5,7,7,8,8,10], target = 8",
+                "output": "[3,4]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function searchRange(nums, target) {\n}",
+            "python": "def search_range(nums, target):\n    pass",
+            "cpp": "vector<int> searchRange(vector<int>& nums, int target) {\n}"
+        },
+        "hints": [
+            "Run two binary searches.",
+            "One for leftmost, one for rightmost."
+        ]
+    },
+    {
+        "id": "kth-smallest-matrix",
+        "title": "Kth Smallest Element in Sorted Matrix",
+        "topic": "searching",
+        "difficulty": "Medium",
+        "description": "Given an n x n matrix where rows and columns are sorted, find the kth smallest element.",
+        "examples": [
+            {
+                "input": "matrix = [[1,5,9],[10,11,13],[12,13,15]], k = 8",
+                "output": "13"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function kthSmallest(matrix, k) {\n}",
+            "python": "def kth_smallest(matrix, k):\n    pass",
+            "cpp": "int kthSmallest(vector<vector<int>>& matrix, int k) {\n}"
+        },
+        "hints": [
+            "Binary search on value range.",
+            "Count elements <= mid."
+        ]
+    },
+    {
+        "id": "median-two-arrays",
+        "title": "Median of Two Sorted Arrays",
+        "topic": "searching",
+        "difficulty": "Hard",
+        "description": "Find the median of two sorted arrays. The overall run time complexity should be O(log(m+n)).",
+        "examples": [
+            {
+                "input": "nums1 = [1,3], nums2 = [2]",
+                "output": "2.0"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function findMedianSortedArrays(nums1, nums2) {\n}",
+            "python": "def find_median_sorted_arrays(nums1, nums2):\n    pass",
+            "cpp": "double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {\n}"
+        },
+        "hints": [
+            "Binary search on the smaller array.",
+            "Partition both arrays to find median."
+        ]
+    },
+    {
+        "id": "valid-parentheses",
+        "title": "Valid Parentheses",
+        "topic": "stacks",
+        "difficulty": "Easy",
+        "description": "Given a string containing just '(', ')', '{', '}', '[' and ']', determine if the input string is valid.",
+        "examples": [
+            {
+                "input": "s = \"()\"",
+                "output": "true"
+            },
+            {
+                "input": "s = \"([)]\"",
+                "output": "false"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function isValid(s) {\n}",
+            "python": "def is_valid(s):\n    pass",
+            "cpp": "bool isValid(string s) {\n}"
+        },
+        "hints": [
+            "Use a stack to track opening brackets.",
+            "Pop and match when you see a closing bracket."
+        ]
+    },
+    {
+        "id": "min-stack",
+        "title": "Min Stack",
+        "topic": "stacks",
+        "difficulty": "Medium",
+        "description": "Design a stack that supports push, pop, top, and retrieving the minimum element in constant time.",
+        "examples": [
+            {
+                "input": "[\"MinStack\",\"push\",\"getMin\"]",
+                "output": "[null,null,-3]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "class MinStack {\n  constructor() {}\n  push(val) {}\n  pop() {}\n  top() {}\n  getMin() {}\n}",
+            "python": "class MinStack:\n    def __init__(self):\n        pass",
+            "cpp": "class MinStack {\npublic:\n    void push(int val) {}\n    void pop() {}\n    int top() {}\n    int getMin() {}\n};"
+        },
+        "hints": [
+            "Keep track of minimum at each level.",
+            "Use a second stack or store pairs."
+        ]
+    },
+    {
+        "id": "eval-rpn",
+        "title": "Evaluate Reverse Polish Notation",
+        "topic": "stacks",
+        "difficulty": "Medium",
+        "description": "Evaluate the value of an arithmetic expression in Reverse Polish Notation.",
+        "examples": [
+            {
+                "input": "tokens = [\"2\",\"1\",\"+\",\"3\",\"*\"]",
+                "output": "9",
+                "explanation": "((2 + 1) * 3) = 9"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function evalRPN(tokens) {\n}",
+            "python": "def eval_rpn(tokens):\n    pass",
+            "cpp": "int evalRPN(vector<string>& tokens) {\n}"
+        },
+        "hints": [
+            "Push numbers onto stack.",
+            "Pop two operands when you see an operator."
+        ]
+    },
+    {
+        "id": "daily-temperatures",
+        "title": "Daily Temperatures",
+        "topic": "stacks",
+        "difficulty": "Medium",
+        "description": "Given temperatures, return an array where answer[i] is the number of days until a warmer temperature.",
+        "examples": [
+            {
+                "input": "temperatures = [73,74,75,71,69,72,76,73]",
+                "output": "[1,1,4,2,1,1,0,0]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function dailyTemperatures(temperatures) {\n}",
+            "python": "def daily_temperatures(temperatures):\n    pass",
+            "cpp": "vector<int> dailyTemperatures(vector<int>& temperatures) {\n}"
+        },
+        "hints": [
+            "Use a monotonic decreasing stack.",
+            "Store indices, not values."
+        ]
+    },
+    {
+        "id": "next-greater-element",
+        "title": "Next Greater Element I",
+        "topic": "stacks",
+        "difficulty": "Easy",
+        "description": "Find the next greater element for each element in nums1 from nums2.",
+        "examples": [
+            {
+                "input": "nums1 = [4,1,2], nums2 = [1,3,4,2]",
+                "output": "[-1,3,-1]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function nextGreaterElement(nums1, nums2) {\n}",
+            "python": "def next_greater_element(nums1, nums2):\n    pass",
+            "cpp": "vector<int> nextGreaterElement(vector<int>& nums1, vector<int>& nums2) {\n}"
+        },
+        "hints": [
+            "Process nums2 with a monotonic stack.",
+            "Store results in a hash map."
+        ]
+    },
+    {
+        "id": "largest-rectangle",
+        "title": "Largest Rectangle in Histogram",
+        "topic": "stacks",
+        "difficulty": "Hard",
+        "description": "Find the largest rectangular area possible in a histogram.",
+        "examples": [
+            {
+                "input": "heights = [2,1,5,6,2,3]",
+                "output": "10"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function largestRectangleArea(heights) {\n}",
+            "python": "def largest_rectangle_area(heights):\n    pass",
+            "cpp": "int largestRectangleArea(vector<int>& heights) {\n}"
+        },
+        "hints": [
+            "Use a monotonic increasing stack.",
+            "Calculate area when popping."
+        ]
+    },
+    {
+        "id": "decode-string",
+        "title": "Decode String",
+        "topic": "stacks",
+        "difficulty": "Medium",
+        "description": "Decode an encoded string like \"3[a2[c]]\" to \"accaccacc\".",
+        "examples": [
+            {
+                "input": "s = \"3[a]2[bc]\"",
+                "output": "\"aaabcbc\""
+            }
+        ],
+        "starterCode": {
+            "javascript": "function decodeString(s) {\n}",
+            "python": "def decode_string(s):\n    pass",
+            "cpp": "string decodeString(string s) {\n}"
+        },
+        "hints": [
+            "Use two stacks: one for counts, one for strings.",
+            "Build result from inside out."
+        ]
+    },
+    {
+        "id": "basic-calculator",
+        "title": "Basic Calculator II",
+        "topic": "stacks",
+        "difficulty": "Medium",
+        "description": "Implement a basic calculator to evaluate a simple expression string with +, -, *, /.",
+        "examples": [
+            {
+                "input": "s = \"3+2*2\"",
+                "output": "7"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function calculate(s) {\n}",
+            "python": "def calculate(s):\n    pass",
+            "cpp": "int calculate(string s) {\n}"
+        },
+        "hints": [
+            "Handle * and / immediately.",
+            "Push +/- numbers to stack, sum at end."
+        ]
+    },
+    {
+        "id": "asteroid-collision",
+        "title": "Asteroid Collision",
+        "topic": "stacks",
+        "difficulty": "Medium",
+        "description": "Find out the state of asteroids after all collisions. Positive = right, negative = left.",
+        "examples": [
+            {
+                "input": "asteroids = [5,10,-5]",
+                "output": "[5,10]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function asteroidCollision(asteroids) {\n}",
+            "python": "def asteroid_collision(asteroids):\n    pass",
+            "cpp": "vector<int> asteroidCollision(vector<int>& asteroids) {\n}"
+        },
+        "hints": [
+            "Collision only when right-moving meets left-moving.",
+            "Use stack to track survivors."
+        ]
+    },
+    {
+        "id": "remove-k-digits",
+        "title": "Remove K Digits",
+        "topic": "stacks",
+        "difficulty": "Medium",
+        "description": "Remove k digits from the number so that the new number is the smallest possible.",
+        "examples": [
+            {
+                "input": "num = \"1432219\", k = 3",
+                "output": "\"1219\""
+            }
+        ],
+        "starterCode": {
+            "javascript": "function removeKdigits(num, k) {\n}",
+            "python": "def remove_kdigits(num, k):\n    pass",
+            "cpp": "string removeKdigits(string num, int k) {\n}"
+        },
+        "hints": [
+            "Use a monotonic increasing stack.",
+            "Remove larger digits from left."
+        ]
+    },
+    {
+        "id": "implement-queue-stacks",
+        "title": "Implement Queue using Stacks",
+        "topic": "queues",
+        "difficulty": "Easy",
+        "description": "Implement a first in first out (FIFO) queue using only two stacks.",
+        "examples": [
+            {
+                "input": "[\"MyQueue\",\"push\",\"peek\",\"pop\"]",
+                "output": "[null,null,1,1]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "class MyQueue {\n  constructor() {}\n  push(x) {}\n  pop() {}\n  peek() {}\n  empty() {}\n}",
+            "python": "class MyQueue:\n    def __init__(self):\n        pass",
+            "cpp": "class MyQueue {\npublic:\n    void push(int x) {}\n    int pop() {}\n    int peek() {}\n    bool empty() {}\n};"
+        },
+        "hints": [
+            "Use one stack for push, one for pop.",
+            "Transfer elements lazily."
+        ]
+    },
+    {
+        "id": "implement-stack-queues",
+        "title": "Implement Stack using Queues",
+        "topic": "queues",
+        "difficulty": "Easy",
+        "description": "Implement a last-in-first-out (LIFO) stack using only two queues.",
+        "examples": [
+            {
+                "input": "[\"MyStack\",\"push\",\"top\",\"pop\"]",
+                "output": "[null,null,2,2]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "class MyStack {\n  constructor() {}\n  push(x) {}\n  pop() {}\n  top() {}\n  empty() {}\n}",
+            "python": "class MyStack:\n    def __init__(self):\n        pass",
+            "cpp": "class MyStack {\npublic:\n    void push(int x) {}\n    int pop() {}\n    int top() {}\n    bool empty() {}\n};"
+        },
+        "hints": [
+            "Push to back, then rotate to front.",
+            "One queue is sufficient."
+        ]
+    },
+    {
+        "id": "sliding-window-maximum",
+        "title": "Sliding Window Maximum",
+        "topic": "queues",
+        "difficulty": "Hard",
+        "description": "Return the max sliding window for each window of size k.",
+        "examples": [
+            {
+                "input": "nums = [1,3,-1,-3,5,3,6,7], k = 3",
+                "output": "[3,3,5,5,6,7]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function maxSlidingWindow(nums, k) {\n}",
+            "python": "def max_sliding_window(nums, k):\n    pass",
+            "cpp": "vector<int> maxSlidingWindow(vector<int>& nums, int k) {\n}"
+        },
+        "hints": [
+            "Use a monotonic decreasing deque.",
+            "Remove elements outside window."
+        ]
+    },
+    {
+        "id": "task-scheduler",
+        "title": "Task Scheduler",
+        "topic": "queues",
+        "difficulty": "Medium",
+        "description": "Given tasks and cooling period, find minimum intervals needed to finish all tasks.",
+        "examples": [
+            {
+                "input": "tasks = [\"A\",\"A\",\"A\",\"B\",\"B\",\"B\"], n = 2",
+                "output": "8"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function leastInterval(tasks, n) {\n}",
+            "python": "def least_interval(tasks, n):\n    pass",
+            "cpp": "int leastInterval(vector<char>& tasks, int n) {\n}"
+        },
+        "hints": [
+            "Most frequent task determines idle slots.",
+            "Fill idle slots with other tasks."
+        ]
+    },
+    {
+        "id": "k-closest-points",
+        "title": "K Closest Points to Origin",
+        "topic": "queues",
+        "difficulty": "Medium",
+        "description": "Return the k closest points to the origin (0, 0).",
+        "examples": [
+            {
+                "input": "points = [[1,3],[-2,2]], k = 1",
+                "output": "[[-2,2]]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function kClosest(points, k) {\n}",
+            "python": "def k_closest(points, k):\n    pass",
+            "cpp": "vector<vector<int>> kClosest(vector<vector<int>>& points, int k) {\n}"
+        },
+        "hints": [
+            "Use a max heap of size k.",
+            "Compare by squared distance."
+        ]
+    },
+    {
+        "id": "merge-k-sorted",
+        "title": "Merge K Sorted Lists",
+        "topic": "queues",
+        "difficulty": "Hard",
+        "description": "Merge k sorted linked lists and return it as one sorted list.",
+        "examples": [
+            {
+                "input": "lists = [[1,4,5],[1,3,4],[2,6]]",
+                "output": "[1,1,2,3,4,4,5,6]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function mergeKLists(lists) {\n}",
+            "python": "def merge_k_lists(lists):\n    pass",
+            "cpp": "ListNode* mergeKLists(vector<ListNode*>& lists) {\n}"
+        },
+        "hints": [
+            "Use a min heap to track smallest heads.",
+            "Pop smallest, push its next."
+        ]
+    },
+    {
+        "id": "kth-largest",
+        "title": "Kth Largest Element in Stream",
+        "topic": "queues",
+        "difficulty": "Easy",
+        "description": "Design a class to find the kth largest element in a stream.",
+        "examples": [
+            {
+                "input": "[\"KthLargest\",\"add\"]",
+                "output": "[null,4]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "class KthLargest {\n  constructor(k, nums) {}\n  add(val) {}\n}",
+            "python": "class KthLargest:\n    def __init__(self, k, nums):\n        pass\n    def add(self, val):\n        pass",
+            "cpp": "class KthLargest {\npublic:\n    KthLargest(int k, vector<int>& nums) {}\n    int add(int val) {}\n};"
+        },
+        "hints": [
+            "Use a min heap of size k.",
+            "Top of heap is kth largest."
+        ]
+    },
+    {
+        "id": "design-circular-queue",
+        "title": "Design Circular Queue",
+        "topic": "queues",
+        "difficulty": "Medium",
+        "description": "Design your implementation of the circular queue.",
+        "examples": [
+            {
+                "input": "[\"MyCircularQueue\",\"enQueue\",\"Front\"]",
+                "output": "[null,true,1]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "class MyCircularQueue {\n  constructor(k) {}\n  enQueue(value) {}\n  deQueue() {}\n  Front() {}\n  Rear() {}\n  isEmpty() {}\n  isFull() {}\n}",
+            "python": "class MyCircularQueue:\n    def __init__(self, k):\n        pass",
+            "cpp": "class MyCircularQueue {\npublic:\n    MyCircularQueue(int k) {}\n    bool enQueue(int value) {}\n    bool deQueue() {}\n    int Front() {}\n    int Rear() {}\n    bool isEmpty() {}\n    bool isFull() {}\n};"
+        },
+        "hints": [
+            "Use circular array indexing.",
+            "Track head, tail, and count."
+        ]
+    },
+    {
+        "id": "last-stone-weight",
+        "title": "Last Stone Weight",
+        "topic": "queues",
+        "difficulty": "Easy",
+        "description": "Smash the two heaviest stones together. Return the weight of the last remaining stone.",
+        "examples": [
+            {
+                "input": "stones = [2,7,4,1,8,1]",
+                "output": "1"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function lastStoneWeight(stones) {\n}",
+            "python": "def last_stone_weight(stones):\n    pass",
+            "cpp": "int lastStoneWeight(vector<int>& stones) {\n}"
+        },
+        "hints": [
+            "Use a max heap.",
+            "Pop two, push difference if non-zero."
+        ]
+    },
+    {
+        "id": "median-data-stream",
+        "title": "Find Median from Data Stream",
+        "topic": "queues",
+        "difficulty": "Hard",
+        "description": "Design a data structure that supports adding integers and finding the median.",
+        "examples": [
+            {
+                "input": "[\"MedianFinder\",\"addNum\",\"findMedian\"]",
+                "output": "[null,null,1.5]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "class MedianFinder {\n  constructor() {}\n  addNum(num) {}\n  findMedian() {}\n}",
+            "python": "class MedianFinder:\n    def __init__(self):\n        pass",
+            "cpp": "class MedianFinder {\npublic:\n    void addNum(int num) {}\n    double findMedian() {}\n};"
+        },
+        "hints": [
+            "Use two heaps: max heap for lower half, min heap for upper.",
+            "Balance heaps after each insert."
+        ]
+    },
+    {
+        "id": "reverse-linked-list",
+        "title": "Reverse Linked List",
+        "topic": "linked-lists",
+        "difficulty": "Easy",
+        "description": "Given the head of a singly linked list, reverse the list.",
+        "examples": [
+            {
+                "input": "head = [1,2,3,4,5]",
+                "output": "[5,4,3,2,1]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function reverseList(head) {\n}",
+            "python": "def reverse_list(head):\n    pass",
+            "cpp": "ListNode* reverseList(ListNode* head) {\n}"
+        },
+        "hints": [
+            "Use three pointers: prev, curr, next.",
+            "Update pointers iteratively."
+        ]
+    },
+    {
+        "id": "merge-two-lists",
+        "title": "Merge Two Sorted Lists",
+        "topic": "linked-lists",
+        "difficulty": "Easy",
+        "description": "Merge two sorted linked lists into one sorted list.",
+        "examples": [
+            {
+                "input": "list1 = [1,2,4], list2 = [1,3,4]",
+                "output": "[1,1,2,3,4,4]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function mergeTwoLists(list1, list2) {\n}",
+            "python": "def merge_two_lists(list1, list2):\n    pass",
+            "cpp": "ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {\n}"
+        },
+        "hints": [
+            "Use a dummy head.",
+            "Compare and link smaller node."
+        ]
+    },
+    {
+        "id": "linked-list-cycle",
+        "title": "Linked List Cycle",
+        "topic": "linked-lists",
+        "difficulty": "Easy",
+        "description": "Given head, determine if the linked list has a cycle in it.",
+        "examples": [
+            {
+                "input": "head = [3,2,0,-4], pos = 1",
+                "output": "true"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function hasCycle(head) {\n}",
+            "python": "def has_cycle(head):\n    pass",
+            "cpp": "bool hasCycle(ListNode* head) {\n}"
+        },
+        "hints": [
+            "Floyd's tortoise and hare.",
+            "Slow moves 1, fast moves 2."
+        ]
+    },
+    {
+        "id": "middle-linked-list",
+        "title": "Middle of the Linked List",
+        "topic": "linked-lists",
+        "difficulty": "Easy",
+        "description": "Given a non-empty linked list, return the middle node.",
+        "examples": [
+            {
+                "input": "head = [1,2,3,4,5]",
+                "output": "[3,4,5]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function middleNode(head) {\n}",
+            "python": "def middle_node(head):\n    pass",
+            "cpp": "ListNode* middleNode(ListNode* head) {\n}"
+        },
+        "hints": [
+            "Use slow and fast pointers.",
+            "When fast reaches end, slow is at middle."
+        ]
+    },
+    {
+        "id": "remove-nth-end",
+        "title": "Remove Nth Node From End",
+        "topic": "linked-lists",
+        "difficulty": "Medium",
+        "description": "Remove the nth node from the end of the list.",
+        "examples": [
+            {
+                "input": "head = [1,2,3,4,5], n = 2",
+                "output": "[1,2,3,5]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function removeNthFromEnd(head, n) {\n}",
+            "python": "def remove_nth_from_end(head, n):\n    pass",
+            "cpp": "ListNode* removeNthFromEnd(ListNode* head, int n) {\n}"
+        },
+        "hints": [
+            "Two pointer technique.",
+            "Move fast pointer n steps ahead."
+        ]
+    },
+    {
+        "id": "add-two-numbers",
+        "title": "Add Two Numbers",
+        "topic": "linked-lists",
+        "difficulty": "Medium",
+        "description": "Add two numbers represented as linked lists (digits in reverse order).",
+        "examples": [
+            {
+                "input": "l1 = [2,4,3], l2 = [5,6,4]",
+                "output": "[7,0,8]",
+                "explanation": "342 + 465 = 807"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function addTwoNumbers(l1, l2) {\n}",
+            "python": "def add_two_numbers(l1, l2):\n    pass",
+            "cpp": "ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {\n}"
+        },
+        "hints": [
+            "Simulate addition with carry.",
+            "Handle different list lengths."
+        ]
+    },
+    {
+        "id": "palindrome-linked-list",
+        "title": "Palindrome Linked List",
+        "topic": "linked-lists",
+        "difficulty": "Easy",
+        "description": "Given the head of a linked list, return true if it is a palindrome.",
+        "examples": [
+            {
+                "input": "head = [1,2,2,1]",
+                "output": "true"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function isPalindrome(head) {\n}",
+            "python": "def is_palindrome(head):\n    pass",
+            "cpp": "bool isPalindrome(ListNode* head) {\n}"
+        },
+        "hints": [
+            "Find middle, reverse second half.",
+            "Compare both halves."
+        ]
+    },
+    {
+        "id": "intersection-two-lists",
+        "title": "Intersection of Two Linked Lists",
+        "topic": "linked-lists",
+        "difficulty": "Easy",
+        "description": "Find the node at which the intersection of two linked lists begins.",
+        "examples": [
+            {
+                "input": "intersectVal = 8, listA = [4,1,8,4,5], listB = [5,6,1,8,4,5]",
+                "output": "8"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function getIntersectionNode(headA, headB) {\n}",
+            "python": "def get_intersection_node(headA, headB):\n    pass",
+            "cpp": "ListNode* getIntersectionNode(ListNode* headA, ListNode* headB) {\n}"
+        },
+        "hints": [
+            "Two pointer technique.",
+            "Concatenate lists in different orders."
+        ]
+    },
+    {
+        "id": "copy-random-list",
+        "title": "Copy List with Random Pointer",
+        "topic": "linked-lists",
+        "difficulty": "Medium",
+        "description": "Construct a deep copy of a list where each node has an additional random pointer.",
+        "examples": [
+            {
+                "input": "head = [[7,null],[13,0],[11,4],[10,2],[1,0]]",
+                "output": "[[7,null],[13,0],[11,4],[10,2],[1,0]]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function copyRandomList(head) {\n}",
+            "python": "def copy_random_list(head):\n    pass",
+            "cpp": "Node* copyRandomList(Node* head) {\n}"
+        },
+        "hints": [
+            "Use a hash map to map old to new nodes.",
+            "Or interleave copies with originals."
+        ]
+    },
+    {
+        "id": "invert-tree",
+        "title": "Invert Binary Tree",
+        "topic": "trees",
+        "difficulty": "Easy",
+        "description": "Given the root of a binary tree, invert the tree and return its root.",
+        "examples": [
+            {
+                "input": "root = [4,2,7,1,3,6,9]",
+                "output": "[4,7,2,9,6,3,1]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function invertTree(root) {\n}",
+            "python": "def invert_tree(root):\n    pass",
+            "cpp": "TreeNode* invertTree(TreeNode* root) {\n}"
+        },
+        "hints": [
+            "Swap left and right children recursively.",
+            "Base case is when node is null."
+        ]
+    },
+    {
+        "id": "max-depth-tree",
+        "title": "Maximum Depth of Binary Tree",
+        "topic": "trees",
+        "difficulty": "Easy",
+        "description": "Find the maximum depth of a binary tree.",
+        "examples": [
+            {
+                "input": "root = [3,9,20,null,null,15,7]",
+                "output": "3"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function maxDepth(root) {\n}",
+            "python": "def max_depth(root):\n    pass",
+            "cpp": "int maxDepth(TreeNode* root) {\n}"
+        },
+        "hints": [
+            "Use recursion.",
+            "Depth = 1 + max(left depth, right depth)."
+        ]
+    },
+    {
+        "id": "same-tree",
+        "title": "Same Tree",
+        "topic": "trees",
+        "difficulty": "Easy",
+        "description": "Given roots of two binary trees, check if they are the same.",
+        "examples": [
+            {
+                "input": "p = [1,2,3], q = [1,2,3]",
+                "output": "true"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function isSameTree(p, q) {\n}",
+            "python": "def is_same_tree(p, q):\n    pass",
+            "cpp": "bool isSameTree(TreeNode* p, TreeNode* q) {\n}"
+        },
+        "hints": [
+            "Recursively compare nodes.",
+            "Check null cases and values."
+        ]
+    },
+    {
+        "id": "symmetric-tree",
+        "title": "Symmetric Tree",
+        "topic": "trees",
+        "difficulty": "Easy",
+        "description": "Check whether a binary tree is a mirror of itself.",
+        "examples": [
+            {
+                "input": "root = [1,2,2,3,4,4,3]",
+                "output": "true"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function isSymmetric(root) {\n}",
+            "python": "def is_symmetric(root):\n    pass",
+            "cpp": "bool isSymmetric(TreeNode* root) {\n}"
+        },
+        "hints": [
+            "Compare left subtree with mirror of right.",
+            "Use two-pointer recursion."
+        ]
+    },
+    {
+        "id": "validate-bst",
+        "title": "Validate Binary Search Tree",
+        "topic": "trees",
+        "difficulty": "Medium",
+        "description": "Determine if a binary tree is a valid BST.",
+        "examples": [
+            {
+                "input": "root = [2,1,3]",
+                "output": "true"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function isValidBST(root) {\n}",
+            "python": "def is_valid_bst(root):\n    pass",
+            "cpp": "bool isValidBST(TreeNode* root) {\n}"
+        },
+        "hints": [
+            "Track min and max bounds.",
+            "Inorder traversal should be sorted."
+        ]
+    },
+    {
+        "id": "lowest-common-ancestor",
+        "title": "Lowest Common Ancestor of BST",
+        "topic": "trees",
+        "difficulty": "Medium",
+        "description": "Find the lowest common ancestor of two nodes in a BST.",
+        "examples": [
+            {
+                "input": "root = [6,2,8,0,4,7,9], p = 2, q = 8",
+                "output": "6"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function lowestCommonAncestor(root, p, q) {\n}",
+            "python": "def lowest_common_ancestor(root, p, q):\n    pass",
+            "cpp": "TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {\n}"
+        },
+        "hints": [
+            "Use BST property.",
+            "If both < node, go left; if both > node, go right."
+        ]
+    },
+    {
+        "id": "binary-tree-paths",
+        "title": "Binary Tree Paths",
+        "topic": "trees",
+        "difficulty": "Easy",
+        "description": "Return all root-to-leaf paths in a binary tree.",
+        "examples": [
+            {
+                "input": "root = [1,2,3,null,5]",
+                "output": "[\"1->2->5\",\"1->3\"]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function binaryTreePaths(root) {\n}",
+            "python": "def binary_tree_paths(root):\n    pass",
+            "cpp": "vector<string> binaryTreePaths(TreeNode* root) {\n}"
+        },
+        "hints": [
+            "Use DFS with path tracking.",
+            "Add path when reaching a leaf."
+        ]
+    },
+    {
+        "id": "kth-smallest-bst",
+        "title": "Kth Smallest Element in BST",
+        "topic": "trees",
+        "difficulty": "Medium",
+        "description": "Return the kth smallest element in a BST.",
+        "examples": [
+            {
+                "input": "root = [3,1,4,null,2], k = 1",
+                "output": "1"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function kthSmallest(root, k) {\n}",
+            "python": "def kth_smallest(root, k):\n    pass",
+            "cpp": "int kthSmallest(TreeNode* root, int k) {\n}"
+        },
+        "hints": [
+            "Inorder traversal gives sorted order.",
+            "Return kth element."
+        ]
+    },
+    {
+        "id": "construct-tree-preorder",
+        "title": "Construct Tree from Preorder and Inorder",
+        "topic": "trees",
+        "difficulty": "Medium",
+        "description": "Build a binary tree from preorder and inorder traversal arrays.",
+        "examples": [
+            {
+                "input": "preorder = [3,9,20,15,7], inorder = [9,3,15,20,7]",
+                "output": "[3,9,20,null,null,15,7]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function buildTree(preorder, inorder) {\n}",
+            "python": "def build_tree(preorder, inorder):\n    pass",
+            "cpp": "TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {\n}"
+        },
+        "hints": [
+            "First of preorder is root.",
+            "Find root in inorder to split left/right."
+        ]
+    },
+    {
+        "id": "serialize-tree",
+        "title": "Serialize and Deserialize Binary Tree",
+        "topic": "trees",
+        "difficulty": "Hard",
+        "description": "Design an algorithm to serialize and deserialize a binary tree.",
+        "examples": [
+            {
+                "input": "root = [1,2,3,null,null,4,5]",
+                "output": "[1,2,3,null,null,4,5]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function serialize(root) {}\nfunction deserialize(data) {}",
+            "python": "def serialize(root):\n    pass\ndef deserialize(data):\n    pass",
+            "cpp": "string serialize(TreeNode* root) {}\nTreeNode* deserialize(string data) {}"
+        },
+        "hints": [
+            "Use level-order or preorder traversal.",
+            "Mark null nodes explicitly."
+        ]
+    },
+    {
+        "id": "num-islands",
+        "title": "Number of Islands",
+        "topic": "graphs",
+        "difficulty": "Medium",
+        "description": "Count the number of islands in a 2D grid of '1's (land) and '0's (water).",
+        "examples": [
+            {
+                "input": "grid = [[\"1\",\"1\",\"0\"],[\"1\",\"0\",\"0\"],[\"0\",\"0\",\"1\"]]",
+                "output": "2"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function numIslands(grid) {\n}",
+            "python": "def num_islands(grid):\n    pass",
+            "cpp": "int numIslands(vector<vector<char>>& grid) {\n}"
+        },
+        "hints": [
+            "Use BFS or DFS to explore connected land.",
+            "Mark visited cells."
+        ]
+    },
+    {
+        "id": "clone-graph",
+        "title": "Clone Graph",
+        "topic": "graphs",
+        "difficulty": "Medium",
+        "description": "Return a deep copy of a connected undirected graph.",
+        "examples": [
+            {
+                "input": "adjList = [[2,4],[1,3],[2,4],[1,3]]",
+                "output": "[[2,4],[1,3],[2,4],[1,3]]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function cloneGraph(node) {\n}",
+            "python": "def clone_graph(node):\n    pass",
+            "cpp": "Node* cloneGraph(Node* node) {\n}"
+        },
+        "hints": [
+            "Use a hash map to track cloned nodes.",
+            "BFS or DFS traversal."
+        ]
+    },
+    {
+        "id": "course-schedule",
+        "title": "Course Schedule",
+        "topic": "graphs",
+        "difficulty": "Medium",
+        "description": "Determine if you can finish all courses given prerequisites.",
+        "examples": [
+            {
+                "input": "numCourses = 2, prerequisites = [[1,0]]",
+                "output": "true"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function canFinish(numCourses, prerequisites) {\n}",
+            "python": "def can_finish(numCourses, prerequisites):\n    pass",
+            "cpp": "bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {\n}"
+        },
+        "hints": [
+            "Detect cycle in directed graph.",
+            "Use topological sort or DFS."
+        ]
+    },
+    {
+        "id": "word-ladder",
+        "title": "Word Ladder",
+        "topic": "graphs",
+        "difficulty": "Hard",
+        "description": "Find the shortest transformation sequence from beginWord to endWord.",
+        "examples": [
+            {
+                "input": "beginWord = \"hit\", endWord = \"cog\", wordList = [\"hot\",\"dot\",\"dog\",\"cog\"]",
+                "output": "5"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function ladderLength(beginWord, endWord, wordList) {\n}",
+            "python": "def ladder_length(beginWord, endWord, wordList):\n    pass",
+            "cpp": "int ladderLength(string beginWord, string endWord, vector<string>& wordList) {\n}"
+        },
+        "hints": [
+            "BFS for shortest path.",
+            "Generate all possible one-letter transformations."
+        ]
+    },
+    {
+        "id": "pacific-atlantic",
+        "title": "Pacific Atlantic Water Flow",
+        "topic": "graphs",
+        "difficulty": "Medium",
+        "description": "Find all cells where water can flow to both Pacific and Atlantic oceans.",
+        "examples": [
+            {
+                "input": "heights = [[1,2,2,3,5],[3,2,3,4,4],[2,4,5,3,1],[6,7,1,4,5],[5,1,1,2,4]]",
+                "output": "[[0,4],[1,3],[1,4],[2,2],[3,0],[3,1],[4,0]]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function pacificAtlantic(heights) {\n}",
+            "python": "def pacific_atlantic(heights):\n    pass",
+            "cpp": "vector<vector<int>> pacificAtlantic(vector<vector<int>>& heights) {\n}"
+        },
+        "hints": [
+            "BFS/DFS from ocean borders.",
+            "Find cells reachable from both."
+        ]
+    },
+    {
+        "id": "network-delay",
+        "title": "Network Delay Time",
+        "topic": "graphs",
+        "difficulty": "Medium",
+        "description": "Find the minimum time for all nodes to receive a signal from source node.",
+        "examples": [
+            {
+                "input": "times = [[2,1,1],[2,3,1],[3,4,1]], n = 4, k = 2",
+                "output": "2"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function networkDelayTime(times, n, k) {\n}",
+            "python": "def network_delay_time(times, n, k):\n    pass",
+            "cpp": "int networkDelayTime(vector<vector<int>>& times, int n, int k) {\n}"
+        },
+        "hints": [
+            "Use Dijkstra's algorithm.",
+            "Return max distance or -1 if unreachable."
+        ]
+    },
+    {
+        "id": "graph-valid-tree",
+        "title": "Graph Valid Tree",
+        "topic": "graphs",
+        "difficulty": "Medium",
+        "description": "Check if given graph forms a valid tree (connected, no cycles).",
+        "examples": [
+            {
+                "input": "n = 5, edges = [[0,1],[0,2],[0,3],[1,4]]",
+                "output": "true"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function validTree(n, edges) {\n}",
+            "python": "def valid_tree(n, edges):\n    pass",
+            "cpp": "bool validTree(int n, vector<vector<int>>& edges) {\n}"
+        },
+        "hints": [
+            "Tree has exactly n-1 edges.",
+            "Check connectivity with Union-Find or DFS."
+        ]
+    },
+    {
+        "id": "connected-components",
+        "title": "Number of Connected Components",
+        "topic": "graphs",
+        "difficulty": "Medium",
+        "description": "Count the number of connected components in an undirected graph.",
+        "examples": [
+            {
+                "input": "n = 5, edges = [[0,1],[1,2],[3,4]]",
+                "output": "2"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function countComponents(n, edges) {\n}",
+            "python": "def count_components(n, edges):\n    pass",
+            "cpp": "int countComponents(int n, vector<vector<int>>& edges) {\n}"
+        },
+        "hints": [
+            "Use Union-Find or DFS.",
+            "Count distinct root/component leaders."
+        ]
+    },
+    {
+        "id": "alien-dictionary",
+        "title": "Alien Dictionary",
+        "topic": "graphs",
+        "difficulty": "Hard",
+        "description": "Derive the order of letters in an alien language from a sorted dictionary.",
+        "examples": [
+            {
+                "input": "words = [\"wrt\",\"wrf\",\"er\",\"ett\",\"rftt\"]",
+                "output": "\"wertf\""
+            }
+        ],
+        "starterCode": {
+            "javascript": "function alienOrder(words) {\n}",
+            "python": "def alien_order(words):\n    pass",
+            "cpp": "string alienOrder(vector<string>& words) {\n}"
+        },
+        "hints": [
+            "Build graph from adjacent word comparisons.",
+            "Topological sort."
+        ]
+    },
+    {
+        "id": "redundant-connection",
+        "title": "Redundant Connection",
+        "topic": "graphs",
+        "difficulty": "Medium",
+        "description": "Find the edge that can be removed to make the graph a valid tree.",
+        "examples": [
+            {
+                "input": "edges = [[1,2],[1,3],[2,3]]",
+                "output": "[2,3]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function findRedundantConnection(edges) {\n}",
+            "python": "def find_redundant_connection(edges):\n    pass",
+            "cpp": "vector<int> findRedundantConnection(vector<vector<int>>& edges) {\n}"
+        },
+        "hints": [
+            "Use Union-Find.",
+            "Edge creating cycle is redundant."
+        ]
+    },
+    {
+        "id": "sort-array",
+        "title": "Sort an Array",
+        "topic": "sorting",
+        "difficulty": "Medium",
+        "description": "Sort an array of integers in ascending order without using built-in functions.",
+        "examples": [
+            {
+                "input": "nums = [5,2,3,1]",
+                "output": "[1,2,3,5]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function sortArray(nums) {\n}",
+            "python": "def sort_array(nums):\n    pass",
+            "cpp": "vector<int> sortArray(vector<int>& nums) {\n}"
+        },
+        "hints": [
+            "Use merge sort or quick sort.",
+            "Aim for O(n log n) complexity."
+        ]
+    },
+    {
+        "id": "merge-intervals",
+        "title": "Merge Intervals",
+        "topic": "sorting",
+        "difficulty": "Medium",
+        "description": "Merge all overlapping intervals.",
+        "examples": [
+            {
+                "input": "intervals = [[1,3],[2,6],[8,10],[15,18]]",
+                "output": "[[1,6],[8,10],[15,18]]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function merge(intervals) {\n}",
+            "python": "def merge(intervals):\n    pass",
+            "cpp": "vector<vector<int>> merge(vector<vector<int>>& intervals) {\n}"
+        },
+        "hints": [
+            "Sort by start time.",
+            "Merge if current overlaps previous."
+        ]
+    },
+    {
+        "id": "insert-interval",
+        "title": "Insert Interval",
+        "topic": "sorting",
+        "difficulty": "Medium",
+        "description": "Insert a new interval into a list of non-overlapping intervals.",
+        "examples": [
+            {
+                "input": "intervals = [[1,3],[6,9]], newInterval = [2,5]",
+                "output": "[[1,5],[6,9]]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function insert(intervals, newInterval) {\n}",
+            "python": "def insert(intervals, newInterval):\n    pass",
+            "cpp": "vector<vector<int>> insert(vector<vector<int>>& intervals, vector<int>& newInterval) {\n}"
+        },
+        "hints": [
+            "Add non-overlapping before, merge overlapping, add rest."
+        ]
+    },
+    {
+        "id": "sort-colors",
+        "title": "Sort Colors",
+        "topic": "sorting",
+        "difficulty": "Medium",
+        "description": "Sort an array with elements 0, 1, 2 in-place (Dutch National Flag problem).",
+        "examples": [
+            {
+                "input": "nums = [2,0,2,1,1,0]",
+                "output": "[0,0,1,1,2,2]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function sortColors(nums) {\n}",
+            "python": "def sort_colors(nums):\n    pass",
+            "cpp": "void sortColors(vector<int>& nums) {\n}"
+        },
+        "hints": [
+            "Three pointers: low, mid, high.",
+            "Swap 0s to front, 2s to back."
+        ]
+    },
+    {
+        "id": "kth-largest-element",
+        "title": "Kth Largest Element in Array",
+        "topic": "sorting",
+        "difficulty": "Medium",
+        "description": "Find the kth largest element in an unsorted array.",
+        "examples": [
+            {
+                "input": "nums = [3,2,1,5,6,4], k = 2",
+                "output": "5"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function findKthLargest(nums, k) {\n}",
+            "python": "def find_kth_largest(nums, k):\n    pass",
+            "cpp": "int findKthLargest(vector<int>& nums, int k) {\n}"
+        },
+        "hints": [
+            "Use quickselect for O(n) average.",
+            "Or heap for O(n log k)."
+        ]
+    },
+    {
+        "id": "wiggle-sort",
+        "title": "Wiggle Sort II",
+        "topic": "sorting",
+        "difficulty": "Medium",
+        "description": "Reorder array so nums[0] < nums[1] > nums[2] < nums[3]...",
+        "examples": [
+            {
+                "input": "nums = [1,5,1,1,6,4]",
+                "output": "[1,6,1,5,1,4]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function wiggleSort(nums) {\n}",
+            "python": "def wiggle_sort(nums):\n    pass",
+            "cpp": "void wiggleSort(vector<int>& nums) {\n}"
+        },
+        "hints": [
+            "Find median.",
+            "Place larger elements at odd indices."
+        ]
+    },
+    {
+        "id": "largest-number",
+        "title": "Largest Number",
+        "topic": "sorting",
+        "difficulty": "Medium",
+        "description": "Arrange numbers to form the largest possible number.",
+        "examples": [
+            {
+                "input": "nums = [10,2]",
+                "output": "\"210\""
+            }
+        ],
+        "starterCode": {
+            "javascript": "function largestNumber(nums) {\n}",
+            "python": "def largest_number(nums):\n    pass",
+            "cpp": "string largestNumber(vector<int>& nums) {\n}"
+        },
+        "hints": [
+            "Custom comparator: compare ab vs ba.",
+            "Handle leading zeros."
+        ]
+    },
+    {
+        "id": "h-index",
+        "title": "H-Index",
+        "topic": "sorting",
+        "difficulty": "Medium",
+        "description": "Find a researcher's h-index from citation counts.",
+        "examples": [
+            {
+                "input": "citations = [3,0,6,1,5]",
+                "output": "3"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function hIndex(citations) {\n}",
+            "python": "def h_index(citations):\n    pass",
+            "cpp": "int hIndex(vector<int>& citations) {\n}"
+        },
+        "hints": [
+            "Sort in descending order.",
+            "Find index where citations[i] >= i+1."
+        ]
+    },
+    {
+        "id": "meeting-rooms-ii",
+        "title": "Meeting Rooms II",
+        "topic": "sorting",
+        "difficulty": "Medium",
+        "description": "Find minimum number of conference rooms required.",
+        "examples": [
+            {
+                "input": "intervals = [[0,30],[5,10],[15,20]]",
+                "output": "2"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function minMeetingRooms(intervals) {\n}",
+            "python": "def min_meeting_rooms(intervals):\n    pass",
+            "cpp": "int minMeetingRooms(vector<vector<int>>& intervals) {\n}"
+        },
+        "hints": [
+            "Sort by start time.",
+            "Use min heap to track end times."
+        ]
+    },
+    {
+        "id": "rotate-list",
+        "title": "Rotate List",
+        "topic": "linked-lists",
+        "difficulty": "Medium",
+        "description": "Given a linked list, rotate the list to the right by k places.",
+        "examples": [
+            {
+                "input": "head = [1,2,3,4,5], k = 2",
+                "output": "[4,5,1,2,3]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function rotateRight(head, k) {\n}",
+            "python": "def rotate_right(head, k):\n    pass",
+            "cpp": "ListNode* rotateRight(ListNode* head, int k) {\n}"
+        },
+        "hints": [
+            "Find length and use modulo for k.",
+            "Connect tail to head, break at new tail."
+        ]
+    },
+    {
+        "id": "relative-sort-array",
+        "title": "Relative Sort Array",
+        "topic": "sorting",
+        "difficulty": "Easy",
+        "description": "Sort arr1 such that the relative ordering of items in arr1 are the same as in arr2.",
+        "examples": [
+            {
+                "input": "arr1 = [2,3,1,3,2,4,6,7,9,2,19], arr2 = [2,1,4,3,9,6]",
+                "output": "[2,2,2,1,4,3,3,9,6,7,19]"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function relativeSortArray(arr1, arr2) {\n}",
+            "python": "def relative_sort_array(arr1, arr2):\n    pass",
+            "cpp": "vector<int> relativeSortArray(vector<int>& arr1, vector<int>& arr2) {\n}"
+        },
+        "hints": [
+            "Count occurrences of each element.",
+            "Add elements in arr2 order, then remaining sorted."
+        ]
+    }
+]
