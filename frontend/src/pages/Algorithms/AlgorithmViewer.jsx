@@ -373,10 +373,11 @@ const LinkedListVisualization = ({ step }) => {
     const current = step.current
     const prev = step.prev
     const next = step.next
+    const isDoubly = step.isDoubly
 
     return (
         <div className="flex flex-col items-center gap-4 overflow-x-auto py-4">
-            <div className="text-sm text-gray-400 mb-2">HEAD ↓</div>
+            <div className="text-sm text-gray-400 mb-2">{isDoubly ? 'DLL HEAD ↓' : 'HEAD ↓'}</div>
             <div className="flex items-center gap-0">
                 {nodes.map((node, idx) => {
                     const isHead = idx === head
@@ -399,6 +400,9 @@ const LinkedListVisualization = ({ step }) => {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: idx * 0.1 }}
                         >
+                            {idx === 0 && isDoubly && (
+                                <div className="mr-2 text-gray-500 text-sm">NULL ⇄</div>
+                            )}
                             <div className={`
                                 flex items-center rounded-lg overflow-hidden shadow-lg
                                 ${isCurrent ? 'ring-2 ring-white scale-105' : ''}
@@ -406,20 +410,23 @@ const LinkedListVisualization = ({ step }) => {
                                 <div className={`w-12 h-12 flex items-center justify-center ${nodeColor} text-white font-bold`}>
                                     {node}
                                 </div>
-                                <div className="w-8 h-12 flex items-center justify-center bg-gray-700 text-gray-400 text-xs">
-                                    •→
+                                <div className="w-8 h-12 flex items-center justify-center bg-gray-700 text-gray-400 text-xs font-mono">
+                                    {isDoubly ? '⇄' : '•→'}
                                 </div>
                             </div>
                             {idx < nodes.length - 1 && (
                                 <div className="w-6 h-0.5 bg-gray-500" />
                             )}
                             {idx === nodes.length - 1 && (
-                                <div className="ml-2 text-gray-500 text-sm">NULL</div>
+                                <div className="ml-2 text-gray-500 text-sm">
+                                    {isDoubly ? '⇄ NULL' : '→ NULL'}
+                                </div>
                             )}
                         </motion.div>
                     )
                 })}
             </div>
+            {isDoubly && <div className="text-[10px] text-gray-500 mt-2 uppercase tracking-tighter">prev ⇄ next</div>}
         </div>
     )
 }
@@ -839,6 +846,16 @@ const sortingGenerators = {
             if (start >= end) return
 
             const mid = Math.floor((start + end) / 2)
+
+            steps.push({
+                array: [...array],
+                found: [mid],
+                comparing: [start, end],
+                range: [start, end], // Helper for UI to create a bracket?
+                message: `Divide: Splitting array [${start}...${end}] at index ${mid}.`,
+                line: 2
+            })
+
             mergeSort(start, mid)
             mergeSort(mid + 1, end)
             merge(start, mid, end)
@@ -850,14 +867,22 @@ const sortingGenerators = {
 
             let i = 0, j = 0, k = start
 
+            steps.push({
+                array: [...array],
+                comparing: [],
+                range: [start, end],
+                message: `Conquer: Merging subarrays [${start}...${mid}] and [${mid + 1}...${end}]`,
+                line: 5
+            })
+
             while (i < left.length && j < right.length) {
                 steps.push({
                     array: [...array],
                     comparing: [start + i, mid + 1 + j],
                     swapping: [],
                     sorted: [],
-                    message: `Merging: comparing ${left[i]} and ${right[j]}`,
-                    line: 6,
+                    message: `Comparing ${left[i]} and ${right[j]}. Smaller goes to position ${k}.`,
+                    line: 7,
                 })
 
                 if (left[i] <= right[j]) {
@@ -881,6 +906,14 @@ const sortingGenerators = {
                 j++
                 k++
             }
+
+            // Post-merge snapshot
+            steps.push({
+                array: [...array],
+                found: Array.from({ length: end - start + 1 }, (_, idx) => start + idx),
+                message: `Merged segment [${start}...${end}] is now sorted.`,
+                line: 14,
+            })
         }
 
         mergeSort(0, array.length - 1)
@@ -1433,6 +1466,166 @@ const arraysGenerators = {
         })
         return steps
     },
+    'dynamic-array': (data) => {
+        const steps = []
+        // Simulate dynamic array operations
+        const inputs = Array.isArray(data) ? data : [1, 2, 3, 4, 5, 6, 7, 8]
+        let capacity = 2
+        let size = 0
+        let arr = new Array(capacity).fill(null)
+
+        steps.push({
+            array: [...arr],
+            message: `Init Dynamic Array. Capacity: ${capacity}, Size: ${size}`,
+            line: 1
+        })
+
+        for (const val of inputs) {
+            // Check resize
+            if (size === capacity) {
+                steps.push({
+                    array: [...arr],
+                    message: `Array full (Size ${size} == Cap ${capacity}). Triggering RESIZE!`,
+                    line: 2,
+                    swapping: [] // Clear highlights
+                })
+
+                // Resize visualization steps
+                const oldCap = capacity
+                capacity *= 2
+                const newArr = new Array(capacity).fill(null)
+
+                steps.push({
+                    array: [...newArr],
+                    message: `1. Created new array of capacity ${capacity} (Double of ${oldCap})`,
+                    line: 3
+                })
+
+                // Copy
+                for (let i = 0; i < size; i++) {
+                    newArr[i] = arr[i]
+                    steps.push({
+                        array: [...newArr],
+                        comparing: [i], // Highlight copy source/dest
+                        message: `2. Copying element ${arr[i]} to new array`,
+                        line: 3
+                    })
+                }
+
+                arr = newArr
+                steps.push({
+                    array: [...arr],
+                    message: `3. Resize complete. New Capacity: ${capacity}`,
+                    line: 3
+                })
+            }
+
+            // Insert
+            arr[size] = val
+            steps.push({
+                array: [...arr],
+                found: [size], // Highlight insertion
+                message: `Inserted ${val} at index ${size}. Size: ${size + 1}/${capacity}`,
+                line: 4,
+                comparing: []
+            })
+            size++
+        }
+
+        return steps
+    },
+    'array-insert': () => {
+        const steps = []
+        const arr = [10, 20, 30, 40, null]
+        let size = 4
+        const insertVal = 25
+        const insertIdx = 1
+
+        steps.push({
+            array: [...arr],
+            message: `Static Array Insert: Add ${insertVal} at index ${insertIdx}. Current Size: ${size}`,
+            line: 1
+        })
+
+        // Shift Right
+        for (let i = size - 1; i >= insertIdx; i--) {
+            steps.push({
+                array: [...arr],
+                comparing: [i],
+                swapping: [i + 1], // Suggesting movement
+                message: `Shift Right: Moving ${arr[i]} from index ${i} to ${i + 1}.`,
+                line: 2
+            })
+            arr[i + 1] = arr[i]
+            arr[i] = null // distinct clear for visual
+            steps.push({
+                array: [...arr],
+                found: [i + 1],
+                message: `Shifted. Space created at index ${i}.`,
+                line: 2
+            })
+        }
+
+        // Insert
+        arr[insertIdx] = insertVal
+        steps.push({
+            array: [...arr],
+            found: [insertIdx],
+            message: `Inserted ${insertVal} at index ${insertIdx}. Time Complexity: O(n) due to shifting.`,
+            line: 3
+        })
+
+        return steps
+    },
+    'array-delete': () => {
+        const steps = []
+        const arr = [10, 20, 30, 40, 50]
+        let size = 5
+        const deleteIdx = 1 // Value 20
+
+        steps.push({
+            array: [...arr],
+            comparing: [deleteIdx],
+            message: `Static Array Delete: Remove element at index ${deleteIdx} (${arr[deleteIdx]}).`,
+            line: 1
+        })
+
+        // Logical delete
+        arr[deleteIdx] = null
+        steps.push({
+            array: [...arr],
+            message: `Element removed logically. Now must shift left to fill gap.`,
+            line: 2
+        })
+
+        // Shift Left
+        for (let i = deleteIdx; i < size - 1; i++) {
+            steps.push({
+                array: [...arr],
+                comparing: [i + 1],
+                swapping: [i],
+                message: `Shift Left: Moving ${arr[i + 1]} from index ${i + 1} to ${i}.`,
+                line: 3
+            })
+            arr[i] = arr[i + 1]
+            arr[i + 1] = null
+            steps.push({
+                array: [...arr],
+                found: [i],
+                message: `Shifted.`,
+                line: 3
+            })
+        }
+
+        size--
+        steps.push({
+            array: [...arr],
+            message: `Deletion Complete. Size is now ${size}. Time Complexity: O(n).`,
+            line: 4
+        })
+
+        return steps
+    }
 }
 
 // Step generators for DP algorithms
@@ -1545,6 +1738,73 @@ const dpGenerators = {
             message: `LIS length = ${tails.length}`,
             line: 8,
         })
+        return steps
+    },
+    'fibonacci': (n = 7) => {
+        const steps = []
+        const dp = new Array(n + 1).fill(0)
+        dp[0] = 0; dp[1] = 1
+
+        steps.push({
+            array: [...dp],
+            message: `Calculate Fib(${n}). Base cases: dp[0]=0, dp[1]=1`,
+            highlight: [0, 1],
+            line: 1
+        })
+
+        for (let i = 2; i <= n; i++) {
+            dp[i] = dp[i - 1] + dp[i - 2]
+            steps.push({
+                array: [...dp],
+                comparing: [i - 1, i - 2],
+                found: [i],
+                message: `dp[${i}] = dp[${i - 1}] + dp[${i - 2}] = ${dp[i - 1]} + ${dp[i - 2]} = ${dp[i]}`,
+                line: 2
+            })
+        }
+        return steps
+    },
+    'lcs': (data) => {
+        const str1 = "ACADB"
+        const str2 = "CBDA"
+        const m = str1.length
+        const n = str2.length
+        const dp = Array(m + 1).fill().map(() => Array(n + 1).fill(0))
+        const steps = []
+
+        // In this simplified viewer, we flatten the 2D array or just show the active row.
+        // We'll show the flattened array for the visualizer state.
+        const flatten = () => dp.reduce((acc, row) => acc.concat(row), [])
+
+        steps.push({
+            array: flatten(),
+            message: `LCS of "${str1}" vs "${str2}". Initialize ${(m + 1)}x${(n + 1)} table with 0s.`,
+            line: 1
+        })
+
+        for (let i = 1; i <= m; i++) {
+            for (let j = 1; j <= n; j++) {
+                const flatIdx = i * (n + 1) + j
+                if (str1[i - 1] === str2[j - 1]) {
+                    dp[i][j] = 1 + dp[i - 1][j - 1]
+                    steps.push({
+                        array: flatten(),
+                        comparing: [flatIdx],
+                        found: [flatIdx],
+                        message: `Match '${str1[i - 1]}'. dp[${i}][${j}] = 1 + dp[${i - 1}][${j - 1}] (${dp[i - 1][j - 1]}) = ${dp[i][j]}`,
+                        line: 2
+                    })
+                } else {
+                    dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1])
+                    steps.push({
+                        array: flatten(),
+                        comparing: [flatIdx],
+                        message: `Mismatch. max(top:${dp[i - 1][j]}, left:${dp[i][j - 1]}) = ${dp[i][j]}`,
+                        line: 3
+                    })
+                }
+            }
+        }
         return steps
     },
     'coin-change': () => {
@@ -1921,6 +2181,91 @@ const stacksGenerators = {
         })
         return steps
     },
+    'stack-push': (arr) => {
+        const steps = []
+        const stack = arr.slice(0, 4)
+        const newValue = 99
+        const maxSize = 6
+
+        steps.push({
+            array: [...stack],
+            top: stack.length - 1,
+            message: `Initial stack: [${stack.join(', ')}] (Size: ${stack.length}/${maxSize})`,
+            line: 1,
+        })
+
+        steps.push({
+            array: [...stack],
+            top: stack.length - 1,
+            highlightIndex: stack.length,
+            message: `Step 1: Check for overflow. Current size ${stack.length} < ${maxSize}. OK to push.`,
+            line: 2,
+        })
+
+        const newStack = [...stack, newValue]
+        steps.push({
+            array: newStack,
+            top: newStack.length - 1,
+            operation: 'push',
+            message: `Step 2: Increment top and insert ${newValue} at index ${newStack.length - 1}`,
+            line: 3,
+        })
+
+        steps.push({
+            array: newStack,
+            top: newStack.length - 1,
+            sorted: [newStack.length - 1],
+            message: `Push complete! Top is now ${newValue} at index ${newStack.length - 1}`,
+            line: 4,
+        })
+
+        return steps
+    },
+    'stack-pop': (arr) => {
+        const steps = []
+        const stack = arr.slice(0, 5)
+
+        steps.push({
+            array: [...stack],
+            top: stack.length - 1,
+            message: `Initial stack: [${stack.join(', ')}] (Size: ${stack.length})`,
+            line: 1,
+        })
+
+        steps.push({
+            array: [...stack],
+            top: stack.length - 1,
+            message: `Step 1: Check for underflow. Stack is not empty. OK to pop.`,
+            line: 2,
+        })
+
+        const poppedValue = stack[stack.length - 1]
+        steps.push({
+            array: [...stack],
+            top: stack.length - 1,
+            operation: 'pop',
+            message: `Step 2: Access the top element: ${poppedValue}`,
+            line: 3,
+        })
+
+        const newStack = stack.slice(0, -1)
+        steps.push({
+            array: newStack,
+            top: newStack.length - 1,
+            message: `Step 3: Decrement top pointer. Popped value: ${poppedValue}`,
+            line: 4,
+        })
+
+        steps.push({
+            array: newStack,
+            top: newStack.length - 1,
+            swapping: [newStack.length], // Visual cue for where it was
+            message: `Pop complete! ${poppedValue} removed from stack.`,
+            line: 5,
+        })
+
+        return steps
+    },
     'infix-postfix': () => {
         const steps = []
         const exp = "a+b*c"
@@ -2100,6 +2445,99 @@ const queuesGenerators = {
         })
         return steps
     },
+    'queue-enqueue': (arr) => {
+        const steps = []
+        const queueSize = 5
+        const queue = arr.slice(0, 4)
+        const newValue = 88
+
+        steps.push({
+            array: [...queue],
+            front: 0,
+            rear: queue.length - 1,
+            message: `Initial queue: [${queue.join(', ')}] (Size: ${queue.length}/${queueSize})`,
+            line: 1,
+        })
+
+        steps.push({
+            array: [...queue],
+            front: 0,
+            rear: queue.length - 1,
+            message: `Step 1: Check for overflow. Current size ${queue.length} < ${queueSize}. OK to enqueue.`,
+            line: 2,
+        })
+
+        const newQueue = [...queue, newValue]
+        steps.push({
+            array: newQueue,
+            front: 0,
+            rear: newQueue.length - 1,
+            operation: 'enqueue',
+            message: `Step 2: Update rear and insert ${newValue} at the end.`,
+            line: 3,
+        })
+
+        steps.push({
+            array: newQueue,
+            front: 0,
+            rear: newQueue.length - 1,
+            sorted: [newQueue.length - 1],
+            message: `Enqueue complete! Rear is now ${newValue} at index ${newQueue.length - 1}`,
+            line: 4,
+        })
+
+        return steps
+    },
+    'queue-dequeue': (arr) => {
+        const steps = []
+        const queue = arr.slice(0, 5)
+
+        steps.push({
+            array: [...queue],
+            front: 0,
+            rear: queue.length - 1,
+            message: `Initial queue: [${queue.join(', ')}] (Size: ${queue.length})`,
+            line: 1,
+        })
+
+        steps.push({
+            array: [...queue],
+            front: 0,
+            rear: queue.length - 1,
+            message: `Step 1: Check for underflow. Queue is not empty. OK to dequeue.`,
+            line: 2,
+        })
+
+        const dequeuedValue = queue[0]
+        steps.push({
+            array: [...queue],
+            front: 0,
+            rear: queue.length - 1,
+            operation: 'dequeue',
+            message: `Step 2: Access the front element: ${dequeuedValue}`,
+            line: 3,
+        })
+
+        const newQueue = queue.slice(1)
+        steps.push({
+            array: newQueue,
+            front: 0,
+            rear: newQueue.length - 1,
+            message: `Step 3: Update front pointer (remove element from front). Dequeued value: ${dequeuedValue}`,
+            line: 4,
+        })
+
+        steps.push({
+            array: newQueue,
+            front: 0,
+            rear: newQueue.length - 1,
+            swapping: [0], // Visual cue for where it was
+            message: `Dequeue complete! ${dequeuedValue} removed from front.`,
+            line: 5,
+        })
+
+        return steps
+    },
 }
 
 // Step generators for linked list algorithms
@@ -2139,6 +2577,85 @@ const linkedListsGenerators = {
             message: `Final List: ${nodes.join(' → ')} → null`,
             line: 5,
         })
+        return steps
+    },
+    'singly-linked-list-insert-head': (arr) => {
+        const steps = []
+        const nodes = arr.slice(0, 4)
+        const newElement = 99
+
+        steps.push({
+            array: [...nodes],
+            head: 0,
+            message: `Initial list: ${nodes.join(' → ')} → null`,
+            line: 1,
+        })
+
+        steps.push({
+            array: [newElement, ...nodes],
+            found: [0],
+            head: 1,
+            message: `Created new node ${newElement}, pointing its next to current head (${nodes[0]})`,
+            line: 2,
+        })
+
+        steps.push({
+            array: [newElement, ...nodes],
+            found: [0],
+            head: 0,
+            message: `Updated head to point to {newElement}`,
+            line: 3,
+        })
+
+        steps.push({
+            array: [newElement, ...nodes],
+            sorted: [0, 1, 2, 3, 4],
+            message: `Insertion complete: ${[newElement, ...nodes].join(' → ')} → null`,
+            line: 4,
+        })
+
+        return steps
+    },
+    'singly-linked-list-insert-position': (arr) => {
+        const steps = []
+        const nodes = arr.slice(0, 4)
+        const newElement = 55
+        const pos = 2
+
+        steps.push({
+            array: [...nodes],
+            message: `Insert ${newElement} at position ${pos}`,
+            line: 1,
+        })
+
+        for (let i = 0; i < pos; i++) {
+            steps.push({
+                array: [...nodes],
+                current: i,
+                message: `Traversing... currently at node ${i} (value: ${nodes[i]})`,
+                line: 2,
+            })
+        }
+
+        const result = [...nodes]
+        result.splice(pos, 0, newElement)
+
+        steps.push({
+            array: result,
+            prev: pos - 1,
+            found: [pos],
+            next: pos + 1,
+            message: `Update pointers: Node ${nodes[pos - 1]} → ${newElement} → ${nodes[pos]}`,
+            line: 3,
+        })
+
+        steps.push({
+            array: result,
+            sorted: result.map((_, i) => i),
+            message: `Insertion complete: ${result.join(' → ')} → null`,
+            line: 4,
+        })
+
         return steps
     },
     'reverse-linked-list': (arr) => {
@@ -2230,9 +2747,7 @@ const linkedListsGenerators = {
 
         steps.push({
             array: [...nodes],
-            comparing: [],
-            swapping: [],
-            sorted: [],
+            isDoubly: true,
             message: `Doubly Linked List: each node has prev and next pointers`,
             line: 1,
         })
@@ -2242,22 +2757,138 @@ const linkedListsGenerators = {
             list.push(nodes[i])
             steps.push({
                 array: [...list],
-                comparing: [],
-                swapping: [],
-                sorted: [],
+                isDoubly: true,
                 found: [list.length - 1],
-                message: `Insert ${nodes[i]}: null ← ${list.join(' ⇄ ')} → null`,
+                message: `Insert ${nodes[i]} at tail`,
                 line: 3,
             })
         }
 
         steps.push({
             array: [...list],
-            comparing: [],
-            swapping: [],
+            isDoubly: true,
             sorted: list.map((_, i) => i),
-            message: `DLL Complete: null ← ${list.join(' ⇄ ')} → null`,
+            message: `DLL Complete`,
             line: 5,
+        })
+        return steps
+    },
+    'doubly-linked-list-insert-head': (arr) => {
+        const steps = []
+        const nodes = arr.slice(0, 4)
+        const newElement = 88
+
+        steps.push({
+            array: [...nodes],
+            isDoubly: true,
+            head: 0,
+            message: `Initial Doubly Linked List`,
+            line: 1,
+        })
+
+        steps.push({
+            array: [newElement, ...nodes],
+            isDoubly: true,
+            found: [0],
+            head: 1,
+            message: `Created node ${newElement}. Point its next to ${nodes[0]}.`,
+            line: 2,
+        })
+
+        steps.push({
+            array: [newElement, ...nodes],
+            isDoubly: true,
+            found: [0],
+            head: 0,
+            next: 1,
+            message: `Update head and set ${nodes[0]}.prev to new node.`,
+            line: 3,
+        })
+
+        steps.push({
+            array: [newElement, ...nodes],
+            isDoubly: true,
+            sorted: [0, 1, 2, 3, 4],
+            message: `DLL Head insertion complete`,
+            line: 4,
+        })
+
+        return steps
+    },
+    'doubly-linked-list-insert-position': (arr) => {
+        const steps = []
+        const nodes = arr.slice(0, 4)
+        const newElement = 77
+        const pos = 2
+
+        steps.push({
+            array: [...nodes],
+            isDoubly: true,
+            message: `DLL: Insert ${newElement} at position ${pos}`,
+            line: 1,
+        })
+
+        for (let i = 0; i < pos; i++) {
+            steps.push({
+                array: [...nodes],
+                isDoubly: true,
+                current: i,
+                message: `Traversing... at node ${i}`,
+                line: 2,
+            })
+        }
+
+        const result = [...nodes]
+        result.splice(pos, 0, newElement)
+
+        steps.push({
+            array: result,
+            isDoubly: true,
+            prev: pos - 1,
+            found: [pos],
+            next: pos + 1,
+            message: `Link nodes: ${nodes[pos - 1]} ⇄ ${newElement} ⇄ ${nodes[pos]}`,
+            line: 3,
+        })
+
+        steps.push({
+            array: result,
+            isDoubly: true,
+            sorted: result.map((_, i) => i),
+            message: `DLL Position insertion complete`,
+            line: 4,
+        })
+        return steps
+    },
+    'doubly-reverse-linked-list': (arr) => {
+        const steps = []
+        const nodes = arr.slice(0, 5)
+
+        steps.push({
+            array: [...nodes],
+            isDoubly: true,
+            message: `Reverse DLL: Swap prev and next for each node`,
+            line: 1,
+        })
+
+        const result = [...nodes]
+        for (let i = 0; i < nodes.length; i++) {
+            steps.push({
+                array: [...result],
+                isDoubly: true,
+                current: i,
+                message: `Swapping prev and next pointers for node ${nodes[i]}`,
+                line: 2,
+            })
+        }
+
+        result.reverse()
+        steps.push({
+            array: result,
+            isDoubly: true,
+            sorted: result.map((_, i) => i),
+            message: `DLL Reversal complete`,
+            line: 3,
         })
         return steps
     },
@@ -3252,6 +3883,129 @@ const treesGenerators = {
             line: 2
         })
         return steps
+    },
+    'avl-tree': (data) => {
+        const steps = []
+        const elements = Array.isArray(data) ? data.slice(0, 10) : (data.array || [10, 20, 30, 40, 50, 25]).slice(0, 15)
+
+        // Helper class for AVL Node
+        class Node {
+            constructor(val) {
+                this.val = val;
+                this.left = null;
+                this.right = null;
+                this.height = 1;
+            }
+        }
+
+        let root = null;
+
+        // Helper to convert tree to array for visualization
+        const getTreeArray = (node) => {
+            const arr = new Array(31).fill(null);
+            if (!node) return arr;
+            const q = [{ node, idx: 0 }];
+            while (q.length) {
+                const { node: curr, idx } = q.shift();
+                if (idx < 31) {
+                    arr[idx] = curr.val;
+                    if (curr.left) q.push({ node: curr.left, idx: 2 * idx + 1 });
+                    if (curr.right) q.push({ node: curr.right, idx: 2 * idx + 2 });
+                }
+            }
+            return arr;
+        }
+
+        const getHeight = (n) => n ? n.height : 0;
+        const getBalance = (n) => n ? getHeight(n.left) - getHeight(n.right) : 0;
+
+        const rightRotate = (y) => {
+            const x = y.left;
+            const T2 = x.right;
+            x.right = y;
+            y.left = T2;
+            y.height = Math.max(getHeight(y.left), getHeight(y.right)) + 1;
+            x.height = Math.max(getHeight(x.left), getHeight(x.right)) + 1;
+            return x;
+        }
+
+        const leftRotate = (x) => {
+            const y = x.right;
+            const T2 = y.left;
+            y.left = x;
+            x.right = T2;
+            x.height = Math.max(getHeight(x.left), getHeight(x.right)) + 1;
+            y.height = Math.max(getHeight(y.left), getHeight(y.right)) + 1;
+            return y;
+        }
+
+        const insert = (node, val) => {
+            if (!node) return new Node(val);
+            if (val < node.val) node.left = insert(node.left, val);
+            else if (val > node.val) node.right = insert(node.right, val);
+            else return node;
+
+            node.height = 1 + Math.max(getHeight(node.left), getHeight(node.right));
+            const balance = getBalance(node);
+
+            // Left Left
+            if (balance > 1 && val < node.left.val) {
+                steps.push({
+                    treeNodes: getTreeArray(root),
+                    message: `Imbalance at ${node.val} (Bal: ${balance}). Performing Right Rotate.`,
+                    line: 4
+                });
+                return rightRotate(node);
+            }
+            // Right Right
+            if (balance < -1 && val > node.right.val) {
+                steps.push({
+                    treeNodes: getTreeArray(root),
+                    message: `Imbalance at ${node.val} (Bal: ${balance}). Performing Left Rotate.`,
+                    line: 4
+                });
+                return leftRotate(node);
+            }
+            // Left Right
+            if (balance > 1 && val > node.left.val) {
+                steps.push({
+                    treeNodes: getTreeArray(root),
+                    message: `Imbalance at ${node.val} (Bal: ${balance}). Left Rotate ${node.left.val}, then Right Rotate.`,
+                    line: 4
+                });
+                node.left = leftRotate(node.left);
+                return rightRotate(node);
+            }
+            // Right Left
+            if (balance < -1 && val < node.right.val) {
+                steps.push({
+                    treeNodes: getTreeArray(root),
+                    message: `Imbalance at ${node.val} (Bal: ${balance}). Right Rotate ${node.right.val}, then Left Rotate.`,
+                    line: 4
+                });
+                node.right = rightRotate(node.right);
+                return leftRotate(node);
+            }
+
+            return node;
+        }
+
+        steps.push({
+            treeNodes: new Array(31).fill(null),
+            message: `AVL Tree Insertion: [${elements.join(', ')}]`,
+            line: 1
+        });
+
+        for (const val of elements) {
+            root = insert(root, val);
+            steps.push({
+                treeNodes: getTreeArray(root),
+                message: `Inserted ${val}. Tree balanced.`,
+                line: 2
+            });
+        }
+
+        return steps;
     }
 }
 
@@ -3401,6 +4155,96 @@ const generateRandomGraph = (nodeCount = 6) => {
     }
     // Ensure all nodes have at least one edge? Optional.
     return { nodes, edges }
+}
+
+const ColorLegend = () => (
+    <div className="w-full mt-6 mb-4">
+        <h3 className="text-sm font-semibold text-gray-400 mb-2 uppercase tracking-wider text-center">Visualization Legend</h3>
+        <div className="flex flex-wrap gap-4 justify-center p-3 bg-white/5 rounded-lg border border-white/10">
+            <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-gradient-to-b from-google-blue to-blue-600"></div>
+                <span className="text-xs text-gray-300">Default / Unvisited</span>
+            </div>
+            <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-gradient-to-b from-google-yellow to-yellow-600"></div>
+                <span className="text-xs text-gray-300">Comparing / Current</span>
+            </div>
+            <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-gradient-to-b from-google-green to-green-600"></div>
+                <span className="text-xs text-gray-300">Sorted / Found / Swapped</span>
+            </div>
+            <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-gradient-to-b from-google-red to-red-600"></div>
+                <span className="text-xs text-gray-300">Deleting / Pivot / Mismatch</span>
+            </div>
+            <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-purple-500"></div>
+                <span className="text-xs text-gray-300">Pointer / Recursion / Aux</span>
+            </div>
+            <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-cyan-500"></div>
+                <span className="text-xs text-gray-300">Window / Next / Enqueue</span>
+            </div>
+        </div>
+    </div>
+)
+
+const ExamMode = ({ algorithm }) => {
+    const practice = algorithm?.practice || algorithm?.code?.practice;
+    if (!practice) return null;
+    const { theory, coding, interview } = practice;
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="mt-12 border-t border-white/10 pt-8"
+        >
+            <div className="flex items-center gap-3 mb-6">
+                <span className="text-3xl bg-white/10 p-2 rounded-lg">🎓</span>
+                <div>
+                    <h2 className="text-2xl font-bold text-white">Exam & Interview Mode</h2>
+                    <p className="text-gray-400 text-sm">Test your understanding with these curated questions.</p>
+                </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-white/5 p-6 rounded-xl border border-white/10 hover:bg-white/[0.07] transition-colors">
+                    <h3 className="text-lg font-semibold text-google-blue mb-4 flex items-center gap-2">
+                        <span>📚</span> Theory Questions
+                    </h3>
+                    <ul className="space-y-4">
+                        {theory?.map((q, i) => (
+                            <li key={i} className="flex gap-3 text-gray-300">
+                                <span className="font-bold text-white/30 font-mono">0{i + 1}</span>
+                                <span className="leading-relaxed">{q}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+
+                <div className="space-y-6">
+                    <div className="bg-white/5 p-6 rounded-xl border border-white/10 hover:bg-white/[0.07] transition-colors">
+                        <h3 className="text-lg font-semibold text-google-green mb-3 flex items-center gap-2">
+                            <span>💻</span> Coding Challenge
+                        </h3>
+                        <div className="bg-black/40 p-4 rounded-lg border border-white/5">
+                            <p className="text-gray-300 italic font-mono text-sm leading-relaxed">"{coding}"</p>
+                        </div>
+                    </div>
+                    <div className="bg-white/5 p-6 rounded-xl border border-white/10 hover:bg-white/[0.07] transition-colors">
+                        <h3 className="text-lg font-semibold text-google-yellow mb-3 flex items-center gap-2">
+                            <span>💼</span> Interview Question
+                        </h3>
+                        <div className="bg-black/40 p-4 rounded-lg border border-white/5">
+                            <p className="text-gray-300 italic font-mono text-sm leading-relaxed">"{interview}"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </motion.div>
+    )
 }
 
 export default function AlgorithmViewer() {
@@ -3769,27 +4613,10 @@ export default function AlgorithmViewer() {
                 </motion.div>
             </div>
 
-            {/* Legend - only show for sorting */}
-            {hasVisualization && (
-                <motion.div
-                    className="mt-6 flex flex-wrap gap-4 justify-center"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.4 }}
-                >
-                    {[
-                        { color: 'bg-google-blue', label: 'Default' },
-                        { color: 'bg-google-yellow', label: 'Comparing' },
-                        { color: 'bg-google-red', label: 'Swapping' },
-                        { color: 'bg-google-green', label: 'Sorted' },
-                    ].map(({ color, label }) => (
-                        <div key={label} className="flex items-center gap-2">
-                            <div className={`w-4 h-4 rounded ${color}`} />
-                            <span className="text-sm text-gray-400">{label}</span>
-                        </div>
-                    ))}
-                </motion.div>
-            )}
+            {/* Legend & Exam Mode */}
+            {/* Legend & Exam Mode */}
+            {hasVisualization && <ColorLegend />}
+            <ExamMode algorithm={selectedAlgorithm} />
         </div>
     )
 }

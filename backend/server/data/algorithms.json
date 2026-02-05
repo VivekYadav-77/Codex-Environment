@@ -18,6 +18,14 @@
             "python": "def bubble_sort(arr):\n    n = len(arr)\n    for i in range(n - 1):\n        for j in range(n - i - 1):\n            if arr[j] > arr[j + 1]:\n                arr[j], arr[j + 1] = arr[j + 1], arr[j]\n    return arr",
             "java": "public static void bubbleSort(int[] arr) {\n    int n = arr.length;\n    for (int i = 0; i < n - 1; i++) {\n        for (int j = 0; j < n - i - 1; j++) {\n            if (arr[j] > arr[j + 1]) {\n                int temp = arr[j];\n                arr[j] = arr[j + 1];\n                arr[j + 1] = temp;\n            }\n        }\n    }\n}",
             "cpp": "void bubbleSort(int arr[], int n) {\n    for (int i = 0; i < n - 1; i++) {\n        for (int j = 0; j < n - i - 1; j++) {\n            if (arr[j] > arr[j + 1]) {\n                swap(arr[j], arr[j + 1]);\n            }\n        }\n    }\n}"
+        },
+        "practice": {
+            "theory": [
+                "What is the time complexity of Bubble Sort in the worst, average, and best cases?",
+                "Is Bubble Sort a stable sorting algorithm? Why or why not?"
+            ],
+            "coding": "Modify the Bubble Sort algorithm to stop early if the array becomes sorted during an iteration (Optimization).",
+            "interview": "Why is Bubble Sort rarely used in real-world production systems despite its simplicity?"
         }
     },
     {
@@ -39,6 +47,14 @@
             "python": "def selection_sort(arr):\n    n = len(arr)\n    for i in range(n - 1):\n        min_idx = i\n        for j in range(i + 1, n):\n            if arr[j] < arr[min_idx]:\n                min_idx = j\n        arr[i], arr[min_idx] = arr[min_idx], arr[i]\n    return arr",
             "java": "public static void selectionSort(int[] arr) {\n    int n = arr.length;\n    for (int i = 0; i < n - 1; i++) {\n        int minIdx = i;\n        for (int j = i + 1; j < n; j++) {\n            if (arr[j] < arr[minIdx]) minIdx = j;\n        }\n        int temp = arr[i];\n        arr[i] = arr[minIdx];\n        arr[minIdx] = temp;\n    }\n}",
             "cpp": "void selectionSort(int arr[], int n) {\n    for (int i = 0; i < n - 1; i++) {\n        int minIdx = i;\n        for (int j = i + 1; j < n; j++) {\n            if (arr[j] < arr[minIdx]) minIdx = j;\n        }\n        swap(arr[i], arr[minIdx]);\n    }\n}"
+        },
+        "practice": {
+            "theory": [
+                "What is the time complexity of Selection Sort in the best, average, and worst cases?",
+                "Is Selection Sort stable? Explain with an example."
+            ],
+            "coding": "Modify Selection Sort to verify if the list is already sorted before starting.",
+            "interview": "Why does Selection Sort perform fewer swaps than Bubble Sort?"
         }
     },
     {
@@ -60,6 +76,14 @@
             "python": "def insertion_sort(arr):\n    for i in range(1, len(arr)):\n        key = arr[i]\n        j = i - 1\n        while j >= 0 and arr[j] > key:\n            arr[j + 1] = arr[j]\n            j -= 1\n        arr[j + 1] = key\n    return arr",
             "java": "public static void insertionSort(int[] arr) {\n    for (int i = 1; i < arr.length; i++) {\n        int key = arr[i];\n        int j = i - 1;\n        while (j >= 0 && arr[j] > key) {\n            arr[j + 1] = arr[j];\n            j--;\n        }\n        arr[j + 1] = key;\n    }\n}",
             "cpp": "void insertionSort(int arr[], int n) {\n    for (int i = 1; i < n; i++) {\n        int key = arr[i];\n        int j = i - 1;\n        while (j >= 0 && arr[j] > key) {\n            arr[j + 1] = arr[j];\n            j--;\n        }\n        arr[j + 1] = key;\n    }\n}"
+        },
+        "practice": {
+            "theory": [
+                "Why is Insertion Sort efficient for small or nearly sorted datasets?",
+                "What is the time complexity when the array is already sorted?"
+            ],
+            "coding": "Implement Recursive Insertion Sort.",
+            "interview": "In what real-world scenario would you choose Insertion Sort over Quick Sort?"
         }
     },
     {
@@ -82,6 +106,14 @@
             "python": "def quick_sort(arr, low=0, high=None):\n    if high is None:\n        high = len(arr) - 1\n    if low < high:\n        pivot_idx = partition(arr, low, high)\n        quick_sort(arr, low, pivot_idx - 1)\n        quick_sort(arr, pivot_idx + 1, high)\n    return arr\n\ndef partition(arr, low, high):\n    pivot = arr[high]\n    i = low - 1\n    for j in range(low, high):\n        if arr[j] < pivot:\n            i += 1\n            arr[i], arr[j] = arr[j], arr[i]\n    arr[i + 1], arr[high] = arr[high], arr[i + 1]\n    return i + 1",
             "java": "public static void quickSort(int[] arr, int low, int high) {\n    if (low < high) {\n        int pi = partition(arr, low, high);\n        quickSort(arr, low, pi - 1);\n        quickSort(arr, pi + 1, high);\n    }\n}\n\nstatic int partition(int[] arr, int low, int high) {\n    int pivot = arr[high];\n    int i = low - 1;\n    for (int j = low; j < high; j++) {\n        if (arr[j] < pivot) {\n            i++;\n            int temp = arr[i];\n            arr[i] = arr[j];\n            arr[j] = temp;\n        }\n    }\n    int temp = arr[i + 1];\n    arr[i + 1] = arr[high];\n    arr[high] = temp;\n    return i + 1;\n}",
             "cpp": "int partition(int arr[], int low, int high) {\n    int pivot = arr[high];\n    int i = low - 1;\n    for (int j = low; j < high; j++) {\n        if (arr[j] < pivot) {\n            i++;\n            swap(arr[i], arr[j]);\n        }\n    }\n    swap(arr[i + 1], arr[high]);\n    return i + 1;\n}\n\nvoid quickSort(int arr[], int low, int high) {\n    if (low < high) {\n        int pi = partition(arr, low, high);\n        quickSort(arr, low, pi - 1);\n        quickSort(arr, pi + 1, high);\n    }\n}"
+        },
+        "practice": {
+            "theory": [
+                "Explain the best, average, and worst-case time complexities of Quick Sort.",
+                "How does pivot selection affect performance?"
+            ],
+            "coding": "Implement Quick Sort using a random pivot.",
+            "interview": "Why is Quick Sort often preferred over Merge Sort for arrays?"
         }
     },
     {
@@ -103,6 +135,14 @@
             "python": "def merge_sort(arr):\n    if len(arr) <= 1:\n        return arr\n    mid = len(arr) // 2\n    left = merge_sort(arr[:mid])\n    right = merge_sort(arr[mid:])\n    return merge(left, right)\n\ndef merge(left, right):\n    result = []\n    i = j = 0\n    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:\n            result.append(left[i])\n            i += 1\n        else:\n            result.append(right[j])\n            j += 1\n    return result + left[i:] + right[j:]",
             "java": "public static void mergeSort(int[] arr, int l, int r) {\n    if (l < r) {\n        int m = l + (r - l) / 2;\n        mergeSort(arr, l, m);\n        mergeSort(arr, m + 1, r);\n        merge(arr, l, m, r);\n    }\n}\n\nstatic void merge(int[] arr, int l, int m, int r) {\n    int[] L = Arrays.copyOfRange(arr, l, m + 1);\n    int[] R = Arrays.copyOfRange(arr, m + 1, r + 1);\n    int i = 0, j = 0, k = l;\n    while (i < L.length && j < R.length) {\n        arr[k++] = L[i] <= R[j] ? L[i++] : R[j++];\n    }\n    while (i < L.length) arr[k++] = L[i++];\n    while (j < R.length) arr[k++] = R[j++];\n}",
             "cpp": "void merge(int arr[], int l, int m, int r) {\n    vector<int> L(arr + l, arr + m + 1);\n    vector<int> R(arr + m + 1, arr + r + 1);\n    int i = 0, j = 0, k = l;\n    while (i < L.size() && j < R.size()) {\n        arr[k++] = L[i] <= R[j] ? L[i++] : R[j++];\n    }\n    while (i < L.size()) arr[k++] = L[i++];\n    while (j < R.size()) arr[k++] = R[j++];\n}\n\nvoid mergeSort(int arr[], int l, int r) {\n    if (l < r) {\n        int m = l + (r - l) / 2;\n        mergeSort(arr, l, m);\n        mergeSort(arr, m + 1, r);\n        merge(arr, l, m, r);\n    }\n}"
+        },
+        "practice": {
+            "theory": [
+                "Why is Merge Sort stable?",
+                "Derive the time complexity using the recursion tree method."
+            ],
+            "coding": "Implement Merge Sort for a Linked List.",
+            "interview": "Why is Merge Sort preferred for Linked Lists?"
         }
     },
     {
@@ -125,6 +165,14 @@
             "python": "def heap_sort(arr):\n    n = len(arr)\n    for i in range(n // 2 - 1, -1, -1):\n        heapify(arr, n, i)\n    for i in range(n - 1, 0, -1):\n        arr[0], arr[i] = arr[i], arr[0]\n        heapify(arr, i, 0)\n    return arr\n\ndef heapify(arr, n, i):\n    largest = i\n    l, r = 2 * i + 1, 2 * i + 2\n    if l < n and arr[l] > arr[largest]: largest = l\n    if r < n and arr[r] > arr[largest]: largest = r\n    if largest != i:\n        arr[i], arr[largest] = arr[largest], arr[i]\n        heapify(arr, n, largest)",
             "java": "public static void heapSort(int[] arr) {\n    int n = arr.length;\n    for (int i = n / 2 - 1; i >= 0; i--) heapify(arr, n, i);\n    for (int i = n - 1; i > 0; i--) {\n        int temp = arr[0]; arr[0] = arr[i]; arr[i] = temp;\n        heapify(arr, i, 0);\n    }\n}\n\nstatic void heapify(int[] arr, int n, int i) {\n    int largest = i, l = 2 * i + 1, r = 2 * i + 2;\n    if (l < n && arr[l] > arr[largest]) largest = l;\n    if (r < n && arr[r] > arr[largest]) largest = r;\n    if (largest != i) {\n        int swap = arr[i]; arr[i] = arr[largest]; arr[largest] = swap;\n        heapify(arr, n, largest);\n    }\n}",
             "cpp": "void heapify(int arr[], int n, int i) {\n    int largest = i, l = 2 * i + 1, r = 2 * i + 2;\n    if (l < n && arr[l] > arr[largest]) largest = l;\n    if (r < n && arr[r] > arr[largest]) largest = r;\n    if (largest != i) {\n        swap(arr[i], arr[largest]);\n        heapify(arr, n, largest);\n    }\n}\n\nvoid heapSort(int arr[], int n) {\n    for (int i = n / 2 - 1; i >= 0; i--) heapify(arr, n, i);\n    for (int i = n - 1; i > 0; i--) {\n        swap(arr[0], arr[i]);\n        heapify(arr, i, 0);\n    }\n}"
+        },
+        "practice": {
+            "theory": [
+                "How is the array viewed as a binary tree in Heap Sort?",
+                "What is the difference between Min Heap and Max Heap?"
+            ],
+            "coding": "Implement a function to check if an array represents a Max Heap.",
+            "interview": "Compare Heap Sort vs Quick Sort in terms of cache locality."
         }
     },
     {
@@ -145,6 +193,14 @@
             "python": "def linear_search(arr, target):\n    for i, val in enumerate(arr):\n        if val == target:\n            return i\n    return -1",
             "java": "public static int linearSearch(int[] arr, int target) {\n    for (int i = 0; i < arr.length; i++) {\n        if (arr[i] == target) return i;\n    }\n    return -1;\n}",
             "cpp": "int linearSearch(int arr[], int n, int target) {\n    for (int i = 0; i < n; i++) {\n        if (arr[i] == target) return i;\n    }\n    return -1;\n}"
+        },
+        "practice": {
+            "theory": [
+                "What is the time complexity of Linear Search?",
+                "When is Linear Search preferred over Binary Search?"
+            ],
+            "coding": "Implement Linear Search to find all occurrences of a target.",
+            "interview": "Can Linear Search be recursive? If so, implement it."
         }
     },
     {
@@ -166,6 +222,14 @@
             "python": "def binary_search(arr, target):\n    left, right = 0, len(arr) - 1\n    while left <= right:\n        mid = (left + right) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    return -1",
             "java": "public static int binarySearch(int[] arr, int target) {\n    int left = 0, right = arr.length - 1;\n    while (left <= right) {\n        int mid = left + (right - left) / 2;\n        if (arr[mid] == target) return mid;\n        if (arr[mid] < target) left = mid + 1;\n        else right = mid - 1;\n    }\n    return -1;\n}",
             "cpp": "int binarySearch(int arr[], int n, int target) {\n    int left = 0, right = n - 1;\n    while (left <= right) {\n        int mid = left + (right - left) / 2;\n        if (arr[mid] == target) return mid;\n        if (arr[mid] < target) left = mid + 1;\n        else right = mid - 1;\n    }\n    return -1;\n}"
+        },
+        "practice": {
+            "theory": [
+                "What is the prerequisite for Binary Search?",
+                "Calculate the maximum number of comparisons for an array of size 1000."
+            ],
+            "coding": "Implement Binary Search to find the first occurrence of a target.",
+            "interview": "How do you handle integer overflow when calculating mid?"
         }
     },
     {
@@ -187,6 +251,14 @@
             "python": "import math\n\ndef jump_search(arr, target):\n    n = len(arr)\n    step = int(math.sqrt(n))\n    prev = 0\n    while arr[min(step, n) - 1] < target:\n        prev = step\n        step += int(math.sqrt(n))\n        if prev >= n:\n            return -1\n    while arr[prev] < target:\n        prev += 1\n        if prev == min(step, n):\n            return -1\n    return prev if arr[prev] == target else -1",
             "java": "public static int jumpSearch(int[] arr, int target) {\n    int n = arr.length;\n    int step = (int)Math.sqrt(n);\n    int prev = 0;\n    while (arr[Math.min(step, n) - 1] < target) {\n        prev = step;\n        step += (int)Math.sqrt(n);\n        if (prev >= n) return -1;\n    }\n    while (arr[prev] < target) {\n        prev++;\n        if (prev == Math.min(step, n)) return -1;\n    }\n    return arr[prev] == target ? prev : -1;\n}",
             "cpp": "int jumpSearch(int arr[], int n, int target) {\n    int step = sqrt(n);\n    int prev = 0;\n    while (arr[min(step, n) - 1] < target) {\n        prev = step;\n        step += sqrt(n);\n        if (prev >= n) return -1;\n    }\n    while (arr[prev] < target) {\n        prev++;\n        if (prev == min(step, n)) return -1;\n    }\n    return arr[prev] == target ? prev : -1;\n}"
+        },
+        "practice": {
+            "theory": [
+                "Why is the optimal block size sqrt(n) for Jump Search?",
+                "Compare Jump Search with Linear and Binary Search."
+            ],
+            "coding": "Implement Jump Search for a reverse sorted array.",
+            "interview": "When would you choose Jump Search over Binary Search?"
         }
     },
     {
@@ -208,6 +280,14 @@
             "python": "def interpolation_search(arr, target):\n    low, high = 0, len(arr) - 1\n    while low <= high and target >= arr[low] and target <= arr[high]:\n        pos = low + ((target - arr[low]) * (high - low)) // (arr[high] - arr[low])\n        if arr[pos] == target:\n            return pos\n        if arr[pos] < target:\n            low = pos + 1\n        else:\n            high = pos - 1\n    return -1",
             "java": "public static int interpolationSearch(int[] arr, int target) {\n    int low = 0, high = arr.length - 1;\n    while (low <= high && target >= arr[low] && target <= arr[high]) {\n        int pos = low + ((target - arr[low]) * (high - low)) / (arr[high] - arr[low]);\n        if (arr[pos] == target) return pos;\n        if (arr[pos] < target) low = pos + 1;\n        else high = pos - 1;\n    }\n    return -1;\n}",
             "cpp": "int interpolationSearch(int arr[], int n, int target) {\n    int low = 0, high = n - 1;\n    while (low <= high && target >= arr[low] && target <= arr[high]) {\n        int pos = low + ((target - arr[low]) * (high - low)) / (arr[high] - arr[low]);\n        if (arr[pos] == target) return pos;\n        if (arr[pos] < target) low = pos + 1;\n        else high = pos - 1;\n    }\n    return -1;\n}"
+        },
+        "practice": {
+            "theory": [
+                "What is the best-case time complexity of Interpolation Search?",
+                "Why does Interpolation Search degrade to O(n)?"
+            ],
+            "coding": "Implement Interpolation Search for a uniform dataset.",
+            "interview": "Explain the formula used for probing position."
         }
     },
     {
@@ -218,7 +298,7 @@
             "time": "O(1)",
             "space": "O(n)"
         },
-        "description": "LIFO data structure supporting push, pop, peek operations in constant time.",
+        "description": "LIFO data structure supporting push, pop, and peek operations in constant time.",
         "operations": [
             "push",
             "pop",
@@ -231,6 +311,72 @@
             "python": "class Stack:\n    def __init__(self):\n        self.items = []\n    def push(self, item):\n        self.items.append(item)\n    def pop(self):\n        return self.items.pop()\n    def peek(self):\n        return self.items[-1]\n    def is_empty(self):\n        return len(self.items) == 0\n    def size(self):\n        return len(self.items)",
             "java": "class Stack<T> {\n    private ArrayList<T> items = new ArrayList<>();\n    public void push(T item) { items.add(item); }\n    public T pop() { return items.remove(items.size() - 1); }\n    public T peek() { return items.get(items.size() - 1); }\n    public boolean isEmpty() { return items.isEmpty(); }\n    public int size() { return items.size(); }\n}",
             "cpp": "template<typename T>\nclass Stack {\n    vector<T> items;\npublic:\n    void push(T item) { items.push_back(item); }\n    T pop() { T t = items.back(); items.pop_back(); return t; }\n    T peek() { return items.back(); }\n    bool isEmpty() { return items.empty(); }\n    int size() { return items.size(); }\n};"
+        },
+        "practice": {
+            "theory": [
+                "What real-world applications use Stacks?",
+                "Explain Stack Overflow and how to prevent it."
+            ],
+            "coding": "Implement a Stack using two Queues.",
+            "interview": "Check for balanced parentheses in an expression."
+        }
+    },
+    {
+        "id": "stack-push",
+        "name": "Stack Push",
+        "category": "stacks",
+        "complexity": {
+            "time": "O(1)",
+            "space": "O(1)"
+        },
+        "description": "Adds an element to the top of the stack.",
+        "operations": [
+            "check-overflow",
+            "increment-top",
+            "insert-element"
+        ],
+        "code": {
+            "javascript": "function push(stack, value, maxSize) {\n  if (stack.length >= maxSize) return 'Overflow';\n  stack.push(value);\n  return stack;\n}",
+            "python": "def push(stack, value, max_size):\n    if len(stack) >= max_size: return 'Overflow'\n    stack.append(value)\n    return stack",
+            "java": "public void push(int[] stack, int top, int value, int maxSize) {\n    if (top >= maxSize - 1) throw new Error(\"Overflow\");\n    stack[++top] = value;\n}",
+            "cpp": "void push(int stack[], int &top, int value, int maxSize) {\n    if (top >= maxSize - 1) return;\n    stack[++top] = value;\n}"
+        },
+        "practice": {
+            "theory": [
+                "What is Stack Overflow?",
+                "How does Top change on Push?"
+            ],
+            "coding": "Push in a dynamic array based stack.",
+            "interview": "Design a stack that supports push, pop, top, and retrieving the minimum element in constant time."
+        }
+    },
+    {
+        "id": "stack-pop",
+        "name": "Stack Pop",
+        "category": "stacks",
+        "complexity": {
+            "time": "O(1)",
+            "space": "O(1)"
+        },
+        "description": "Removes the top element from the stack.",
+        "operations": [
+            "check-underflow",
+            "access-top",
+            "decrement-top"
+        ],
+        "code": {
+            "javascript": "function pop(stack) {\n  if (stack.length === 0) return 'Underflow';\n  return stack.pop();\n}",
+            "python": "def pop(stack):\n    if not stack: return 'Underflow'\n    return stack.pop()",
+            "java": "public int pop(int[] stack, int top) {\n    if (top == -1) throw new Error(\"Underflow\");\n    return stack[top--];\n}",
+            "cpp": "int pop(int stack[], int &top) {\n    if (top == -1) return -1;\n    return stack[top--];\n}"
+        },
+        "practice": {
+            "theory": [
+                "What is Stack Underflow?",
+                "How does Top change on Pop?"
+            ],
+            "coding": "Pop implementation details.",
+            "interview": "Check for balanced parentheses using a stack."
         }
     },
     {
@@ -253,6 +399,14 @@
             "python": "def infix_to_postfix(exp):\n    prec = {'+':1, '-':1, '*':2, '/':2, '^':3}\n    stack, result = [], []\n    for c in exp:\n        if c.isalnum(): result.append(c)\n        elif c == '(': stack.append(c)\n        elif c == ')':\n            while stack and stack[-1] != '(': result.append(stack.pop())\n            stack.pop()\n        else:\n            while stack and stack[-1] != '(' and prec.get(stack[-1], 0) >= prec[c]:\n                result.append(stack.pop())\n            stack.append(c)\n    while stack: result.append(stack.pop())\n    return ''.join(result)",
             "java": "public static String infixToPostfix(String exp) {\n    Map<Character,Integer> prec = Map.of('+',1,'-',1,'*',2,'/',2,'^',3);\n    Stack<Character> stack = new Stack<>();\n    StringBuilder result = new StringBuilder();\n    for (char c : exp.toCharArray()) {\n        if (Character.isLetterOrDigit(c)) result.append(c);\n        else if (c == '(') stack.push(c);\n        else if (c == ')') {\n            while (!stack.isEmpty() && stack.peek() != '(') result.append(stack.pop());\n            stack.pop();\n        } else {\n            while (!stack.isEmpty() && prec.getOrDefault(stack.peek(),0) >= prec.get(c))\n                result.append(stack.pop());\n            stack.push(c);\n        }\n    }\n    while (!stack.isEmpty()) result.append(stack.pop());\n    return result.toString();\n}",
             "cpp": "string infixToPostfix(string exp) {\n    map<char,int> prec = {{'+',1},{'-',1},{'*',2},{'/',2},{'^',3}};\n    stack<char> st;\n    string result;\n    for (char c : exp) {\n        if (isalnum(c)) result += c;\n        else if (c == '(') st.push(c);\n        else if (c == ')') {\n            while (!st.empty() && st.top() != '(') { result += st.top(); st.pop(); }\n            st.pop();\n        } else {\n            while (!st.empty() && st.top() != '(' && prec[st.top()] >= prec[c])\n                { result += st.top(); st.pop(); }\n            st.push(c);\n        }\n    }\n    while (!st.empty()) { result += st.top(); st.pop(); }\n    return result;\n}"
+        },
+        "practice": {
+            "theory": [
+                "Why is Postfix notation easier for computers to evaluate?",
+                "What is the role of operator precedence?"
+            ],
+            "coding": "Evaluate a Postfix expression.",
+            "interview": "Convert Infix to Prefix notation."
         }
     },
     {
@@ -276,6 +430,14 @@
             "python": "from collections import deque\nclass Queue:\n    def __init__(self):\n        self.items = deque()\n    def enqueue(self, item):\n        self.items.append(item)\n    def dequeue(self):\n        return self.items.popleft()\n    def front(self):\n        return self.items[0]\n    def is_empty(self):\n        return len(self.items) == 0\n    def size(self):\n        return len(self.items)",
             "java": "class Queue<T> {\n    private LinkedList<T> items = new LinkedList<>();\n    public void enqueue(T item) { items.addLast(item); }\n    public T dequeue() { return items.removeFirst(); }\n    public T front() { return items.getFirst(); }\n    public boolean isEmpty() { return items.isEmpty(); }\n    public int size() { return items.size(); }\n}",
             "cpp": "template<typename T>\nclass Queue {\n    deque<T> items;\npublic:\n    void enqueue(T item) { items.push_back(item); }\n    T dequeue() { T t = items.front(); items.pop_front(); return t; }\n    T front() { return items.front(); }\n    bool isEmpty() { return items.empty(); }\n    int size() { return items.size(); }\n};"
+        },
+        "practice": {
+            "theory": [
+                "Where are Queues used in operating systems?",
+                "Difference between Queue and Priority Queue."
+            ],
+            "coding": "Implement a Queue using two Stacks.",
+            "interview": "Design a system to handle printer jobs using a Queue."
         }
     },
     {
@@ -300,6 +462,14 @@
             "python": "class CircularQueue:\n    def __init__(self, k):\n        self.size = k\n        self.queue = [None] * k\n        self.front = self.rear = -1\n    def enqueue(self, val):\n        if self.is_full(): return False\n        if self.front == -1: self.front = 0\n        self.rear = (self.rear + 1) % self.size\n        self.queue[self.rear] = val\n        return True\n    def dequeue(self):\n        if self.is_empty(): return -1\n        val = self.queue[self.front]\n        if self.front == self.rear: self.front = self.rear = -1\n        else: self.front = (self.front + 1) % self.size\n        return val\n    def is_full(self): return (self.rear + 1) % self.size == self.front\n    def is_empty(self): return self.front == -1",
             "java": "class CircularQueue {\n    private int[] queue; private int front, rear, size;\n    public CircularQueue(int k) { size = k; queue = new int[k]; front = rear = -1; }\n    public boolean enqueue(int val) {\n        if (isFull()) return false;\n        if (front == -1) front = 0;\n        rear = (rear + 1) % size;\n        queue[rear] = val;\n        return true;\n    }\n    public int dequeue() {\n        if (isEmpty()) return -1;\n        int val = queue[front];\n        if (front == rear) { front = rear = -1; }\n        else front = (front + 1) % size;\n        return val;\n    }\n    public boolean isFull() { return (rear + 1) % size == front; }\n    public boolean isEmpty() { return front == -1; }\n}",
             "cpp": "class CircularQueue {\n    vector<int> queue; int front, rear, size;\npublic:\n    CircularQueue(int k) : size(k), queue(k), front(-1), rear(-1) {}\n    bool enqueue(int val) {\n        if (isFull()) return false;\n        if (front == -1) front = 0;\n        rear = (rear + 1) % size;\n        queue[rear] = val;\n        return true;\n    }\n    int dequeue() {\n        if (isEmpty()) return -1;\n        int val = queue[front];\n        if (front == rear) front = rear = -1;\n        else front = (front + 1) % size;\n        return val;\n    }\n    bool isFull() { return (rear + 1) % size == front; }\n    bool isEmpty() { return front == -1; }\n};"
+        },
+        "practice": {
+            "theory": [
+                "What problem does a Circular Queue solve?",
+                "How do you distinguish between full and empty states?"
+            ],
+            "coding": "Implement a Circular Deque.",
+            "interview": "Design a ring buffer for audio processing."
         }
     },
     {
@@ -324,6 +494,14 @@
             "python": "class Node:\n    def __init__(self, val):\n        self.val = val\n        self.next = None\n\nclass LinkedList:\n    def __init__(self):\n        self.head = None\n    def insert_at_head(self, val):\n        node = Node(val)\n        node.next = self.head\n        self.head = node\n    def insert_at_tail(self, val):\n        node = Node(val)\n        if not self.head:\n            self.head = node\n            return\n        curr = self.head\n        while curr.next:\n            curr = curr.next\n        curr.next = node\n    def delete(self, val):\n        if not self.head: return\n        if self.head.val == val:\n            self.head = self.head.next\n            return\n        curr = self.head\n        while curr.next and curr.next.val != val:\n            curr = curr.next\n        if curr.next:\n            curr.next = curr.next.next\n    def search(self, val):\n        curr = self.head\n        while curr:\n            if curr.val == val: return True\n            curr = curr.next\n        return False",
             "java": "class Node {\n    int val; Node next;\n    Node(int val) { this.val = val; this.next = null; }\n}\nclass LinkedList {\n    Node head;\n    void insertAtHead(int val) {\n        Node node = new Node(val);\n        node.next = head;\n        head = node;\n    }\n    void insertAtTail(int val) {\n        Node node = new Node(val);\n        if (head == null) { head = node; return; }\n        Node curr = head;\n        while (curr.next != null) curr = curr.next;\n        curr.next = node;\n    }\n    void delete(int val) {\n        if (head == null) return;\n        if (head.val == val) { head = head.next; return; }\n        Node curr = head;\n        while (curr.next != null && curr.next.val != val) curr = curr.next;\n        if (curr.next != null) curr.next = curr.next.next;\n    }\n    boolean search(int val) {\n        Node curr = head;\n        while (curr != null) { if (curr.val == val) return true; curr = curr.next; }\n        return false;\n    }\n}",
             "cpp": "struct Node {\n    int val; Node* next;\n    Node(int v) : val(v), next(nullptr) {}\n};\nclass LinkedList {\n    Node* head = nullptr;\npublic:\n    void insertAtHead(int val) {\n        Node* node = new Node(val);\n        node->next = head;\n        head = node;\n    }\n    void insertAtTail(int val) {\n        Node* node = new Node(val);\n        if (!head) { head = node; return; }\n        Node* curr = head;\n        while (curr->next) curr = curr->next;\n        curr->next = node;\n    }\n    void deleteNode(int val) {\n        if (!head) return;\n        if (head->val == val) { head = head->next; return; }\n        Node* curr = head;\n        while (curr->next && curr->next->val != val) curr = curr->next;\n        if (curr->next) curr->next = curr->next->next;\n    }\n    bool search(int val) {\n        Node* curr = head;\n        while (curr) { if (curr->val == val) return true; curr = curr->next; }\n        return false;\n    }\n};"
+        },
+        "practice": {
+            "theory": [
+                "Time complexity of insertion at head vs tail?",
+                "Advantage of Linked List over Array?"
+            ],
+            "coding": "Find the middle element of a Linked List.",
+            "interview": "How to detect an intersection of two Linked Lists?"
         }
     },
     {
@@ -345,6 +523,14 @@
             "python": "def reverse_list(head):\n    prev, curr = None, head\n    while curr:\n        next_node = curr.next\n        curr.next = prev\n        prev = curr\n        curr = next_node\n    return prev",
             "java": "public ListNode reverseList(ListNode head) {\n    ListNode prev = null, curr = head;\n    while (curr != null) {\n        ListNode next = curr.next;\n        curr.next = prev;\n        prev = curr;\n        curr = next;\n    }\n    return prev;\n}",
             "cpp": "ListNode* reverseList(ListNode* head) {\n    ListNode* prev = nullptr;\n    ListNode* curr = head;\n    while (curr) {\n        ListNode* next = curr->next;\n        curr->next = prev;\n        prev = curr;\n        curr = next;\n    }\n    return prev;\n}"
+        },
+        "practice": {
+            "theory": [
+                "Is it possible to reverse a linked list recursively?",
+                "What is the space complexity of iterative reversal?"
+            ],
+            "coding": "Reverse a Linked List in groups of K.",
+            "interview": "Explain the pointer manipulation during reversal."
         }
     },
     {
@@ -366,6 +552,14 @@
             "python": "def has_cycle(head):\n    slow = fast = head\n    while fast and fast.next:\n        slow = slow.next\n        fast = fast.next.next\n        if slow == fast:\n            return True\n    return False",
             "java": "public boolean hasCycle(ListNode head) {\n    ListNode slow = head, fast = head;\n    while (fast != null && fast.next != null) {\n        slow = slow.next;\n        fast = fast.next.next;\n        if (slow == fast) return true;\n    }\n    return false;\n}",
             "cpp": "bool hasCycle(ListNode* head) {\n    ListNode* slow = head;\n    ListNode* fast = head;\n    while (fast && fast->next) {\n        slow = slow->next;\n        fast = fast->next->next;\n        if (slow == fast) return true;\n    }\n    return false;\n}"
+        },
+        "practice": {
+            "theory": [
+                "How does Floyd's Cycle Detection work?",
+                "What if the fast pointer moves 3 steps?"
+            ],
+            "coding": "Find the starting node of the cycle.",
+            "interview": "Can you detect a cycle using a hash set? Pros/Cons?"
         }
     },
     {
@@ -388,6 +582,160 @@
             "python": "class DNode:\n    def __init__(self, val):\n        self.val = val\n        self.prev = None\n        self.next = None\n\nclass DoublyLinkedList:\n    def __init__(self):\n        self.head = None\n        self.tail = None\n    def insert_at_head(self, val):\n        node = DNode(val)\n        if not self.head:\n            self.head = self.tail = node\n            return\n        node.next = self.head\n        self.head.prev = node\n        self.head = node\n    def insert_at_tail(self, val):\n        node = DNode(val)\n        if not self.tail:\n            self.head = self.tail = node\n            return\n        node.prev = self.tail\n        self.tail.next = node\n        self.tail = node\n    def delete(self, val):\n        curr = self.head\n        while curr and curr.val != val:\n            curr = curr.next\n        if not curr: return\n        if curr.prev: curr.prev.next = curr.next\n        else: self.head = curr.next\n        if curr.next: curr.next.prev = curr.prev\n        else: self.tail = curr.prev",
             "java": "class DNode {\n    int val; DNode prev, next;\n    DNode(int val) { this.val = val; }\n}\nclass DoublyLinkedList {\n    DNode head, tail;\n    void insertAtHead(int val) {\n        DNode node = new DNode(val);\n        if (head == null) { head = tail = node; return; }\n        node.next = head;\n        head.prev = node;\n        head = node;\n    }\n    void insertAtTail(int val) {\n        DNode node = new DNode(val);\n        if (tail == null) { head = tail = node; return; }\n        node.prev = tail;\n        tail.next = node;\n        tail = node;\n    }\n    void delete(int val) {\n        DNode curr = head;\n        while (curr != null && curr.val != val) curr = curr.next;\n        if (curr == null) return;\n        if (curr.prev != null) curr.prev.next = curr.next;\n        else head = curr.next;\n        if (curr.next != null) curr.next.prev = curr.prev;\n        else tail = curr.prev;\n    }\n}",
             "cpp": "struct DNode {\n    int val; DNode* prev; DNode* next;\n    DNode(int v) : val(v), prev(nullptr), next(nullptr) {}\n};\nclass DoublyLinkedList {\n    DNode* head = nullptr;\n    DNode* tail = nullptr;\npublic:\n    void insertAtHead(int val) {\n        DNode* node = new DNode(val);\n        if (!head) { head = tail = node; return; }\n        node->next = head;\n        head->prev = node;\n        head = node;\n    }\n    void insertAtTail(int val) {\n        DNode* node = new DNode(val);\n        if (!tail) { head = tail = node; return; }\n        node->prev = tail;\n        tail->next = node;\n        tail = node;\n    }\n    void deleteNode(int val) {\n        DNode* curr = head;\n        while (curr && curr->val != val) curr = curr->next;\n        if (!curr) return;\n        if (curr->prev) curr->prev->next = curr->next;\n        else head = curr->next;\n        if (curr->next) curr->next->prev = curr->prev;\n        else tail = curr->prev;\n    }\n};"
+        },
+        "practice": {
+            "theory": [
+                "Advantage of Doubly Linked List over Singly Linked List?",
+                "Memory overhead of Doubly Linked List?"
+            ],
+            "coding": "Reverse a Doubly Linked List.",
+            "interview": "Implement an LRU Cache using Doubly Linked List."
+        }
+    },
+    {
+        "id": "singly-linked-list-insert-head",
+        "name": "Insert at Head (Singly)",
+        "category": "linked-lists",
+        "complexity": {
+            "time": "O(1)",
+            "space": "O(1)"
+        },
+        "description": "Inserts a new node at the beginning of a singly linked list.",
+        "operations": [
+            "create-node",
+            "point-next",
+            "update-head"
+        ],
+        "code": {
+            "javascript": "function insertAtHead(head, val) {\n    const newNode = new Node(val);\n    newNode.next = head;\n    return newNode;\n}",
+            "python": "def insert_at_head(head, val):\n    new_node = Node(val)\n    new_node.next = head\n    return new_node",
+            "java": "public Node insertAtHead(Node head, int val) {\n    Node newNode = new Node(val);\n    newNode.next = head;\n    return newNode;\n}",
+            "cpp": "Node* insertAtHead(Node* head, int val) {\n    Node* newNode = new Node(val);\n    newNode->next = head;\n    return newNode;\n}"
+        },
+        "practice": {
+            "theory": [
+                "Why is insertion at head O(1)?",
+                "What if the list is empty?"
+            ],
+            "coding": "Implement insertAtHead for a list with a tail pointer.",
+            "interview": "Can you use insertAtHead to implement a Stack?"
+        }
+    },
+    {
+        "id": "singly-linked-list-insert-position",
+        "name": "Insert at Position (Singly)",
+        "category": "linked-lists",
+        "complexity": {
+            "time": "O(n)",
+            "space": "O(1)"
+        },
+        "description": "Inserts a new node at a given 0-indexed position in a singly linked list.",
+        "operations": [
+            "traverse",
+            "create-node",
+            "relink"
+        ],
+        "code": {
+            "javascript": "function insertAtPosition(head, val, pos) {\n    if (pos === 0) return insertAtHead(head, val);\n    let curr = head;\n    for (let i = 0; i < pos - 1 && curr; i++) curr = curr.next;\n    if (!curr) return head;\n    const newNode = new Node(val);\n    newNode.next = curr.next;\n    curr.next = newNode;\n    return head;\n}",
+            "python": "def insert_at_position(head, val, pos):\n    if pos == 0: return insert_at_head(head, val)\n    curr = head\n    for _ in range(pos - 1):\n        if not curr: break\n        curr = curr.next\n    if not curr: return head\n    new_node = Node(val)\n    new_node.next = curr.next\n    curr.next = new_node\n    return head",
+            "java": "public Node insertAtPosition(Node head, int val, int pos) {\n    if (pos == 0) return insertAtHead(head, val);\n    Node curr = head;\n    for (int i = 0; i < pos - 1 && curr != null; i++) curr = curr.next;\n    if (curr == null) return head;\n    Node newNode = new Node(val);\n    newNode.next = curr.next;\n    curr.next = newNode;\n    return head;\n}",
+            "cpp": "Node* insertAtPosition(Node* head, int val, int pos) {\n    if (pos == 0) return insertAtHead(head, val);\n    Node* curr = head;\n    for (int i = 0; i < pos - 1 && curr; ++i) curr = curr->next;\n    if (!curr) return head;\n    Node* newNode = new Node(val);\n    newNode->next = curr->next;\n    curr->next = newNode;\n    return head;\n}"
+        },
+        "practice": {
+            "theory": [
+                "Why is the worst case O(n)?",
+                "What happens if pos > length?"
+            ],
+            "coding": "Handle out-of-bounds position by appending at the end.",
+            "interview": "How does insertion at position differ for arrays vs linked lists?"
+        }
+    },
+    {
+        "id": "doubly-linked-list-insert-head",
+        "name": "Insert at Head (Doubly)",
+        "category": "linked-lists",
+        "complexity": {
+            "time": "O(1)",
+            "space": "O(1)"
+        },
+        "description": "Inserts a new node at the beginning of a doubly linked list, updating both next and prev pointers.",
+        "operations": [
+            "create-node",
+            "link-next-to-head",
+            "link-head-prev-to-new",
+            "update-head"
+        ],
+        "code": {
+            "javascript": "function insertAtHeadDLL(dll, val) {\n    const newNode = new DNode(val);\n    if (!dll.head) {\n        dll.head = dll.tail = newNode;\n    } else {\n        newNode.next = dll.head;\n        dll.head.prev = newNode;\n        dll.head = newNode;\n    }\n}",
+            "python": "def insert_at_head_dll(dll, val):\n    new_node = DNode(val)\n    if not dll.head:\n        dll.head = dll.tail = new_node\n    else:\n        new_node.next = dll.head\n        dll.head.prev = new_node\n        dll.head = new_node",
+            "java": "public void insertAtHeadDLL(DoublyLinkedList dll, int val) {\n    DNode newNode = new DNode(val);\n    if (dll.head == null) {\n        dll.head = dll.tail = newNode;\n    } else {\n        newNode.next = dll.head;\n        dll.head.prev = newNode;\n        dll.head = newNode;\n    }\n}",
+            "cpp": "void insertAtHeadDLL(DoublyLinkedList& dll, int val) {\n    DNode* newNode = new DNode(val);\n    if (!dll.head) {\n        dll.head = dll.tail = newNode;\n    } else {\n        newNode->next = dll.head;\n        dll.head->prev = newNode;\n        dll.head = newNode;\n    }\n}"
+        },
+        "practice": {
+            "theory": [
+                "What are the 4 pointer updates in a DLL head insertion?",
+                "Advantage of DLL head insert?"
+            ],
+            "coding": "Implement with only a head pointer (no tail pointer).",
+            "interview": "Compare DLL head insert performance with Array unshift."
+        }
+    },
+    {
+        "id": "doubly-linked-list-insert-position",
+        "name": "Insert at Position (Doubly)",
+        "category": "linked-lists",
+        "complexity": {
+            "time": "O(n)",
+            "space": "O(1)"
+        },
+        "description": "Inserts a node at a given position in a doubly linked list, maintaining bi-directional links.",
+        "operations": [
+            "traverse",
+            "create-node",
+            "update-4-pointers"
+        ],
+        "code": {
+            "javascript": "function insertAtPosDLL(dll, val, pos) {\n    if (pos === 0) return insertAtHeadDLL(dll, val);\n    let curr = dll.head;\n    for (let i = 0; i < pos && curr; i++) curr = curr.next;\n    if (!curr) return insertAtTailDLL(dll, val);\n    const newNode = new DNode(val);\n    newNode.prev = curr.prev;\n    newNode.next = curr;\n    curr.prev.next = newNode;\n    curr.prev = newNode;\n}",
+            "python": "def insert_at_pos_dll(dll, val, pos):\n    if pos == 0: return insert_at_head_dll(dll, val)\n    curr = dll.head\n    for _ in range(pos):\n        if not curr: break\n        curr = curr.next\n    if not curr: return insert_at_tail_dll(dll, val)\n    new_node = DNode(val)\n    new_node.prev = curr.prev\n    new_node.next = curr\n    curr.prev.next = new_node\n    curr.prev = new_node",
+            "java": "public void insertAtPosDLL(DoublyLinkedList dll, int val, int pos) {\n    if (pos == 0) { insertAtHeadDLL(dll, val); return; }\n    DNode curr = dll.head;\n    for (int i = 0; i < pos && curr != null; i++) curr = curr.next;\n    if (curr == null) { insertAtTailDLL(dll, val); return; }\n    DNode newNode = new DNode(val);\n    newNode.prev = curr.prev;\n    newNode.next = curr;\n    curr.prev.next = newNode;\n    curr.prev = newNode;\n}",
+            "cpp": "void insertAtPosDLL(DoublyLinkedList& dll, int val, int pos) {\n    if (pos == 0) { insertAtHeadDLL(dll, val); return; }\n    DNode* curr = dll.head;\n    for (int i = 0; i < pos && curr; ++i) curr = curr->next;\n    if (!curr) { insertAtTailDLL(dll, val); return; }\n    DNode* newNode = new DNode(val);\n    newNode->prev = curr->prev;\n    newNode->next = curr;\n    curr->prev->next = newNode;\n    curr->prev = newNode;\n}"
+        },
+        "practice": {
+            "theory": [
+                "How many pointers are updated when inserting in the middle of a DLL?",
+                "Worst case traverse time?"
+            ],
+            "coding": "Optimize traversal if pos > length / 2 by starting from tail.",
+            "interview": "Explain the importance of order when updating DLL pointers."
+        }
+    },
+    {
+        "id": "doubly-reverse-linked-list",
+        "name": "Reverse Doubly Linked List",
+        "category": "linked-lists",
+        "complexity": {
+            "time": "O(n)",
+            "space": "O(1)"
+        },
+        "description": "Reverses a doubly linked list by swapping the next and prev pointers of every node.",
+        "operations": [
+            "traverse",
+            "swap-pointers",
+            "update-head-tail"
+        ],
+        "code": {
+            "javascript": "function reverseDLL(dll) {\n    let curr = dll.head;\n    let temp = null;\n    while (curr) {\n        temp = curr.prev;\n        curr.prev = curr.next;\n        curr.next = temp;\n        curr = curr.prev;\n    }\n    if (temp) dll.head = temp.prev;\n}",
+            "python": "def reverse_dll(dll):\n    curr = dll.head\n    temp = None\n    while curr:\n        temp = curr.prev\n        curr.prev = curr.next\n        curr.next = temp\n        curr = curr.prev\n    if temp: dll.head = temp.prev",
+            "java": "public void reverseDLL(DoublyLinkedList dll) {\n    DNode curr = dll.head, temp = null;\n    while (curr != null) {\n        temp = curr.prev;\n        curr.prev = curr.next;\n        curr.next = temp;\n        curr = curr.prev;\n    }\n    if (temp != null) dll.head = temp.prev;\n}",
+            "cpp": "void reverseDLL(DoublyLinkedList& dll) {\n    DNode *curr = dll.head, *temp = nullptr;\n    while (curr) {\n        temp = curr->prev;\n        curr->prev = curr->next;\n        curr->next = temp;\n        curr = curr->prev;\n    }\n    if (temp) dll.head = temp->prev;\n}"
+        },
+        "practice": {
+            "theory": [
+                "Difference between reversing Singly vs Doubly list?",
+                "Is any extra space needed?"
+            ],
+            "coding": "Implement recursive reversal for DLL.",
+            "interview": "Why is swapping pointers enough to reverse a DLL?"
         }
     },
     {
@@ -410,7 +758,15 @@
             "javascript": "class TreeNode {\n  constructor(val) { this.val = val; this.left = null; this.right = null; }\n}\nclass BST {\n  constructor() { this.root = null; }\n  insert(val) {\n    const node = new TreeNode(val);\n    if (!this.root) { this.root = node; return; }\n    let curr = this.root;\n    while (true) {\n      if (val < curr.val) {\n        if (!curr.left) { curr.left = node; return; }\n        curr = curr.left;\n      } else {\n        if (!curr.right) { curr.right = node; return; }\n        curr = curr.right;\n      }\n    }\n  }\n  search(val) {\n    let curr = this.root;\n    while (curr) {\n      if (val === curr.val) return true;\n      curr = val < curr.val ? curr.left : curr.right;\n    }\n    return false;\n  }\n}",
             "python": "class TreeNode:\n    def __init__(self, val):\n        self.val = val\n        self.left = None\n        self.right = None\n\nclass BST:\n    def __init__(self):\n        self.root = None\n    def insert(self, val):\n        if not self.root:\n            self.root = TreeNode(val)\n            return\n        curr = self.root\n        while True:\n            if val < curr.val:\n                if not curr.left:\n                    curr.left = TreeNode(val)\n                    return\n                curr = curr.left\n            else:\n                if not curr.right:\n                    curr.right = TreeNode(val)\n                    return\n                curr = curr.right\n    def search(self, val):\n        curr = self.root\n        while curr:\n            if val == curr.val: return True\n            curr = curr.left if val < curr.val else curr.right\n        return False",
             "java": "class TreeNode {\n    int val; TreeNode left, right;\n    TreeNode(int val) { this.val = val; }\n}\nclass BST {\n    TreeNode root;\n    void insert(int val) {\n        if (root == null) { root = new TreeNode(val); return; }\n        TreeNode curr = root;\n        while (true) {\n            if (val < curr.val) {\n                if (curr.left == null) { curr.left = new TreeNode(val); return; }\n                curr = curr.left;\n            } else {\n                if (curr.right == null) { curr.right = new TreeNode(val); return; }\n                curr = curr.right;\n            }\n        }\n    }\n    boolean search(int val) {\n        TreeNode curr = root;\n        while (curr != null) {\n            if (val == curr.val) return true;\n            curr = val < curr.val ? curr.left : curr.right;\n        }\n        return false;\n    }\n}",
-            "cpp": "struct TreeNode {\n    int val; TreeNode* left; TreeNode* right;\n    TreeNode(int v) : val(v), left(nullptr), right(nullptr) {}\n};\nclass BST {\n    TreeNode* root = nullptr;\npublic:\n    void insert(int val) {\n        if (!root) { root = new TreeNode(val); return; }\n        TreeNode* curr = root;\n        while (true) {\n            if (val < curr->val) {\n                if (!curr->left) { curr->left = new TreeNode(val); return; }\n                curr = curr->left;\n            } else {\n                if (!curr->right) { curr->right = new TreeNode(val); return; }\n                curr = curr->right;\n            }\n        }\n    }\n    bool search(int val) {\n        TreeNode* curr = root;\n        while (curr) {\n            if (val == curr->val) return true;\n            curr = val < curr->val ? curr->left : curr->right;\n        }\n        return false;\n    }\n};"
+            "cpp": "struct TreeNode {\n    int val; TreeNode* left; TreeNode* right;\n    TreeNode(int v) : val(v), left(nullptr), right(nullptr) {}\n};\nclass BST {\n    TreeNode* root = nullptr;\npublic:\n    void insert(int val) {\n        if (!root) { root = new TreeNode(val); return; }\n        TreeNode* curr = root;\n        while (true) {\n            if (val < curr->val) {\n                if (!curr->left) { curr->left = new TreeNode(val); return; }\n                curr = curr->left;\n            } else {\n                if (!curr->right) { curr->right = new TreeNode(val); return; }\n                curr = curr->right;\n            }\n        }\n    }\n    bool search(int val) {\n        TreeNode* curr = root;\n        while (curr) {\n            if (val == curr->val) return true;\n            curr = val < curr->val ? curr->left : curr->right;\n        }\n        return false;\n    }\n};",
+            "practice": {
+                "theory": [
+                    "BST vs Binary Tree?",
+                    "Worst case insertion complexity?"
+                ],
+                "coding": "Delete a node in a BST.",
+                "interview": "Validate if a tree is a BST."
+            }
         }
     },
     {
@@ -432,7 +788,15 @@
             "javascript": "function inorderTraversal(root) {\n  const result = [];\n  function inorder(node) {\n    if (!node) return;\n    inorder(node.left);\n    result.push(node.val);\n    inorder(node.right);\n  }\n  inorder(root);\n  return result;\n}",
             "python": "def inorder_traversal(root):\n    result = []\n    def inorder(node):\n        if not node: return\n        inorder(node.left)\n        result.append(node.val)\n        inorder(node.right)\n    inorder(root)\n    return result",
             "java": "public List<Integer> inorderTraversal(TreeNode root) {\n    List<Integer> result = new ArrayList<>();\n    inorder(root, result);\n    return result;\n}\nprivate void inorder(TreeNode node, List<Integer> result) {\n    if (node == null) return;\n    inorder(node.left, result);\n    result.add(node.val);\n    inorder(node.right, result);\n}",
-            "cpp": "vector<int> inorderTraversal(TreeNode* root) {\n    vector<int> result;\n    function<void(TreeNode*)> inorder = [&](TreeNode* node) {\n        if (!node) return;\n        inorder(node->left);\n        result.push_back(node->val);\n        inorder(node->right);\n    };\n    inorder(root);\n    return result;\n}"
+            "cpp": "vector<int> inorderTraversal(TreeNode* root) {\n    vector<int> result;\n    function<void(TreeNode*)> inorder = [&](TreeNode* node) {\n        if (!node) return;\n        inorder(node->left);\n        result.push_back(node->val);\n        inorder(node->right);\n    };\n    inorder(root);\n    return result;\n}",
+            "practice": {
+                "theory": [
+                    "What sequence does inorder traversal of BST produce?",
+                    "Space complexity of recursive inorder?"
+                ],
+                "coding": "Kth Smallest Element in a BST.",
+                "interview": "Inorder Successor in BST."
+            }
         }
     },
     {
@@ -454,7 +818,15 @@
             "javascript": "function preorderTraversal(root) {\n  const result = [];\n  function preorder(node) {\n    if (!node) return;\n    result.push(node.val);\n    preorder(node.left);\n    preorder(node.right);\n  }\n  preorder(root);\n  return result;\n}",
             "python": "def preorder_traversal(root):\n    result = []\n    def preorder(node):\n        if not node: return\n        result.append(node.val)\n        preorder(node.left)\n        preorder(node.right)\n    preorder(root)\n    return result",
             "java": "public List<Integer> preorderTraversal(TreeNode root) {\n    List<Integer> result = new ArrayList<>();\n    preorder(root, result);\n    return result;\n}\nprivate void preorder(TreeNode node, List<Integer> result) {\n    if (node == null) return;\n    result.add(node.val);\n    preorder(node.left, result);\n    preorder(node.right, result);\n}",
-            "cpp": "vector<int> preorderTraversal(TreeNode* root) {\n    vector<int> result;\n    function<void(TreeNode*)> preorder = [&](TreeNode* node) {\n        if (!node) return;\n        result.push_back(node->val);\n        preorder(node->left);\n        preorder(node->right);\n    };\n    preorder(root);\n    return result;\n}"
+            "cpp": "vector<int> preorderTraversal(TreeNode* root) {\n    vector<int> result;\n    function<void(TreeNode*)> preorder = [&](TreeNode* node) {\n        if (!node) return;\n        result.push_back(node->val);\n        preorder(node->left);\n        preorder(node->right);\n    };\n    preorder(root);\n    return result;\n}",
+            "practice": {
+                "theory": [
+                    "When is preorder traversal useful?",
+                    "Iterative preorder implementation?"
+                ],
+                "coding": "Serialize and Deserialize Binary Tree.",
+                "interview": "Construct BST from preorder traversal."
+            }
         }
     },
     {
@@ -476,7 +848,15 @@
             "javascript": "function postorderTraversal(root) {\n  const result = [];\n  function postorder(node) {\n    if (!node) return;\n    postorder(node.left);\n    postorder(node.right);\n    result.push(node.val);\n  }\n  postorder(root);\n  return result;\n}",
             "python": "def postorder_traversal(root):\n    result = []\n    def postorder(node):\n        if not node: return\n        postorder(node.left)\n        postorder(node.right)\n        result.append(node.val)\n    postorder(root)\n    return result",
             "java": "public List<Integer> postorderTraversal(TreeNode root) {\n    List<Integer> result = new ArrayList<>();\n    postorder(root, result);\n    return result;\n}\nprivate void postorder(TreeNode node, List<Integer> result) {\n    if (node == null) return;\n    postorder(node.left, result);\n    postorder(node.right, result);\n    result.add(node.val);\n}",
-            "cpp": "vector<int> postorderTraversal(TreeNode* root) {\n    vector<int> result;\n    function<void(TreeNode*)> postorder = [&](TreeNode* node) {\n        if (!node) return;\n        postorder(node->left);\n        postorder(node->right);\n        result.push_back(node->val);\n    };\n    postorder(root);\n    return result;\n}"
+            "cpp": "vector<int> postorderTraversal(TreeNode* root) {\n    vector<int> result;\n    function<void(TreeNode*)> postorder = [&](TreeNode* node) {\n        if (!node) return;\n        postorder(node->left);\n        postorder(node->right);\n        result.push_back(node->val);\n    };\n    postorder(root);\n    return result;\n}",
+            "practice": {
+                "theory": [
+                    "When is postorder traversal useful?",
+                    "Iterative postorder implementation?"
+                ],
+                "coding": "Binary Tree Maximum Path Sum.",
+                "interview": "Find diameter of binary tree."
+            }
         }
     },
     {
@@ -498,7 +878,15 @@
             "javascript": "function levelOrder(root) {\n  if (!root) return [];\n  const result = [], queue = [root];\n  while (queue.length) {\n    const levelSize = queue.length, level = [];\n    for (let i = 0; i < levelSize; i++) {\n      const node = queue.shift();\n      level.push(node.val);\n      if (node.left) queue.push(node.left);\n      if (node.right) queue.push(node.right);\n    }\n    result.push(level);\n  }\n  return result;\n}",
             "python": "from collections import deque\ndef level_order(root):\n    if not root: return []\n    result, queue = [], deque([root])\n    while queue:\n        level_size, level = len(queue), []\n        for _ in range(level_size):\n            node = queue.popleft()\n            level.append(node.val)\n            if node.left: queue.append(node.left)\n            if node.right: queue.append(node.right)\n        result.append(level)\n    return result",
             "java": "public List<List<Integer>> levelOrder(TreeNode root) {\n    List<List<Integer>> result = new ArrayList<>();\n    if (root == null) return result;\n    Queue<TreeNode> queue = new LinkedList<>();\n    queue.add(root);\n    while (!queue.isEmpty()) {\n        int levelSize = queue.size();\n        List<Integer> level = new ArrayList<>();\n        for (int i = 0; i < levelSize; i++) {\n            TreeNode node = queue.poll();\n            level.add(node.val);\n            if (node.left != null) queue.add(node.left);\n            if (node.right != null) queue.add(node.right);\n        }\n        result.add(level);\n    }\n    return result;\n}",
-            "cpp": "vector<vector<int>> levelOrder(TreeNode* root) {\n    vector<vector<int>> result;\n    if (!root) return result;\n    queue<TreeNode*> q;\n    q.push(root);\n    while (!q.empty()) {\n        int levelSize = q.size();\n        vector<int> level;\n        for (int i = 0; i < levelSize; i++) {\n            TreeNode* node = q.front(); q.pop();\n            level.push_back(node->val);\n            if (node->left) q.push(node->left);\n            if (node->right) q.push(node->right);\n        }\n        result.push_back(level);\n    }\n    return result;\n}"
+            "cpp": "vector<vector<int>> levelOrder(TreeNode* root) {\n    vector<vector<int>> result;\n    if (!root) return result;\n    queue<TreeNode*> q;\n    q.push(root);\n    while (!q.empty()) {\n        int levelSize = q.size();\n        vector<int> level;\n        for (int i = 0; i < levelSize; i++) {\n            TreeNode* node = q.front(); q.pop();\n            level.push_back(node->val);\n            if (node->left) q.push(node->left);\n            if (node->right) q.push(node->right);\n        }\n        result.push_back(level);\n    }\n    return result;\n}",
+            "practice": {
+                "theory": [
+                    "BFS vs DFS for trees?",
+                    "Queue usage in Level Order?"
+                ],
+                "coding": "Binary Tree Zigzag Level Order Traversal.",
+                "interview": "Connect nodes at same level."
+            }
         }
     },
     {
@@ -520,6 +908,45 @@
             "python": "def max_depth(root):\n    if not root: return 0\n    return 1 + max(max_depth(root.left), max_depth(root.right))",
             "java": "public int maxDepth(TreeNode root) {\n    if (root == null) return 0;\n    return 1 + Math.max(maxDepth(root.left), maxDepth(root.right));\n}",
             "cpp": "int maxDepth(TreeNode* root) {\n    if (!root) return 0;\n    return 1 + max(maxDepth(root->left), maxDepth(root->right));\n}"
+        },
+        "practice": {
+            "theory": [
+                "Height vs Depth of a tree?",
+                "Recursive relation for height?"
+            ],
+            "coding": "Minimum Depth of Binary Tree.",
+            "interview": "Check if a Binary Tree is Balanced."
+        }
+    },
+    {
+        "id": "avl-tree",
+        "name": "AVL Tree",
+        "category": "trees",
+        "complexity": {
+            "time": "O(log n)",
+            "space": "O(n)"
+        },
+        "description": "Self-balancing Binary Search Tree where the difference between heights of left and right subtrees cannot be more than one.",
+        "operations": [
+            "insert",
+            "rotate-left",
+            "rotate-right",
+            "rebalance",
+            "get-balance"
+        ],
+        "code": {
+            "javascript": "class Node {\n  constructor(val) { this.val = val; this.left = null; this.right = null; this.height = 1; }\n}\nclass AVLTree {\n  getHeight(n) { return n ? n.height : 0; }\n  getBalance(n) { return n ? this.getHeight(n.left) - this.getHeight(n.right) : 0; }\n  rightRotate(y) {\n    const x = y.left, T2 = x.right;\n    x.right = y; y.left = T2;\n    y.height = Math.max(this.getHeight(y.left), this.getHeight(y.right)) + 1;\n    x.height = Math.max(this.getHeight(x.left), this.getHeight(x.right)) + 1;\n    return x;\n  }\n  leftRotate(x) {\n    const y = x.right, T2 = y.left;\n    y.left = x; x.right = T2;\n    x.height = Math.max(this.getHeight(x.left), this.getHeight(x.right)) + 1;\n    y.height = Math.max(this.getHeight(y.left), this.getHeight(y.right)) + 1;\n    return y;\n  }\n  insert(node, val) {\n    if (!node) return new Node(val);\n    if (val < node.val) node.left = this.insert(node.left, val);\n    else if (val > node.val) node.right = this.insert(node.right, val);\n    else return node;\n    node.height = 1 + Math.max(this.getHeight(node.left), this.getHeight(node.right));\n    const balance = this.getBalance(node);\n    if (balance > 1 && val < node.left.val) return this.rightRotate(node);\n    if (balance < -1 && val > node.right.val) return this.leftRotate(node);\n    if (balance > 1 && val > node.left.val) { node.left = this.leftRotate(node.left); return this.rightRotate(node); }\n    if (balance < -1 && val < node.right.val) { node.right = this.rightRotate(node.right); return this.leftRotate(node); }\n    return node;\n  }\n}",
+            "python": "class Node:\n    def __init__(self, val): self.val = val; self.left = None; self.right = None; self.height = 1\nclass AVLTree:\n    def get_height(self, root): return root.height if root else 0\n    def get_balance(self, root): return self.get_height(root.left) - self.get_height(root.right) if root else 0\n    def right_rotate(self, y):\n        x = y.left; T2 = x.right; x.right = y; y.left = T2\n        y.height = 1 + max(self.get_height(y.left), self.get_height(y.right))\n        x.height = 1 + max(self.get_height(x.left), self.get_height(x.right))\n        return x\n    def left_rotate(self, x):\n        y = x.right; T2 = y.left; y.left = x; x.right = T2\n        x.height = 1 + max(self.get_height(x.left), self.get_height(x.right))\n        y.height = 1 + max(self.get_height(y.left), self.get_height(y.right))\n        return y\n    def insert(self, root, val):\n        if not root: return Node(val)\n        if val < root.val: root.left = self.insert(root.left, val)\n        elif val > root.val: root.right = self.insert(root.right, val)\n        else: return root\n        root.height = 1 + max(self.get_height(root.left), self.get_height(root.right))\n        balance = self.get_balance(root)\n        if balance > 1 and val < root.left.val: return self.right_rotate(root)\n        if balance < -1 and val > root.right.val: return self.left_rotate(root)\n        if balance > 1 and val > root.left.val: root.left = self.left_rotate(root.left); return self.right_rotate(root)\n        if balance < -1 and val < root.right.val: root.right = self.right_rotate(root.right); return self.left_rotate(root)\n        return root",
+            "java": "class Node { int val, height; Node left, right; Node(int d) { val = d; height = 1; } }\nclass AVLTree {\n    Node root;\n    int height(Node N) { return N == null ? 0 : N.height; }\n    int getBalance(Node N) { return N == null ? 0 : height(N.left) - height(N.right); }\n    Node rightRotate(Node y) {\n        Node x = y.left; Node T2 = x.right;\n        x.right = y; y.left = T2;\n        y.height = Math.max(height(y.left), height(y.right)) + 1;\n        x.height = Math.max(height(x.left), height(x.right)) + 1;\n        return x;\n    }\n    Node leftRotate(Node x) {\n        Node y = x.right; Node T2 = y.left;\n        y.left = x; x.right = T2;\n        x.height = Math.max(height(x.left), height(x.right)) + 1;\n        y.height = Math.max(height(y.left), height(y.right)) + 1;\n        return y;\n    }\n    Node insert(Node node, int val) {\n        if (node == null) return new Node(val);\n        if (val < node.val) node.left = insert(node.left, val);\n        else if (val > node.val) node.right = insert(node.right, val);\n        else return node;\n        node.height = 1 + Math.max(height(node.left), height(node.right));\n        int balance = getBalance(node);\n        if (balance > 1 && val < node.left.val) return rightRotate(node);\n        if (balance < -1 && val > node.right.val) return leftRotate(node);\n        if (balance > 1 && val > node.left.val) { node.left = leftRotate(node.left); return rightRotate(node); }\n        if (balance < -1 && val < node.right.val) { node.right = rightRotate(node.right); return leftRotate(node); }\n        return node;\n    }\n}",
+            "cpp": "class Node { public: int val; Node *left; Node *right; int height; };\nclass AVLTree {\n    int height(Node *N) { return N == NULL ? 0 : N->height; }\n    int getBalance(Node *N) { return N == NULL ? 0 : height(N->left) - height(N->right); }\n    Node *rightRotate(Node *y) {\n        Node *x = y->left; Node *T2 = x->right;\n        x->right = y; y->left = T2;\n        y->height = max(height(y->left), height(y->right)) + 1;\n        x->height = max(height(x->left), height(x->right)) + 1;\n        return x;\n    }\n    Node *leftRotate(Node *x) {\n        Node *y = x->right; Node *T2 = y->left;\n        y->left = x; x->right = T2;\n        x->height = max(height(x->left), height(x->right)) + 1;\n        y->height = max(height(y->left), height(y->right)) + 1;\n        return y;\n    }\n    Node* insert(Node* node, int val) {\n        if (node == NULL) return new Node();\n        if (val < node->val) node->left = insert(node->left, val);\n        else if (val > node->val) node->right = insert(node->right, val);\n        else return node;\n        node->height = 1 + max(height(node->left), height(node->right));\n        int balance = getBalance(node);\n        if (balance > 1 && val < node->left->val) return rightRotate(node);\n        if (balance < -1 && val > node->right->val) return leftRotate(node);\n        if (balance > 1 && val > node->left->val) { node->left = leftRotate(node->left); return rightRotate(node); }\n        if (balance < -1 && val < node->right->val) { node->right = rightRotate(node->right); return leftRotate(node); }\n        return node;\n    }\n};",
+            "practice": {
+                "theory": [
+                    "What are Rotations in AVL?",
+                    "What is Balance Factor?"
+                ],
+                "coding": "Convert Sorted Array to Binary Search Tree.",
+                "interview": "Why AVL tree over Red-Black tree?"
+            }
         }
     },
     {
@@ -541,7 +968,15 @@
             "javascript": "function bfs(graph, start) {\n  const visited = new Set([start]);\n  const queue = [start];\n  const result = [];\n  while (queue.length) {\n    const node = queue.shift();\n    result.push(node);\n    for (const neighbor of graph[node] || []) {\n      if (!visited.has(neighbor)) {\n        visited.add(neighbor);\n        queue.push(neighbor);\n      }\n    }\n  }\n  return result;\n}",
             "python": "from collections import deque\ndef bfs(graph, start):\n    visited = {start}\n    queue = deque([start])\n    result = []\n    while queue:\n        node = queue.popleft()\n        result.append(node)\n        for neighbor in graph.get(node, []):\n            if neighbor not in visited:\n                visited.add(neighbor)\n                queue.append(neighbor)\n    return result",
             "java": "public List<Integer> bfs(Map<Integer, List<Integer>> graph, int start) {\n    List<Integer> result = new ArrayList<>();\n    Set<Integer> visited = new HashSet<>();\n    Queue<Integer> queue = new LinkedList<>();\n    visited.add(start);\n    queue.add(start);\n    while (!queue.isEmpty()) {\n        int node = queue.poll();\n        result.add(node);\n        for (int neighbor : graph.getOrDefault(node, Collections.emptyList())) {\n            if (!visited.contains(neighbor)) {\n                visited.add(neighbor);\n                queue.add(neighbor);\n            }\n        }\n    }\n    return result;\n}",
-            "cpp": "vector<int> bfs(map<int, vector<int>>& graph, int start) {\n    vector<int> result;\n    set<int> visited;\n    queue<int> q;\n    visited.insert(start);\n    q.push(start);\n    while (!q.empty()) {\n        int node = q.front(); q.pop();\n        result.push_back(node);\n        for (int neighbor : graph[node]) {\n            if (visited.find(neighbor) == visited.end()) {\n                visited.insert(neighbor);\n                q.push(neighbor);\n            }\n        }\n    }\n    return result;\n}"
+            "cpp": "vector<int> bfs(map<int, vector<int>>& graph, int start) {\n    vector<int> result;\n    set<int> visited;\n    queue<int> q;\n    visited.insert(start);\n    q.push(start);\n    while (!q.empty()) {\n        int node = q.front(); q.pop();\n        result.push_back(node);\n        for (int neighbor : graph[node]) {\n            if (visited.find(neighbor) == visited.end()) {\n                visited.insert(neighbor);\n                q.push(neighbor);\n            }\n        }\n    }\n    return result;\n}",
+            "practice": {
+                "theory": [
+                    "Finding shortest path in unweighted graph?",
+                    "Queue usage in BFS?"
+                ],
+                "coding": "Rotting Oranges.",
+                "interview": "Word Ladder."
+            }
         }
     },
     {
@@ -564,7 +999,15 @@
             "javascript": "function dfs(graph, start) {\n  const visited = new Set();\n  const result = [];\n  function explore(node) {\n    if (visited.has(node)) return;\n    visited.add(node);\n    result.push(node);\n    for (const neighbor of graph[node] || []) {\n      explore(neighbor);\n    }\n  }\n  explore(start);\n  return result;\n}",
             "python": "def dfs(graph, start):\n    visited = set()\n    result = []\n    def explore(node):\n        if node in visited: return\n        visited.add(node)\n        result.append(node)\n        for neighbor in graph.get(node, []):\n            explore(neighbor)\n    explore(start)\n    return result",
             "java": "public List<Integer> dfs(Map<Integer, List<Integer>> graph, int start) {\n    List<Integer> result = new ArrayList<>();\n    Set<Integer> visited = new HashSet<>();\n    dfsHelper(graph, start, visited, result);\n    return result;\n}\nprivate void dfsHelper(Map<Integer, List<Integer>> graph, int node, Set<Integer> visited, List<Integer> result) {\n    if (visited.contains(node)) return;\n    visited.add(node);\n    result.add(node);\n    for (int neighbor : graph.getOrDefault(node, Collections.emptyList())) {\n        dfsHelper(graph, neighbor, visited, result);\n    }\n}",
-            "cpp": "void dfsHelper(map<int, vector<int>>& graph, int node, set<int>& visited, vector<int>& result) {\n    if (visited.count(node)) return;\n    visited.insert(node);\n    result.push_back(node);\n    for (int neighbor : graph[node]) {\n        dfsHelper(graph, neighbor, visited, result);\n    }\n}\nvector<int> dfs(map<int, vector<int>>& graph, int start) {\n    vector<int> result;\n    set<int> visited;\n    dfsHelper(graph, start, visited, result);\n    return result;\n}"
+            "cpp": "void dfsHelper(map<int, vector<int>>& graph, int node, set<int>& visited, vector<int>& result) {\n    if (visited.count(node)) return;\n    visited.insert(node);\n    result.push_back(node);\n    for (int neighbor : graph[node]) {\n        dfsHelper(graph, neighbor, visited, result);\n    }\n}\nvector<int> dfs(map<int, vector<int>>& graph, int start) {\n    vector<int> result;\n    set<int> visited;\n    dfsHelper(graph, start, visited, result);\n    return result;\n}",
+            "practice": {
+                "theory": [
+                    "Cycle detection using DFS?",
+                    "Stack usage in DFS?"
+                ],
+                "coding": "Number of Islands.",
+                "interview": "Course Schedule (Cycle Detection)."
+            }
         }
     },
     {
@@ -586,7 +1029,15 @@
             "javascript": "function dijkstra(graph, start) {\n  const dist = {};\n  const visited = new Set();\n  for (const node in graph) dist[node] = Infinity;\n  dist[start] = 0;\n  const pq = [[0, start]];\n  while (pq.length) {\n    pq.sort((a, b) => a[0] - b[0]);\n    const [d, u] = pq.shift();\n    if (visited.has(u)) continue;\n    visited.add(u);\n    for (const [v, w] of graph[u] || []) {\n      if (dist[u] + w < dist[v]) {\n        dist[v] = dist[u] + w;\n        pq.push([dist[v], v]);\n      }\n    }\n  }\n  return dist;\n}",
             "python": "import heapq\ndef dijkstra(graph, start):\n    dist = {node: float('inf') for node in graph}\n    dist[start] = 0\n    pq = [(0, start)]\n    visited = set()\n    while pq:\n        d, u = heapq.heappop(pq)\n        if u in visited: continue\n        visited.add(u)\n        for v, w in graph.get(u, []):\n            if dist[u] + w < dist[v]:\n                dist[v] = dist[u] + w\n                heapq.heappush(pq, (dist[v], v))\n    return dist",
             "java": "public Map<Integer, Integer> dijkstra(Map<Integer, List<int[]>> graph, int start) {\n    Map<Integer, Integer> dist = new HashMap<>();\n    for (int node : graph.keySet()) dist.put(node, Integer.MAX_VALUE);\n    dist.put(start, 0);\n    PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[0] - b[0]);\n    pq.add(new int[]{0, start});\n    Set<Integer> visited = new HashSet<>();\n    while (!pq.isEmpty()) {\n        int[] curr = pq.poll();\n        int u = curr[1];\n        if (visited.contains(u)) continue;\n        visited.add(u);\n        for (int[] edge : graph.getOrDefault(u, Collections.emptyList())) {\n            int v = edge[0], w = edge[1];\n            if (dist.get(u) + w < dist.get(v)) {\n                dist.put(v, dist.get(u) + w);\n                pq.add(new int[]{dist.get(v), v});\n            }\n        }\n    }\n    return dist;\n}",
-            "cpp": "map<int, int> dijkstra(map<int, vector<pair<int,int>>>& graph, int start) {\n    map<int, int> dist;\n    for (auto& p : graph) dist[p.first] = INT_MAX;\n    dist[start] = 0;\n    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<>> pq;\n    pq.push({0, start});\n    set<int> visited;\n    while (!pq.empty()) {\n        auto [d, u] = pq.top(); pq.pop();\n        if (visited.count(u)) continue;\n        visited.insert(u);\n        for (auto& [v, w] : graph[u]) {\n            if (dist[u] + w < dist[v]) {\n                dist[v] = dist[u] + w;\n                pq.push({dist[v], v});\n            }\n        }\n    }\n    return dist;\n}"
+            "cpp": "map<int, int> dijkstra(map<int, vector<pair<int,int>>>& graph, int start) {\n    map<int, int> dist;\n    for (auto& p : graph) dist[p.first] = INT_MAX;\n    dist[start] = 0;\n    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<>> pq;\n    pq.push({0, start});\n    set<int> visited;\n    while (!pq.empty()) {\n        auto [d, u] = pq.top(); pq.pop();\n        if (visited.count(u)) continue;\n        visited.insert(u);\n        for (auto& [v, w] : graph[u]) {\n            if (dist[u] + w < dist[v]) {\n                dist[v] = dist[u] + w;\n                pq.push({dist[v], v});\n            }\n        }\n    }\n    return dist;\n}",
+            "practice": {
+                "theory": [
+                    "Does Dijkstra work with negative weights?",
+                    "Greedy approach in Dijkstra?"
+                ],
+                "coding": "Network Delay Time.",
+                "interview": "Cheapest Flights Within K Stops."
+            }
         }
     },
     {
@@ -608,7 +1059,15 @@
             "javascript": "function topologicalSort(graph) {\n  const visited = new Set();\n  const stack = [];\n  function dfs(node) {\n    if (visited.has(node)) return;\n    visited.add(node);\n    for (const neighbor of graph[node] || []) {\n      dfs(neighbor);\n    }\n    stack.push(node);\n  }\n  for (const node in graph) dfs(node);\n  return stack.reverse();\n}",
             "python": "def topological_sort(graph):\n    visited = set()\n    stack = []\n    def dfs(node):\n        if node in visited: return\n        visited.add(node)\n        for neighbor in graph.get(node, []):\n            dfs(neighbor)\n        stack.append(node)\n    for node in graph:\n        dfs(node)\n    return stack[::-1]",
             "java": "public List<Integer> topologicalSort(Map<Integer, List<Integer>> graph) {\n    Set<Integer> visited = new HashSet<>();\n    Stack<Integer> stack = new Stack<>();\n    for (int node : graph.keySet()) {\n        if (!visited.contains(node)) dfs(graph, node, visited, stack);\n    }\n    List<Integer> result = new ArrayList<>();\n    while (!stack.isEmpty()) result.add(stack.pop());\n    return result;\n}\nprivate void dfs(Map<Integer, List<Integer>> graph, int node, Set<Integer> visited, Stack<Integer> stack) {\n    visited.add(node);\n    for (int neighbor : graph.getOrDefault(node, Collections.emptyList())) {\n        if (!visited.contains(neighbor)) dfs(graph, neighbor, visited, stack);\n    }\n    stack.push(node);\n}",
-            "cpp": "void dfs(map<int, vector<int>>& graph, int node, set<int>& visited, stack<int>& st) {\n    visited.insert(node);\n    for (int neighbor : graph[node]) {\n        if (!visited.count(neighbor)) dfs(graph, neighbor, visited, st);\n    }\n    st.push(node);\n}\nvector<int> topologicalSort(map<int, vector<int>>& graph) {\n    set<int> visited;\n    stack<int> st;\n    for (auto& p : graph) {\n        if (!visited.count(p.first)) dfs(graph, p.first, visited, st);\n    }\n    vector<int> result;\n    while (!st.empty()) { result.push_back(st.top()); st.pop(); }\n    return result;\n}"
+            "cpp": "void dfs(map<int, vector<int>>& graph, int node, set<int>& visited, stack<int>& st) {\n    visited.insert(node);\n    for (int neighbor : graph[node]) {\n        if (!visited.count(neighbor)) dfs(graph, neighbor, visited, st);\n    }\n    st.push(node);\n}\nvector<int> topologicalSort(map<int, vector<int>>& graph) {\n    set<int> visited;\n    stack<int> st;\n    for (auto& p : graph) {\n        if (!visited.count(p.first)) dfs(graph, p.first, visited, st);\n    }\n    vector<int> result;\n    while (!st.empty()) { result.push_back(st.top()); st.pop(); }\n    return result;\n}",
+            "practice": {
+                "theory": [
+                    "DAG requirement for Topological Sort?",
+                    "Real-world applications of Topological Sort?"
+                ],
+                "coding": "Course Schedule II.",
+                "interview": "Alien Dictionary."
+            }
         }
     },
     {
@@ -631,7 +1090,15 @@
             "javascript": "class HashTable {\n  constructor(size = 53) {\n    this.table = new Array(size);\n    this.size = size;\n  }\n  _hash(key) {\n    let hash = 0;\n    for (let i = 0; i < key.length; i++) {\n      hash = (hash * 31 + key.charCodeAt(i)) % this.size;\n    }\n    return hash;\n  }\n  set(key, value) {\n    const idx = this._hash(key);\n    if (!this.table[idx]) this.table[idx] = [];\n    const existing = this.table[idx].find(p => p[0] === key);\n    if (existing) existing[1] = value;\n    else this.table[idx].push([key, value]);\n  }\n  get(key) {\n    const idx = this._hash(key);\n    const bucket = this.table[idx];\n    if (bucket) {\n      const pair = bucket.find(p => p[0] === key);\n      if (pair) return pair[1];\n    }\n    return undefined;\n  }\n}",
             "python": "class HashTable:\n    def __init__(self, size=53):\n        self.size = size\n        self.table = [[] for _ in range(size)]\n    def _hash(self, key):\n        h = 0\n        for c in str(key):\n            h = (h * 31 + ord(c)) % self.size\n        return h\n    def put(self, key, value):\n        idx = self._hash(key)\n        for pair in self.table[idx]:\n            if pair[0] == key:\n                pair[1] = value\n                return\n        self.table[idx].append([key, value])\n    def get(self, key):\n        idx = self._hash(key)\n        for pair in self.table[idx]:\n            if pair[0] == key:\n                return pair[1]\n        return None",
             "java": "class HashTable<K, V> {\n    private LinkedList<Entry<K,V>>[] table;\n    private int size;\n    class Entry<K,V> { K key; V value; Entry(K k, V v) { key=k; value=v; }}\n    public HashTable(int size) {\n        this.size = size;\n        table = new LinkedList[size];\n        for (int i = 0; i < size; i++) table[i] = new LinkedList<>();\n    }\n    private int hash(K key) { return Math.abs(key.hashCode()) % size; }\n    public void put(K key, V value) {\n        int idx = hash(key);\n        for (Entry<K,V> e : table[idx]) {\n            if (e.key.equals(key)) { e.value = value; return; }\n        }\n        table[idx].add(new Entry<>(key, value));\n    }\n    public V get(K key) {\n        int idx = hash(key);\n        for (Entry<K,V> e : table[idx]) {\n            if (e.key.equals(key)) return e.value;\n        }\n        return null;\n    }\n}",
-            "cpp": "template<typename K, typename V>\nclass HashTable {\n    vector<list<pair<K,V>>> table;\n    int size;\n    int hash(const K& key) { return std::hash<K>{}(key) % size; }\npublic:\n    HashTable(int s = 53) : size(s), table(s) {}\n    void put(const K& key, const V& value) {\n        int idx = hash(key);\n        for (auto& p : table[idx]) {\n            if (p.first == key) { p.second = value; return; }\n        }\n        table[idx].push_back({key, value});\n    }\n    V* get(const K& key) {\n        int idx = hash(key);\n        for (auto& p : table[idx]) {\n            if (p.first == key) return &p.second;\n        }\n        return nullptr;\n    }\n};"
+            "cpp": "template<typename K, typename V>\nclass HashTable {\n    vector<list<pair<K,V>>> table;\n    int size;\n    int hash(const K& key) { return std::hash<K>{}(key) % size; }\npublic:\n    HashTable(int s = 53) : size(s), table(s) {}\n    void put(const K& key, const V& value) {\n        int idx = hash(key);\n        for (auto& p : table[idx]) {\n            if (p.first == key) { p.second = value; return; }\n        }\n        table[idx].push_back({key, value});\n    }\n    V* get(const K& key) {\n        int idx = hash(key);\n        for (auto& p : table[idx]) {\n            if (p.first == key) return &p.second;\n        }\n        return nullptr;\n    }\n};",
+            "practice": {
+                "theory": [
+                    "Collision resolution techniques?",
+                    "What is Load Factor?"
+                ],
+                "coding": "Design HashMap.",
+                "interview": "Longest Consecutive Sequence."
+            }
         }
     },
     {
@@ -654,7 +1121,15 @@
             "javascript": "class LinearProbingHashTable {\n  constructor(size = 53) {\n    this.keys = new Array(size).fill(null);\n    this.values = new Array(size).fill(null);\n    this.size = size;\n  }\n  _hash(key) {\n    let hash = 0;\n    for (let c of String(key)) hash = (hash * 31 + c.charCodeAt(0)) % this.size;\n    return hash;\n  }\n  put(key, value) {\n    let idx = this._hash(key);\n    while (this.keys[idx] !== null && this.keys[idx] !== key) {\n      idx = (idx + 1) % this.size;\n    }\n    this.keys[idx] = key;\n    this.values[idx] = value;\n  }\n  get(key) {\n    let idx = this._hash(key);\n    while (this.keys[idx] !== null) {\n      if (this.keys[idx] === key) return this.values[idx];\n      idx = (idx + 1) % this.size;\n    }\n    return undefined;\n  }\n}",
             "python": "class LinearProbingHashTable:\n    def __init__(self, size=53):\n        self.size = size\n        self.keys = [None] * size\n        self.values = [None] * size\n    def _hash(self, key):\n        h = 0\n        for c in str(key):\n            h = (h * 31 + ord(c)) % self.size\n        return h\n    def put(self, key, value):\n        idx = self._hash(key)\n        while self.keys[idx] is not None and self.keys[idx] != key:\n            idx = (idx + 1) % self.size\n        self.keys[idx] = key\n        self.values[idx] = value\n    def get(self, key):\n        idx = self._hash(key)\n        while self.keys[idx] is not None:\n            if self.keys[idx] == key:\n                return self.values[idx]\n            idx = (idx + 1) % self.size\n        return None",
             "java": "class LinearProbingHashTable<K, V> {\n    private K[] keys;\n    private V[] values;\n    private int size;\n    public LinearProbingHashTable(int size) {\n        this.size = size;\n        keys = (K[]) new Object[size];\n        values = (V[]) new Object[size];\n    }\n    private int hash(K key) { return Math.abs(key.hashCode()) % size; }\n    public void put(K key, V value) {\n        int idx = hash(key);\n        while (keys[idx] != null && !keys[idx].equals(key)) {\n            idx = (idx + 1) % size;\n        }\n        keys[idx] = key;\n        values[idx] = value;\n    }\n    public V get(K key) {\n        int idx = hash(key);\n        while (keys[idx] != null) {\n            if (keys[idx].equals(key)) return values[idx];\n            idx = (idx + 1) % size;\n        }\n        return null;\n    }\n}",
-            "cpp": "template<typename K, typename V>\nclass LinearProbingHashTable {\n    vector<K> keys;\n    vector<V> values;\n    vector<bool> occupied;\n    int size;\n    int hash(const K& key) { return std::hash<K>{}(key) % size; }\npublic:\n    LinearProbingHashTable(int s = 53) : size(s), keys(s), values(s), occupied(s, false) {}\n    void put(const K& key, const V& value) {\n        int idx = hash(key);\n        while (occupied[idx] && keys[idx] != key) idx = (idx + 1) % size;\n        keys[idx] = key;\n        values[idx] = value;\n        occupied[idx] = true;\n    }\n    V* get(const K& key) {\n        int idx = hash(key);\n        while (occupied[idx]) {\n            if (keys[idx] == key) return &values[idx];\n            idx = (idx + 1) % size;\n        }\n        return nullptr;\n    }\n};"
+            "cpp": "template<typename K, typename V>\nclass LinearProbingHashTable {\n    vector<K> keys;\n    vector<V> values;\n    vector<bool> occupied;\n    int size;\n    int hash(const K& key) { return std::hash<K>{}(key) % size; }\npublic:\n    LinearProbingHashTable(int s = 53) : size(s), keys(s), values(s), occupied(s, false) {}\n    void put(const K& key, const V& value) {\n        int idx = hash(key);\n        while (occupied[idx] && keys[idx] != key) idx = (idx + 1) % size;\n        keys[idx] = key;\n        values[idx] = value;\n        occupied[idx] = true;\n    }\n    V* get(const K& key) {\n        int idx = hash(key);\n        while (occupied[idx]) {\n            if (keys[idx] == key) return &values[idx];\n            idx = (idx + 1) % size;\n        }\n        return nullptr;\n    }\n};",
+            "practice": {
+                "theory": [
+                    "Primary Clustering in Linear Probing?",
+                    "Deletion challenge in Open Addressing?"
+                ],
+                "coding": "Implement Open Addressing Hash Table.",
+                "interview": "Hashing vs Indexing vs Trees."
+            }
         }
     },
     {
@@ -676,6 +1151,14 @@
             "python": "def build_prefix_sum(arr):\n    prefix = [0]\n    for x in arr:\n        prefix.append(prefix[-1] + x)\n    return prefix\n\ndef range_sum(prefix, l, r):\n    return prefix[r + 1] - prefix[l]",
             "java": "int[] buildPrefixSum(int[] arr) {\n    int[] prefix = new int[arr.length + 1];\n    for (int i = 0; i < arr.length; i++) {\n        prefix[i + 1] = prefix[i] + arr[i];\n    }\n    return prefix;\n}\n\nint rangeSum(int[] prefix, int l, int r) {\n    return prefix[r + 1] - prefix[l];\n}",
             "cpp": "vector<int> buildPrefixSum(vector<int>& arr) {\n    vector<int> prefix(arr.size() + 1, 0);\n    for (int i = 0; i < arr.size(); i++) {\n        prefix[i + 1] = prefix[i] + arr[i];\n    }\n    return prefix;\n}\n\nint rangeSum(vector<int>& prefix, int l, int r) {\n    return prefix[r + 1] - prefix[l];\n}"
+        },
+        "practice": {
+            "theory": [
+                "How does Prefix Sum help in range queries?",
+                "Can Prefix Sum handle updates efficiently?"
+            ],
+            "coding": "Find the subarray with sum equal to K.",
+            "interview": "Solve the equilibrium index problem."
         }
     },
     {
@@ -698,6 +1181,14 @@
             "python": "def max_sum_subarray(arr, k):\n    max_sum = window_sum = 0\n    for i, x in enumerate(arr):\n        window_sum += x\n        if i >= k - 1:\n            max_sum = max(max_sum, window_sum)\n            window_sum -= arr[i - k + 1]\n    return max_sum",
             "java": "int maxSumSubarray(int[] arr, int k) {\n    int maxSum = 0, windowSum = 0;\n    for (int i = 0; i < arr.length; i++) {\n        windowSum += arr[i];\n        if (i >= k - 1) {\n            maxSum = Math.max(maxSum, windowSum);\n            windowSum -= arr[i - k + 1];\n        }\n    }\n    return maxSum;\n}",
             "cpp": "int maxSumSubarray(vector<int>& arr, int k) {\n    int maxSum = 0, windowSum = 0;\n    for (int i = 0; i < arr.size(); i++) {\n        windowSum += arr[i];\n        if (i >= k - 1) {\n            maxSum = max(maxSum, windowSum);\n            windowSum -= arr[i - k + 1];\n        }\n    }\n    return maxSum;\n}"
+        },
+        "practice": {
+            "theory": [
+                "Difference between fixed and variable size sliding window?",
+                "Time complexity of Sliding Window technique?"
+            ],
+            "coding": "Longest Substring Without Repeating Characters.",
+            "interview": "Find all anagrams in a string."
         }
     },
     {
@@ -720,6 +1211,14 @@
             "python": "def two_sum(arr, target):\n    left, right = 0, len(arr) - 1\n    while left < right:\n        s = arr[left] + arr[right]\n        if s == target:\n            return [left, right]\n        elif s < target:\n            left += 1\n        else:\n            right -= 1\n    return [-1, -1]",
             "java": "int[] twoSum(int[] arr, int target) {\n    int left = 0, right = arr.length - 1;\n    while (left < right) {\n        int sum = arr[left] + arr[right];\n        if (sum == target) return new int[]{left, right};\n        if (sum < target) left++;\n        else right--;\n    }\n    return new int[]{-1, -1};\n}",
             "cpp": "vector<int> twoSum(vector<int>& arr, int target) {\n    int left = 0, right = arr.size() - 1;\n    while (left < right) {\n        int sum = arr[left] + arr[right];\n        if (sum == target) return {left, right};\n        if (sum < target) left++;\n        else right--;\n    }\n    return {-1, -1};\n}"
+        },
+        "practice": {
+            "theory": [
+                "Prerequisite condition for Two Pointers technique?",
+                "Variations of Two Pointers."
+            ],
+            "coding": "Container With Most Water.",
+            "interview": "3Sum problem."
         }
     },
     {
@@ -740,7 +1239,15 @@
             "javascript": "function maxSubArray(arr) {\n  let maxSum = arr[0], currentSum = arr[0];\n  for (let i = 1; i < arr.length; i++) {\n    currentSum = Math.max(arr[i], currentSum + arr[i]);\n    maxSum = Math.max(maxSum, currentSum);\n  }\n  return maxSum;\n}",
             "python": "def max_subarray(arr):\n    max_sum = current_sum = arr[0]\n    for x in arr[1:]:\n        current_sum = max(x, current_sum + x)\n        max_sum = max(max_sum, current_sum)\n    return max_sum",
             "java": "int maxSubArray(int[] arr) {\n    int maxSum = arr[0], currentSum = arr[0];\n    for (int i = 1; i < arr.length; i++) {\n        currentSum = Math.max(arr[i], currentSum + arr[i]);\n        maxSum = Math.max(maxSum, currentSum);\n    }\n    return maxSum;\n}",
-            "cpp": "int maxSubArray(vector<int>& arr) {\n    int maxSum = arr[0], currentSum = arr[0];\n    for (int i = 1; i < arr.size(); i++) {\n        currentSum = max(arr[i], currentSum + arr[i]);\n        maxSum = max(maxSum, currentSum);\n    }\n    return maxSum;\n}"
+            "cpp": "int maxSubArray(vector<int>& arr) {\n    int maxSum = arr[0], currentSum = arr[0];\n    for (int i = 1; i < arr.size(); i++) {\n        currentSum = max(arr[i], currentSum + arr[i]);\n        maxSum = max(maxSum, currentSum);\n    }\n    return maxSum;\n}",
+            "practice": {
+                "theory": [
+                    "DP state for Kadane's Algorithm?",
+                    "Handling all negative numbers?"
+                ],
+                "coding": "Maximum Sum Circular Subarray.",
+                "interview": "Maximum Product Subarray."
+            }
         }
     },
     {
@@ -761,7 +1268,15 @@
             "javascript": "function kmpSearch(text, pattern) {\n  const lps = buildLPS(pattern);\n  const result = [];\n  let i = 0, j = 0;\n  while (i < text.length) {\n    if (text[i] === pattern[j]) {\n      i++; j++;\n    }\n    if (j === pattern.length) {\n      result.push(i - j);\n      j = lps[j - 1];\n    } else if (i < text.length && text[i] !== pattern[j]) {\n      j > 0 ? j = lps[j - 1] : i++;\n    }\n  }\n  return result;\n}\n\nfunction buildLPS(pattern) {\n  const lps = [0];\n  let len = 0, i = 1;\n  while (i < pattern.length) {\n    if (pattern[i] === pattern[len]) {\n      lps[i++] = ++len;\n    } else if (len > 0) {\n      len = lps[len - 1];\n    } else {\n      lps[i++] = 0;\n    }\n  }\n  return lps;\n}",
             "python": "def kmp_search(text, pattern):\n    lps = build_lps(pattern)\n    result = []\n    i = j = 0\n    while i < len(text):\n        if text[i] == pattern[j]:\n            i += 1\n            j += 1\n        if j == len(pattern):\n            result.append(i - j)\n            j = lps[j - 1]\n        elif i < len(text) and text[i] != pattern[j]:\n            j = lps[j - 1] if j > 0 else 0\n            if j == 0 and text[i] != pattern[0]:\n                i += 1\n    return result\n\ndef build_lps(pattern):\n    lps = [0] * len(pattern)\n    length = 0\n    i = 1\n    while i < len(pattern):\n        if pattern[i] == pattern[length]:\n            length += 1\n            lps[i] = length\n            i += 1\n        elif length > 0:\n            length = lps[length - 1]\n        else:\n            lps[i] = 0\n            i += 1\n    return lps",
             "java": "List<Integer> kmpSearch(String text, String pattern) {\n    int[] lps = buildLPS(pattern);\n    List<Integer> result = new ArrayList<>();\n    int i = 0, j = 0;\n    while (i < text.length()) {\n        if (text.charAt(i) == pattern.charAt(j)) {\n            i++; j++;\n        }\n        if (j == pattern.length()) {\n            result.add(i - j);\n            j = lps[j - 1];\n        } else if (i < text.length() && text.charAt(i) != pattern.charAt(j)) {\n            j = j > 0 ? lps[j - 1] : 0;\n            if (j == 0) i++;\n        }\n    }\n    return result;\n}",
-            "cpp": "vector<int> kmpSearch(string text, string pattern) {\n    vector<int> lps = buildLPS(pattern);\n    vector<int> result;\n    int i = 0, j = 0;\n    while (i < text.length()) {\n        if (text[i] == pattern[j]) {\n            i++; j++;\n        }\n        if (j == pattern.length()) {\n            result.push_back(i - j);\n            j = lps[j - 1];\n        } else if (i < text.length() && text[i] != pattern[j]) {\n            j = j > 0 ? lps[j - 1] : 0;\n            if (j == 0) i++;\n        }\n    }\n    return result;\n}"
+            "cpp": "vector<int> kmpSearch(string text, string pattern) {\n    vector<int> lps = buildLPS(pattern);\n    vector<int> result;\n    int i = 0, j = 0;\n    while (i < text.length()) {\n        if (text[i] == pattern[j]) {\n            i++; j++;\n        }\n        if (j == pattern.length()) {\n            result.push_back(i - j);\n            j = lps[j - 1];\n        } else if (i < text.length() && text[i] != pattern[j]) {\n            j = j > 0 ? lps[j - 1] : 0;\n            if (j == 0) i++;\n        }\n    }\n    return result;\n}",
+            "practice": {
+                "theory": [
+                    "Failure function in KMP?",
+                    "Time complexity analysis?"
+                ],
+                "coding": "Shortest Palindrome (KMP).",
+                "interview": "Implement strStr() using KMP."
+            }
         }
     },
     {
@@ -783,7 +1298,15 @@
             "javascript": "function rabinKarp(text, pattern) {\n  const d = 256, q = 101;\n  const m = pattern.length, n = text.length;\n  let pHash = 0, tHash = 0, h = 1;\n  const result = [];\n  for (let i = 0; i < m - 1; i++) h = (h * d) % q;\n  for (let i = 0; i < m; i++) {\n    pHash = (d * pHash + pattern.charCodeAt(i)) % q;\n    tHash = (d * tHash + text.charCodeAt(i)) % q;\n  }\n  for (let i = 0; i <= n - m; i++) {\n    if (pHash === tHash && text.substring(i, i + m) === pattern) {\n      result.push(i);\n    }\n    if (i < n - m) {\n      tHash = (d * (tHash - text.charCodeAt(i) * h) + text.charCodeAt(i + m)) % q;\n      if (tHash < 0) tHash += q;\n    }\n  }\n  return result;\n}",
             "python": "def rabin_karp(text, pattern):\n    d, q = 256, 101\n    m, n = len(pattern), len(text)\n    p_hash = t_hash = 0\n    h = pow(d, m - 1, q)\n    result = []\n    for i in range(m):\n        p_hash = (d * p_hash + ord(pattern[i])) % q\n        t_hash = (d * t_hash + ord(text[i])) % q\n    for i in range(n - m + 1):\n        if p_hash == t_hash and text[i:i+m] == pattern:\n            result.append(i)\n        if i < n - m:\n            t_hash = (d * (t_hash - ord(text[i]) * h) + ord(text[i + m])) % q\n    return result",
             "java": "List<Integer> rabinKarp(String text, String pattern) {\n    int d = 256, q = 101;\n    int m = pattern.length(), n = text.length();\n    int pHash = 0, tHash = 0, h = 1;\n    List<Integer> result = new ArrayList<>();\n    for (int i = 0; i < m - 1; i++) h = (h * d) % q;\n    for (int i = 0; i < m; i++) {\n        pHash = (d * pHash + pattern.charAt(i)) % q;\n        tHash = (d * tHash + text.charAt(i)) % q;\n    }\n    for (int i = 0; i <= n - m; i++) {\n        if (pHash == tHash && text.substring(i, i + m).equals(pattern)) {\n            result.add(i);\n        }\n        if (i < n - m) {\n            tHash = (d * (tHash - text.charAt(i) * h) + text.charAt(i + m)) % q;\n            if (tHash < 0) tHash += q;\n        }\n    }\n    return result;\n}",
-            "cpp": "vector<int> rabinKarp(string text, string pattern) {\n    int d = 256, q = 101;\n    int m = pattern.length(), n = text.length();\n    int pHash = 0, tHash = 0, h = 1;\n    vector<int> result;\n    for (int i = 0; i < m - 1; i++) h = (h * d) % q;\n    for (int i = 0; i < m; i++) {\n        pHash = (d * pHash + pattern[i]) % q;\n        tHash = (d * tHash + text[i]) % q;\n    }\n    for (int i = 0; i <= n - m; i++) {\n        if (pHash == tHash && text.substr(i, m) == pattern) {\n            result.push_back(i);\n        }\n        if (i < n - m) {\n            tHash = (d * (tHash - text[i] * h) + text[i + m]) % q;\n            if (tHash < 0) tHash += q;\n        }\n    }\n    return result;\n}"
+            "cpp": "vector<int> rabinKarp(string text, string pattern) {\n    int d = 256, q = 101;\n    int m = pattern.length(), n = text.length();\n    int pHash = 0, tHash = 0, h = 1;\n    vector<int> result;\n    for (int i = 0; i < m - 1; i++) h = (h * d) % q;\n    for (int i = 0; i < m; i++) {\n        pHash = (d * pHash + pattern[i]) % q;\n        tHash = (d * tHash + text[i]) % q;\n    }\n    for (int i = 0; i <= n - m; i++) {\n        if (pHash == tHash && text.substr(i, m) == pattern) {\n            result.push_back(i);\n        }\n        if (i < n - m) {\n            tHash = (d * (tHash - text[i] * h) + text[i + m]) % q;\n            if (tHash < 0) tHash += q;\n        }\n    }\n    return result;\n}",
+            "practice": {
+                "theory": [
+                    "Rolling Hash concept?",
+                    "Handling spurious hits?"
+                ],
+                "coding": "Repeated String Match.",
+                "interview": "Find duplicate subtrees."
+            }
         }
     },
     {
@@ -805,7 +1328,15 @@
             "javascript": "class TrieNode {\n  constructor() {\n    this.children = {};\n    this.isEnd = false;\n  }\n}\n\nclass Trie {\n  constructor() { this.root = new TrieNode(); }\n  insert(word) {\n    let node = this.root;\n    for (const c of word) {\n      if (!node.children[c]) node.children[c] = new TrieNode();\n      node = node.children[c];\n    }\n    node.isEnd = true;\n  }\n  search(word) {\n    let node = this.root;\n    for (const c of word) {\n      if (!node.children[c]) return false;\n      node = node.children[c];\n    }\n    return node.isEnd;\n  }\n  startsWith(prefix) {\n    let node = this.root;\n    for (const c of prefix) {\n      if (!node.children[c]) return false;\n      node = node.children[c];\n    }\n    return true;\n  }\n}",
             "python": "class TrieNode:\n    def __init__(self):\n        self.children = {}\n        self.is_end = False\n\nclass Trie:\n    def __init__(self):\n        self.root = TrieNode()\n    \n    def insert(self, word):\n        node = self.root\n        for c in word:\n            if c not in node.children:\n                node.children[c] = TrieNode()\n            node = node.children[c]\n        node.is_end = True\n    \n    def search(self, word):\n        node = self.root\n        for c in word:\n            if c not in node.children:\n                return False\n            node = node.children[c]\n        return node.is_end\n    \n    def starts_with(self, prefix):\n        node = self.root\n        for c in prefix:\n            if c not in node.children:\n                return False\n            node = node.children[c]\n        return True",
             "java": "class Trie {\n    private TrieNode root = new TrieNode();\n    class TrieNode {\n        Map<Character, TrieNode> children = new HashMap<>();\n        boolean isEnd = false;\n    }\n    public void insert(String word) {\n        TrieNode node = root;\n        for (char c : word.toCharArray()) {\n            node.children.putIfAbsent(c, new TrieNode());\n            node = node.children.get(c);\n        }\n        node.isEnd = true;\n    }\n    public boolean search(String word) {\n        TrieNode node = root;\n        for (char c : word.toCharArray()) {\n            if (!node.children.containsKey(c)) return false;\n            node = node.children.get(c);\n        }\n        return node.isEnd;\n    }\n}",
-            "cpp": "class Trie {\n    struct TrieNode {\n        map<char, TrieNode*> children;\n        bool isEnd = false;\n    };\n    TrieNode* root = new TrieNode();\npublic:\n    void insert(string word) {\n        TrieNode* node = root;\n        for (char c : word) {\n            if (!node->children[c]) node->children[c] = new TrieNode();\n            node = node->children[c];\n        }\n        node->isEnd = true;\n    }\n    bool search(string word) {\n        TrieNode* node = root;\n        for (char c : word) {\n            if (!node->children[c]) return false;\n            node = node->children[c];\n        }\n        return node->isEnd;\n    }\n};"
+            "cpp": "class Trie {\n    struct TrieNode {\n        map<char, TrieNode*> children;\n        bool isEnd = false;\n    };\n    TrieNode* root = new TrieNode();\npublic:\n    void insert(string word) {\n        TrieNode* node = root;\n        for (char c : word) {\n            if (!node->children[c]) node->children[c] = new TrieNode();\n            node = node->children[c];\n        }\n        node->isEnd = true;\n    }\n    bool search(string word) {\n        TrieNode* node = root;\n        for (char c : word) {\n            if (!node->children[c]) return false;\n            node = node->children[c];\n        }\n        return node->isEnd;\n    }\n};",
+            "practice": {
+                "theory": [
+                    "Trie vs HashMap priority?",
+                    "Space complexity of Trie?"
+                ],
+                "coding": "Implement Magic Dictionary.",
+                "interview": "Word Search II."
+            }
         }
     },
     {
@@ -826,7 +1357,15 @@
             "javascript": "function knapsack(weights, values, W) {\n  const n = weights.length;\n  const dp = Array(W + 1).fill(0);\n  for (let i = 0; i < n; i++) {\n    for (let w = W; w >= weights[i]; w--) {\n      dp[w] = Math.max(dp[w], dp[w - weights[i]] + values[i]);\n    }\n  }\n  return dp[W];\n}",
             "python": "def knapsack(weights, values, W):\n    n = len(weights)\n    dp = [0] * (W + 1)\n    for i in range(n):\n        for w in range(W, weights[i] - 1, -1):\n            dp[w] = max(dp[w], dp[w - weights[i]] + values[i])\n    return dp[W]",
             "java": "int knapsack(int[] weights, int[] values, int W) {\n    int n = weights.length;\n    int[] dp = new int[W + 1];\n    for (int i = 0; i < n; i++) {\n        for (int w = W; w >= weights[i]; w--) {\n            dp[w] = Math.max(dp[w], dp[w - weights[i]] + values[i]);\n        }\n    }\n    return dp[W];\n}",
-            "cpp": "int knapsack(vector<int>& weights, vector<int>& values, int W) {\n    int n = weights.size();\n    vector<int> dp(W + 1, 0);\n    for (int i = 0; i < n; i++) {\n        for (int w = W; w >= weights[i]; w--) {\n            dp[w] = max(dp[w], dp[w - weights[i]] + values[i]);\n        }\n    }\n    return dp[W];\n}"
+            "cpp": "int knapsack(vector<int>& weights, vector<int>& values, int W) {\n    int n = weights.size();\n    vector<int> dp(W + 1, 0);\n    for (int i = 0; i < n; i++) {\n        for (int w = W; w >= weights[i]; w--) {\n            dp[w] = max(dp[w], dp[w - weights[i]] + values[i]);\n        }\n    }\n    return dp[W];\n}",
+            "practice": {
+                "theory": [
+                    "Greedy vs DP for Knapsack?",
+                    "Time complexity of 0/1 Knapsack?"
+                ],
+                "coding": "Partition Equal Subset Sum.",
+                "interview": "Target Sum."
+            }
         }
     },
     {
@@ -847,7 +1386,15 @@
             "javascript": "function lengthOfLIS(nums) {\n  const tails = [];\n  for (const num of nums) {\n    let left = 0, right = tails.length;\n    while (left < right) {\n      const mid = Math.floor((left + right) / 2);\n      if (tails[mid] < num) left = mid + 1;\n      else right = mid;\n    }\n    tails[left] = num;\n  }\n  return tails.length;\n}",
             "python": "from bisect import bisect_left\n\ndef length_of_lis(nums):\n    tails = []\n    for num in nums:\n        pos = bisect_left(tails, num)\n        if pos == len(tails):\n            tails.append(num)\n        else:\n            tails[pos] = num\n    return len(tails)",
             "java": "int lengthOfLIS(int[] nums) {\n    List<Integer> tails = new ArrayList<>();\n    for (int num : nums) {\n        int pos = Collections.binarySearch(tails, num);\n        if (pos < 0) pos = -(pos + 1);\n        if (pos == tails.size()) tails.add(num);\n        else tails.set(pos, num);\n    }\n    return tails.size();\n}",
-            "cpp": "int lengthOfLIS(vector<int>& nums) {\n    vector<int> tails;\n    for (int num : nums) {\n        auto it = lower_bound(tails.begin(), tails.end(), num);\n        if (it == tails.end()) tails.push_back(num);\n        else *it = num;\n    }\n    return tails.size();\n}"
+            "cpp": "int lengthOfLIS(vector<int>& nums) {\n    vector<int> tails;\n    for (int num : nums) {\n        auto it = lower_bound(tails.begin(), tails.end(), num);\n        if (it == tails.end()) tails.push_back(num);\n        else *it = num;\n    }\n    return tails.size();\n}",
+            "practice": {
+                "theory": [
+                    "O(n log n) approach for LIS?",
+                    "Patience sorting connection?"
+                ],
+                "coding": "Largest Divisible Subset.",
+                "interview": "Russian Doll Envelopes."
+            }
         }
     },
     {
@@ -868,7 +1415,15 @@
             "javascript": "function lcs(s1, s2) {\n  const m = s1.length, n = s2.length;\n  const dp = Array(m + 1).fill(0).map(() => Array(n + 1).fill(0));\n  for (let i = 1; i <= m; i++) {\n    for (let j = 1; j <= n; j++) {\n      if (s1[i-1] === s2[j-1]) dp[i][j] = dp[i-1][j-1] + 1;\n      else dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);\n    }\n  }\n  return dp[m][n];\n}",
             "python": "def lcs(s1, s2):\n    m, n = len(s1), len(s2)\n    dp = [[0] * (n + 1) for _ in range(m + 1)]\n    for i in range(1, m + 1):\n        for j in range(1, n + 1):\n            if s1[i-1] == s2[j-1]:\n                dp[i][j] = dp[i-1][j-1] + 1\n            else:\n                dp[i][j] = max(dp[i-1][j], dp[i][j-1])\n    return dp[m][n]",
             "java": "int lcs(String s1, String s2) {\n    int m = s1.length(), n = s2.length();\n    int[][] dp = new int[m + 1][n + 1];\n    for (int i = 1; i <= m; i++) {\n        for (int j = 1; j <= n; j++) {\n            if (s1.charAt(i-1) == s2.charAt(j-1))\n                dp[i][j] = dp[i-1][j-1] + 1;\n            else\n                dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);\n        }\n    }\n    return dp[m][n];\n}",
-            "cpp": "int lcs(string s1, string s2) {\n    int m = s1.length(), n = s2.length();\n    vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));\n    for (int i = 1; i <= m; i++) {\n        for (int j = 1; j <= n; j++) {\n            if (s1[i-1] == s2[j-1])\n                dp[i][j] = dp[i-1][j-1] + 1;\n            else\n                dp[i][j] = max(dp[i-1][j], dp[i][j-1]);\n        }\n    }\n    return dp[m][n];\n}"
+            "cpp": "int lcs(string s1, string s2) {\n    int m = s1.length(), n = s2.length();\n    vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));\n    for (int i = 1; i <= m; i++) {\n        for (int j = 1; j <= n; j++) {\n            if (s1[i-1] == s2[j-1])\n                dp[i][j] = dp[i-1][j-1] + 1;\n            else\n                dp[i][j] = max(dp[i-1][j], dp[i][j-1]);\n        }\n    }\n    return dp[m][n];\n}",
+            "practice": {
+                "theory": [
+                    "DP recurrence for LCS?",
+                    "Space optimization to O(min(m,n))?"
+                ],
+                "coding": "Shortest Common Supersequence.",
+                "interview": "Delete Operation for Two Strings."
+            }
         }
     },
     {
@@ -889,7 +1444,15 @@
             "javascript": "function coinChange(coins, amount) {\n  const dp = Array(amount + 1).fill(Infinity);\n  dp[0] = 0;\n  for (const coin of coins) {\n    for (let i = coin; i <= amount; i++) {\n      dp[i] = Math.min(dp[i], dp[i - coin] + 1);\n    }\n  }\n  return dp[amount] === Infinity ? -1 : dp[amount];\n}",
             "python": "def coin_change(coins, amount):\n    dp = [float('inf')] * (amount + 1)\n    dp[0] = 0\n    for coin in coins:\n        for i in range(coin, amount + 1):\n            dp[i] = min(dp[i], dp[i - coin] + 1)\n    return dp[amount] if dp[amount] != float('inf') else -1",
             "java": "int coinChange(int[] coins, int amount) {\n    int[] dp = new int[amount + 1];\n    Arrays.fill(dp, amount + 1);\n    dp[0] = 0;\n    for (int coin : coins) {\n        for (int i = coin; i <= amount; i++) {\n            dp[i] = Math.min(dp[i], dp[i - coin] + 1);\n        }\n    }\n    return dp[amount] > amount ? -1 : dp[amount];\n}",
-            "cpp": "int coinChange(vector<int>& coins, int amount) {\n    vector<int> dp(amount + 1, amount + 1);\n    dp[0] = 0;\n    for (int coin : coins) {\n        for (int i = coin; i <= amount; i++) {\n            dp[i] = min(dp[i], dp[i - coin] + 1);\n        }\n    }\n    return dp[amount] > amount ? -1 : dp[amount];\n}"
+            "cpp": "int coinChange(vector<int>& coins, int amount) {\n    vector<int> dp(amount + 1, amount + 1);\n    dp[0] = 0;\n    for (int coin : coins) {\n        for (int i = coin; i <= amount; i++) {\n            dp[i] = min(dp[i], dp[i - coin] + 1);\n        }\n    }\n    return dp[amount] > amount ? -1 : dp[amount];\n}",
+            "practice": {
+                "theory": [
+                    "Greedy failure case in Coin Change?",
+                    "Unbounded knapsack variant?"
+                ],
+                "coding": "Coin Change 2 (combinations).",
+                "interview": "Minimum Cost For Tickets."
+            }
         }
     },
     {
@@ -910,7 +1473,15 @@
             "javascript": "function maxNonOverlapping(intervals) {\n  intervals.sort((a, b) => a[1] - b[1]);\n  let count = 0, lastEnd = -Infinity;\n  for (const [start, end] of intervals) {\n    if (start >= lastEnd) {\n      count++;\n      lastEnd = end;\n    }\n  }\n  return count;\n}",
             "python": "def max_non_overlapping(intervals):\n    intervals.sort(key=lambda x: x[1])\n    count, last_end = 0, float('-inf')\n    for start, end in intervals:\n        if start >= last_end:\n            count += 1\n            last_end = end\n    return count",
             "java": "int maxNonOverlapping(int[][] intervals) {\n    Arrays.sort(intervals, (a, b) -> a[1] - b[1]);\n    int count = 0, lastEnd = Integer.MIN_VALUE;\n    for (int[] interval : intervals) {\n        if (interval[0] >= lastEnd) {\n            count++;\n            lastEnd = interval[1];\n        }\n    }\n    return count;\n}",
-            "cpp": "int maxNonOverlapping(vector<vector<int>>& intervals) {\n    sort(intervals.begin(), intervals.end(), [](auto& a, auto& b) {\n        return a[1] < b[1];\n    });\n    int count = 0, lastEnd = INT_MIN;\n    for (auto& i : intervals) {\n        if (i[0] >= lastEnd) {\n            count++;\n            lastEnd = i[1];\n        }\n    }\n    return count;\n}"
+            "cpp": "int maxNonOverlapping(vector<vector<int>>& intervals) {\n    sort(intervals.begin(), intervals.end(), [](auto& a, auto& b) {\n        return a[1] < b[1];\n    });\n    int count = 0, lastEnd = INT_MIN;\n    for (auto& i : intervals) {\n        if (i[0] >= lastEnd) {\n            count++;\n            lastEnd = i[1];\n        }\n    }\n    return count;\n}",
+            "practice": {
+                "theory": [
+                    "Greedy choice property?",
+                    "Sorting criterion (end time)?"
+                ],
+                "coding": "Non-overlapping Intervals.",
+                "interview": "Meeting Rooms II."
+            }
         }
     },
     {
@@ -932,7 +1503,15 @@
             "javascript": "function huffmanCodes(chars, freqs) {\n  const heap = chars.map((c, i) => ({char: c, freq: freqs[i], left: null, right: null}));\n  heap.sort((a, b) => a.freq - b.freq);\n  while (heap.length > 1) {\n    const left = heap.shift();\n    const right = heap.shift();\n    const parent = {char: null, freq: left.freq + right.freq, left, right};\n    heap.push(parent);\n    heap.sort((a, b) => a.freq - b.freq);\n  }\n  const codes = {};\n  function traverse(node, code) {\n    if (node.char) { codes[node.char] = code || '0'; return; }\n    if (node.left) traverse(node.left, code + '0');\n    if (node.right) traverse(node.right, code + '1');\n  }\n  traverse(heap[0], '');\n  return codes;\n}",
             "python": "import heapq\n\ndef huffman_codes(chars, freqs):\n    heap = [[f, [c, '']] for c, f in zip(chars, freqs)]\n    heapq.heapify(heap)\n    while len(heap) > 1:\n        lo = heapq.heappop(heap)\n        hi = heapq.heappop(heap)\n        for pair in lo[1:]:\n            pair[1] = '0' + pair[1]\n        for pair in hi[1:]:\n            pair[1] = '1' + pair[1]\n        heapq.heappush(heap, [lo[0] + hi[0]] + lo[1:] + hi[1:])\n    return {c: code for c, code in heap[0][1:]}",
             "java": "// Huffman coding requires priority queue and tree nodes\nMap<Character, String> huffmanCodes(char[] chars, int[] freqs) {\n    PriorityQueue<int[]> pq = new PriorityQueue<>((a,b) -> a[0] - b[0]);\n    for (int i = 0; i < chars.length; i++) pq.add(new int[]{freqs[i], i});\n    // Full implementation requires tree structure\n    return new HashMap<>();\n}",
-            "cpp": "// Huffman coding implementation\nmap<char, string> huffmanCodes(vector<char>& chars, vector<int>& freqs) {\n    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<>> pq;\n    for (int i = 0; i < chars.size(); i++) pq.push({freqs[i], i});\n    // Full implementation requires tree structure\n    return {};\n}"
+            "cpp": "// Huffman coding implementation\nmap<char, string> huffmanCodes(vector<char>& chars, vector<int>& freqs) {\n    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<>> pq;\n    for (int i = 0; i < chars.size(); i++) pq.push({freqs[i], i});\n    // Full implementation requires tree structure\n    return {};\n}",
+            "practice": {
+                "theory": [
+                    "Prefix codes explanation?",
+                    "Optimality of Huffman Coding?"
+                ],
+                "coding": "Construct Huffman Tree.",
+                "interview": "Decode String."
+            }
         }
     },
     {
@@ -954,7 +1533,15 @@
             "javascript": "function solveNQueens(n) {\n  const result = [];\n  const board = Array(n).fill().map(() => Array(n).fill('.'));\n  function isValid(row, col) {\n    for (let i = 0; i < row; i++) {\n      if (board[i][col] === 'Q') return false;\n      if (col - row + i >= 0 && board[i][col - row + i] === 'Q') return false;\n      if (col + row - i < n && board[i][col + row - i] === 'Q') return false;\n    }\n    return true;\n  }\n  function solve(row) {\n    if (row === n) { result.push(board.map(r => r.join(''))); return; }\n    for (let col = 0; col < n; col++) {\n      if (isValid(row, col)) {\n        board[row][col] = 'Q';\n        solve(row + 1);\n        board[row][col] = '.';\n      }\n    }\n  }\n  solve(0);\n  return result;\n}",
             "python": "def solve_n_queens(n):\n    result = []\n    board = [['.' for _ in range(n)] for _ in range(n)]\n    def is_valid(row, col):\n        for i in range(row):\n            if board[i][col] == 'Q': return False\n            if col - row + i >= 0 and board[i][col - row + i] == 'Q': return False\n            if col + row - i < n and board[i][col + row - i] == 'Q': return False\n        return True\n    def solve(row):\n        if row == n:\n            result.append([''.join(r) for r in board])\n            return\n        for col in range(n):\n            if is_valid(row, col):\n                board[row][col] = 'Q'\n                solve(row + 1)\n                board[row][col] = '.'\n    solve(0)\n    return result",
             "java": "List<List<String>> solveNQueens(int n) {\n    List<List<String>> result = new ArrayList<>();\n    char[][] board = new char[n][n];\n    for (char[] row : board) Arrays.fill(row, '.');\n    solve(board, 0, result);\n    return result;\n}",
-            "cpp": "vector<vector<string>> solveNQueens(int n) {\n    vector<vector<string>> result;\n    vector<string> board(n, string(n, '.'));\n    solve(board, 0, result);\n    return result;\n}"
+            "cpp": "vector<vector<string>> solveNQueens(int n) {\n    vector<vector<string>> result;\n    vector<string> board(n, string(n, '.'));\n    solve(board, 0, result);\n    return result;\n}",
+            "practice": {
+                "theory": [
+                    "Backtracking template used?",
+                    "Space complexity of N-Queens?"
+                ],
+                "coding": "N-Queens II (count solutions).",
+                "interview": "Sudoku Solver."
+            }
         }
     },
     {
@@ -975,7 +1562,15 @@
             "javascript": "function permute(nums) {\n  const result = [];\n  function backtrack(start) {\n    if (start === nums.length) { result.push([...nums]); return; }\n    for (let i = start; i < nums.length; i++) {\n      [nums[start], nums[i]] = [nums[i], nums[start]];\n      backtrack(start + 1);\n      [nums[start], nums[i]] = [nums[i], nums[start]];\n    }\n  }\n  backtrack(0);\n  return result;\n}",
             "python": "def permute(nums):\n    result = []\n    def backtrack(start):\n        if start == len(nums):\n            result.append(nums[:])\n            return\n        for i in range(start, len(nums)):\n            nums[start], nums[i] = nums[i], nums[start]\n            backtrack(start + 1)\n            nums[start], nums[i] = nums[i], nums[start]\n    backtrack(0)\n    return result",
             "java": "List<List<Integer>> permute(int[] nums) {\n    List<List<Integer>> result = new ArrayList<>();\n    backtrack(nums, 0, result);\n    return result;\n}\nvoid backtrack(int[] nums, int start, List<List<Integer>> result) {\n    if (start == nums.length) {\n        result.add(Arrays.stream(nums).boxed().collect(Collectors.toList()));\n        return;\n    }\n    for (int i = start; i < nums.length; i++) {\n        swap(nums, start, i);\n        backtrack(nums, start + 1, result);\n        swap(nums, start, i);\n    }\n}",
-            "cpp": "vector<vector<int>> permute(vector<int>& nums) {\n    vector<vector<int>> result;\n    backtrack(nums, 0, result);\n    return result;\n}\nvoid backtrack(vector<int>& nums, int start, vector<vector<int>>& result) {\n    if (start == nums.size()) { result.push_back(nums); return; }\n    for (int i = start; i < nums.size(); i++) {\n        swap(nums[start], nums[i]);\n        backtrack(nums, start + 1, result);\n        swap(nums[start], nums[i]);\n    }\n}"
+            "cpp": "vector<vector<int>> permute(vector<int>& nums) {\n    vector<vector<int>> result;\n    backtrack(nums, 0, result);\n    return result;\n}\nvoid backtrack(vector<int>& nums, int start, vector<vector<int>>& result) {\n    if (start == nums.size()) { result.push_back(nums); return; }\n    for (int i = start; i < nums.size(); i++) {\n        swap(nums[start], nums[i]);\n        backtrack(nums, start + 1, result);\n        swap(nums[start], nums[i]);\n    }\n}",
+            "practice": {
+                "theory": [
+                    "Permutations vs Combinations?",
+                    "Heap's Algorithm logic?"
+                ],
+                "coding": "Next Permutation.",
+                "interview": "Permutation Sequence."
+            }
         }
     },
     {
@@ -996,7 +1591,15 @@
             "javascript": "function subsets(nums) {\n  const result = [];\n  function backtrack(start, current) {\n    result.push([...current]);\n    for (let i = start; i < nums.length; i++) {\n      current.push(nums[i]);\n      backtrack(i + 1, current);\n      current.pop();\n    }\n  }\n  backtrack(0, []);\n  return result;\n}",
             "python": "def subsets(nums):\n    result = []\n    def backtrack(start, current):\n        result.append(current[:])\n        for i in range(start, len(nums)):\n            current.append(nums[i])\n            backtrack(i + 1, current)\n            current.pop()\n    backtrack(0, [])\n    return result",
             "java": "List<List<Integer>> subsets(int[] nums) {\n    List<List<Integer>> result = new ArrayList<>();\n    backtrack(nums, 0, new ArrayList<>(), result);\n    return result;\n}\nvoid backtrack(int[] nums, int start, List<Integer> current, List<List<Integer>> result) {\n    result.add(new ArrayList<>(current));\n    for (int i = start; i < nums.length; i++) {\n        current.add(nums[i]);\n        backtrack(nums, i + 1, current, result);\n        current.remove(current.size() - 1);\n    }\n}",
-            "cpp": "vector<vector<int>> subsets(vector<int>& nums) {\n    vector<vector<int>> result;\n    vector<int> current;\n    backtrack(nums, 0, current, result);\n    return result;\n}\nvoid backtrack(vector<int>& nums, int start, vector<int>& current, vector<vector<int>>& result) {\n    result.push_back(current);\n    for (int i = start; i < nums.size(); i++) {\n        current.push_back(nums[i]);\n        backtrack(nums, i + 1, current, result);\n        current.pop_back();\n    }\n}"
+            "cpp": "vector<vector<int>> subsets(vector<int>& nums) {\n    vector<vector<int>> result;\n    vector<int> current;\n    backtrack(nums, 0, current, result);\n    return result;\n}\nvoid backtrack(vector<int>& nums, int start, vector<int>& current, vector<vector<int>>& result) {\n    result.push_back(current);\n    for (int i = start; i < nums.size(); i++) {\n        current.push_back(nums[i]);\n        backtrack(nums, i + 1, current, result);\n        current.pop_back();\n    }\n}",
+            "practice": {
+                "theory": [
+                    "Power set size calculation?",
+                    "Bit manipulation approach for subsets?"
+                ],
+                "coding": "Subsets II (duplicates).",
+                "interview": "Letter Case Permutation."
+            }
         }
     },
     {
@@ -1019,7 +1622,15 @@
             "javascript": "// Bit manipulation basics\nconst getBit = (n, i) => (n >> i) & 1;\nconst setBit = (n, i) => n | (1 << i);\nconst clearBit = (n, i) => n & ~(1 << i);\nconst toggleBit = (n, i) => n ^ (1 << i);\nconst countBits = (n) => {\n  let count = 0;\n  while (n) { count += n & 1; n >>= 1; }\n  return count;\n};",
             "python": "# Bit manipulation basics\ndef get_bit(n, i): return (n >> i) & 1\ndef set_bit(n, i): return n | (1 << i)\ndef clear_bit(n, i): return n & ~(1 << i)\ndef toggle_bit(n, i): return n ^ (1 << i)\ndef count_bits(n): return bin(n).count('1')",
             "java": "// Bit manipulation basics\nint getBit(int n, int i) { return (n >> i) & 1; }\nint setBit(int n, int i) { return n | (1 << i); }\nint clearBit(int n, int i) { return n & ~(1 << i); }\nint toggleBit(int n, int i) { return n ^ (1 << i); }\nint countBits(int n) { return Integer.bitCount(n); }",
-            "cpp": "// Bit manipulation basics\nint getBit(int n, int i) { return (n >> i) & 1; }\nint setBit(int n, int i) { return n | (1 << i); }\nint clearBit(int n, int i) { return n & ~(1 << i); }\nint toggleBit(int n, int i) { return n ^ (1 << i); }\nint countBits(int n) { return __builtin_popcount(n); }"
+            "cpp": "// Bit manipulation basics\nint getBit(int n, int i) { return (n >> i) & 1; }\nint setBit(int n, int i) { return n | (1 << i); }\nint clearBit(int n, int i) { return n & ~(1 << i); }\nint toggleBit(int n, int i) { return n ^ (1 << i); }\nint countBits(int n) { return __builtin_popcount(n); }",
+            "practice": {
+                "theory": [
+                    "XOR properties?",
+                    "Two's complement representation?"
+                ],
+                "coding": "Number of 1 Bits.",
+                "interview": "Reverse Bits."
+            }
         }
     },
     {
@@ -1040,7 +1651,15 @@
             "javascript": "// Find single number (all others appear twice)\nfunction singleNumber(nums) {\n  return nums.reduce((a, b) => a ^ b, 0);\n}\n\n// Find missing number in 0..n\nfunction missingNumber(nums) {\n  let xor = nums.length;\n  for (let i = 0; i < nums.length; i++) {\n    xor ^= i ^ nums[i];\n  }\n  return xor;\n}",
             "python": "# Find single number\ndef single_number(nums):\n    result = 0\n    for n in nums:\n        result ^= n\n    return result\n\n# Find missing number\ndef missing_number(nums):\n    xor = len(nums)\n    for i, n in enumerate(nums):\n        xor ^= i ^ n\n    return xor",
             "java": "// Find single number\nint singleNumber(int[] nums) {\n    int result = 0;\n    for (int n : nums) result ^= n;\n    return result;\n}\n\n// Find missing number\nint missingNumber(int[] nums) {\n    int xor = nums.length;\n    for (int i = 0; i < nums.length; i++) {\n        xor ^= i ^ nums[i];\n    }\n    return xor;\n}",
-            "cpp": "// Find single number\nint singleNumber(vector<int>& nums) {\n    int result = 0;\n    for (int n : nums) result ^= n;\n    return result;\n}\n\n// Find missing number\nint missingNumber(vector<int>& nums) {\n    int x = nums.size();\n    for (int i = 0; i < nums.size(); i++) {\n        x ^= i ^ nums[i];\n    }\n    return x;\n}"
+            "cpp": "// Find single number\nint singleNumber(vector<int>& nums) {\n    int result = 0;\n    for (int n : nums) result ^= n;\n    return result;\n}\n\n// Find missing number\nint missingNumber(vector<int>& nums) {\n    int x = nums.size();\n    for (int i = 0; i < nums.size(); i++) {\n        x ^= i ^ nums[i];\n    }\n    return x;\n}",
+            "practice": {
+                "theory": [
+                    "a ^ a = 0 property?",
+                    "Swapping elements without temp?"
+                ],
+                "coding": "Single Number II.",
+                "interview": "Find two non-repeating numbers."
+            }
         }
     },
     {
@@ -1062,7 +1681,15 @@
             "javascript": "class DSU {\n  constructor(n) {\n    this.parent = Array.from({length: n}, (_, i) => i);\n    this.rank = Array(n).fill(0);\n  }\n  find(x) {\n    if (this.parent[x] !== x) this.parent[x] = this.find(this.parent[x]);\n    return this.parent[x];\n  }\n  union(x, y) {\n    const px = this.find(x), py = this.find(y);\n    if (px === py) return false;\n    if (this.rank[px] < this.rank[py]) this.parent[px] = py;\n    else if (this.rank[px] > this.rank[py]) this.parent[py] = px;\n    else { this.parent[py] = px; this.rank[px]++; }\n    return true;\n  }\n}",
             "python": "class DSU:\n    def __init__(self, n):\n        self.parent = list(range(n))\n        self.rank = [0] * n\n    \n    def find(self, x):\n        if self.parent[x] != x:\n            self.parent[x] = self.find(self.parent[x])\n        return self.parent[x]\n    \n    def union(self, x, y):\n        px, py = self.find(x), self.find(y)\n        if px == py: return False\n        if self.rank[px] < self.rank[py]:\n            self.parent[px] = py\n        elif self.rank[px] > self.rank[py]:\n            self.parent[py] = px\n        else:\n            self.parent[py] = px\n            self.rank[px] += 1\n        return True",
             "java": "class DSU {\n    int[] parent, rank;\n    DSU(int n) {\n        parent = new int[n];\n        rank = new int[n];\n        for (int i = 0; i < n; i++) parent[i] = i;\n    }\n    int find(int x) {\n        if (parent[x] != x) parent[x] = find(parent[x]);\n        return parent[x];\n    }\n    boolean union(int x, int y) {\n        int px = find(x), py = find(y);\n        if (px == py) return false;\n        if (rank[px] < rank[py]) parent[px] = py;\n        else if (rank[px] > rank[py]) parent[py] = px;\n        else { parent[py] = px; rank[px]++; }\n        return true;\n    }\n}",
-            "cpp": "class DSU {\n    vector<int> parent, rank_;\npublic:\n    DSU(int n) : parent(n), rank_(n, 0) {\n        iota(parent.begin(), parent.end(), 0);\n    }\n    int find(int x) {\n        if (parent[x] != x) parent[x] = find(parent[x]);\n        return parent[x];\n    }\n    bool unite(int x, int y) {\n        int px = find(x), py = find(y);\n        if (px == py) return false;\n        if (rank_[px] < rank_[py]) parent[px] = py;\n        else if (rank_[px] > rank_[py]) parent[py] = px;\n        else { parent[py] = px; rank_[px]++; }\n        return true;\n    }\n};"
+            "cpp": "class DSU {\n    vector<int> parent, rank_;\npublic:\n    DSU(int n) : parent(n), rank_(n, 0) {\n        iota(parent.begin(), parent.end(), 0);\n    }\n    int find(int x) {\n        if (parent[x] != x) parent[x] = find(parent[x]);\n        return parent[x];\n    }\n    bool unite(int x, int y) {\n        int px = find(x), py = find(y);\n        if (px == py) return false;\n        if (rank_[px] < rank_[py]) parent[px] = py;\n        else if (rank_[px] > rank_[py]) parent[py] = px;\n        else { parent[py] = px; rank_[px]++; }\n        return true;\n    }\n};",
+            "practice": {
+                "theory": [
+                    "Path compression optimization?",
+                    "Union by rank logic?"
+                ],
+                "coding": "Redundant Connection.",
+                "interview": "Number of Provinces."
+            }
         }
     },
     {
@@ -1084,7 +1711,186 @@
             "javascript": "class SegmentTree {\n  constructor(arr) {\n    this.n = arr.length;\n    this.tree = Array(4 * this.n).fill(0);\n    this.build(arr, 0, 0, this.n - 1);\n  }\n  build(arr, node, start, end) {\n    if (start === end) { this.tree[node] = arr[start]; return; }\n    const mid = Math.floor((start + end) / 2);\n    this.build(arr, 2*node+1, start, mid);\n    this.build(arr, 2*node+2, mid+1, end);\n    this.tree[node] = this.tree[2*node+1] + this.tree[2*node+2];\n  }\n  query(node, start, end, l, r) {\n    if (r < start || end < l) return 0;\n    if (l <= start && end <= r) return this.tree[node];\n    const mid = Math.floor((start + end) / 2);\n    return this.query(2*node+1, start, mid, l, r) + this.query(2*node+2, mid+1, end, l, r);\n  }\n}",
             "python": "class SegmentTree:\n    def __init__(self, arr):\n        self.n = len(arr)\n        self.tree = [0] * (4 * self.n)\n        self.build(arr, 0, 0, self.n - 1)\n    \n    def build(self, arr, node, start, end):\n        if start == end:\n            self.tree[node] = arr[start]\n            return\n        mid = (start + end) // 2\n        self.build(arr, 2*node+1, start, mid)\n        self.build(arr, 2*node+2, mid+1, end)\n        self.tree[node] = self.tree[2*node+1] + self.tree[2*node+2]\n    \n    def query(self, node, start, end, l, r):\n        if r < start or end < l: return 0\n        if l <= start and end <= r: return self.tree[node]\n        mid = (start + end) // 2\n        return self.query(2*node+1, start, mid, l, r) + self.query(2*node+2, mid+1, end, l, r)",
             "java": "class SegmentTree {\n    int[] tree;\n    int n;\n    SegmentTree(int[] arr) {\n        n = arr.length;\n        tree = new int[4 * n];\n        build(arr, 0, 0, n - 1);\n    }\n    void build(int[] arr, int node, int start, int end) {\n        if (start == end) { tree[node] = arr[start]; return; }\n        int mid = (start + end) / 2;\n        build(arr, 2*node+1, start, mid);\n        build(arr, 2*node+2, mid+1, end);\n        tree[node] = tree[2*node+1] + tree[2*node+2];\n    }\n}",
-            "cpp": "class SegmentTree {\n    vector<int> tree;\n    int n;\npublic:\n    SegmentTree(vector<int>& arr) : n(arr.size()), tree(4 * n) {\n        build(arr, 0, 0, n - 1);\n    }\n    void build(vector<int>& arr, int node, int start, int end) {\n        if (start == end) { tree[node] = arr[start]; return; }\n        int mid = (start + end) / 2;\n        build(arr, 2*node+1, start, mid);\n        build(arr, 2*node+2, mid+1, end);\n        tree[node] = tree[2*node+1] + tree[2*node+2];\n    }\n};"
+            "cpp": "class SegmentTree {\n    vector<int> tree;\n    int n;\npublic:\n    SegmentTree(vector<int>& arr) : n(arr.size()), tree(4 * n) {\n        build(arr, 0, 0, n - 1);\n    }\n    void build(vector<int>& arr, int node, int start, int end) {\n        if (start == end) { tree[node] = arr[start]; return; }\n        int mid = (start + end) / 2;\n        build(arr, 2*node+1, start, mid);\n        build(arr, 2*node+2, mid+1, end);\n        tree[node] = tree[2*node+1] + tree[2*node+2];\n    }\n};",
+            "practice": {
+                "theory": [
+                    "Lazy propagation concept?",
+                    "Range query time complexity?"
+                ],
+                "coding": "Range Sum Query - Mutable.",
+                "interview": "Count of Range Sum."
+            }
+        }
+    },
+    {
+        "id": "dynamic-array",
+        "name": "Dynamic Array",
+        "category": "arrays",
+        "complexity": {
+            "time": "O(1) amortized insert",
+            "space": "O(n)"
+        },
+        "description": "An array that automatically resizes when it runs out of space. Demonstrates capacity vs size.",
+        "operations": [
+            "insert",
+            "resize",
+            "copy",
+            "access"
+        ],
+        "code": {
+            "javascript": "class DynamicArray {\n  constructor() {\n    this.capacity = 2;\n    this.length = 0;\n    this.arr = new Array(2);\n  }\n  push(n) {\n    if (this.length === this.capacity) {\n      this.resize();\n    }\n    this.arr[this.length] = n;\n    this.length++;\n  }\n  resize() {\n    this.capacity *= 2;\n    const newArr = new Array(this.capacity);\n    for (let i = 0; i < this.length; i++) {\n      newArr[i] = this.arr[i];\n    }\n    this.arr = newArr;\n  }\n}",
+            "python": "class DynamicArray:\n    def __init__(self):\n        self.capacity = 2\n        self.length = 0\n        self.arr = [None] * 2\n    def push(self, n):\n        if self.length == self.capacity:\n            self.resize()\n        self.arr[self.length] = n\n        self.length += 1\n    def resize(self):\n        self.capacity *= 2\n        self.arr = self.arr + [None] * self.capacity",
+            "java": "class DynamicArray {\n    int[] arr;\n    int length;\n    int capacity;\n    public DynamicArray() {\n        capacity = 2;\n        length = 0;\n        arr = new int[2];\n    }\n    public void push(int n) {\n        if (length == capacity) resize();\n        arr[length++] = n;\n    }\n    private void resize() {\n        capacity *= 2;\n        int[] newArr = new int[capacity];\n        for (int i = 0; i < length; i++) newArr[i] = arr[i];\n        arr = newArr;\n    }\n}",
+            "cpp": "class DynamicArray {\n    int* arr;\n    int length;\n    int capacity;\npublic:\n    DynamicArray() {\n        capacity = 2;\n        length = 0;\n        arr = new int[2];\n    }\n    void push(int n) {\n        if (length == capacity) resize();\n        arr[length++] = n;\n    }\n    void resize() {\n        capacity *= 2;\n        int* newArr = new int[capacity];\n        for (int i = 0; i < length; i++) newArr[i] = arr[i];\n        delete[] arr;\n        arr = newArr;\n    }\n};"
+        },
+        "practice": {
+            "theory": [
+                "What is the amortized time complexity of inserting into a dynamic array?",
+                "Why do we typically double the capacity instead of adding a fixed amount?"
+            ],
+            "coding": "Implement a function to shrink the dynamic array when it is only 1/4 full.",
+            "interview": "Explain how a Dynamic Array (ArrayList/Vector) manages memory under the hood."
+        }
+    },
+    {
+        "id": "fibonacci",
+        "name": "Fibonacci Sequence",
+        "category": "dp",
+        "complexity": {
+            "time": "O(n)",
+            "space": "O(1)"
+        },
+        "description": "Calculates the nth Fibonacci number. Optimized using dynamic programming (iterative approach).",
+        "operations": [
+            "calculate"
+        ],
+        "code": {
+            "javascript": "function fib(n) {\n  if (n <= 1) return n;\n  let a = 0, b = 1;\n  for (let i = 2; i <= n; i++) {\n    const temp = a + b;\n    a = b;\n    b = temp;\n  }\n  return b;\n}",
+            "python": "def fib(n):\n    if n <= 1: return n\n    a, b = 0, 1\n    for _ in range(2, n + 1):\n        a, b = b, a + b\n    return b",
+            "java": "int fib(int n) {\n    if (n <= 1) return n;\n    int a = 0, b = 1;\n    for (int i = 2; i <= n; i++) {\n        int temp = a + b;\n        a = b;\n        b = temp;\n    }\n    return b;\n}",
+            "cpp": "int fib(int n) {\n    if (n <= 1) return n;\n    int a = 0, b = 1;\n    for (int i = 2; i <= n; i++) {\n        int temp = a + b;\n        a = b;\n        b = temp;\n    }\n    return b;\n}"
+        },
+        "practice": {
+            "theory": [
+                "Time complexity of recursive vs iterative?",
+                "Matrix Exponentiation method?"
+            ],
+            "coding": "Climbing Stairs.",
+            "interview": "Decode Ways."
+        }
+    },
+    {
+        "id": "array-insert",
+        "name": "Array Insertion",
+        "category": "arrays",
+        "complexity": {
+            "time": "O(n)",
+            "space": "O(1)"
+        },
+        "description": "Inserts an element into an array at a specific index, shifting subsequent elements to the right.",
+        "operations": [
+            "insert",
+            "shift-right"
+        ],
+        "code": {
+            "javascript": "function insert(arr, index, element) {\n  for (let i = arr.length; i > index; i--) {\n    arr[i] = arr[i - 1];\n  }\n  arr[index] = element;\n  return arr;\n}",
+            "python": "def insert(arr, index, element):\n    arr.append(None)\n    for i in range(len(arr) - 1, index, -1):\n        arr[i] = arr[i - 1]\n    arr[index] = element\n    return arr",
+            "java": "void insert(int[] arr, int n, int index, int element) {\n    for (int i = n; i > index; i--) {\n        arr[i] = arr[i - 1];\n    }\n    arr[index] = element;\n}",
+            "cpp": "void insert(vector<int>& arr, int index, int element) {\n    arr.push_back(0);\n    for (int i = arr.size() - 1; i > index; i--) {\n        arr[i] = arr[i - 1];\n    }\n    arr[index] = element;\n}"
+        },
+        "practice": {
+            "theory": [
+                "Worst case time complexity for insertion?",
+                "How does resizing affect insertion?"
+            ],
+            "coding": "Merge Sorted Array.",
+            "interview": "Insert Interval."
+        }
+    },
+    {
+        "id": "array-delete",
+        "name": "Array Deletion",
+        "category": "arrays",
+        "complexity": {
+            "time": "O(n)",
+            "space": "O(1)"
+        },
+        "description": "Removes an element from an array at a specific index, shifting subsequent elements to the left.",
+        "operations": [
+            "delete",
+            "shift-left"
+        ],
+        "code": {
+            "javascript": "function remove(arr, index) {\n  for (let i = index; i < arr.length - 1; i++) {\n    arr[i] = arr[i + 1];\n  }\n  arr.pop();\n  return arr;\n}",
+            "python": "def remove(arr, index):\n    for i in range(index, len(arr) - 1):\n        arr[i] = arr[i + 1]\n    arr.pop()\n    return arr",
+            "java": "void remove(int[] arr, int n, int index) {\n    for (int i = index; i < n - 1; i++) {\n        arr[i] = arr[i + 1];\n    }\n    arr[n - 1] = 0; // optional clear\n}",
+            "cpp": "void remove(vector<int>& arr, int index) {\n    for (int i = index; i < arr.size() - 1; i++) {\n        arr[i] = arr[i + 1];\n    }\n    arr.pop_back();\n}"
+        },
+        "practice": {
+            "theory": [
+                "Time complexity of deletion at the beginning vs end?",
+                "Lazy deletion concept?"
+            ],
+            "coding": "Remove Element.",
+            "interview": "Remove Duplicates from Sorted Array."
+        }
+    },
+    {
+        "id": "queue-enqueue",
+        "name": "Queue Enqueue",
+        "category": "queues",
+        "complexity": {
+            "time": "O(1)",
+            "space": "O(1)"
+        },
+        "description": "Adds an element to the rear of the queue.",
+        "operations": [
+            "check-overflow",
+            "update-rear",
+            "insert-element"
+        ],
+        "code": {
+            "javascript": "function enqueue(queue, value, maxSize) {\n  if (queue.length >= maxSize) return 'Overflow';\n  queue.push(value);\n  return queue;\n}",
+            "python": "def enqueue(queue, value, max_size):\n    if len(queue) >= max_size: return 'Overflow'\n    queue.append(value)\n    return queue",
+            "java": "public void enqueue(int[] queue, int rear, int value, int maxSize) {\n    if (rear >= maxSize - 1) throw new Error(\"Overflow\");\n    queue[++rear] = value;\n}",
+            "cpp": "void enqueue(int queue[], int &rear, int value, int maxSize) {\n    if (rear >= maxSize - 1) return;\n    queue[++rear] = value;\n}"
+        },
+        "practice": {
+            "theory": [
+                "What is Queue Overflow?",
+                "How does Rear change on Enqueue?"
+            ],
+            "coding": "Implement Enqueue in a circular queue.",
+            "interview": "How would you implement a Queue using only one Stack?"
+        }
+    },
+    {
+        "id": "queue-dequeue",
+        "name": "Queue Dequeue",
+        "category": "queues",
+        "complexity": {
+            "time": "O(1)",
+            "space": "O(1)"
+        },
+        "description": "Removes the front element from the queue.",
+        "operations": [
+            "check-underflow",
+            "access-front",
+            "update-front"
+        ],
+        "code": {
+            "javascript": "function dequeue(queue) {\n  if (queue.length === 0) return 'Underflow';\n  return queue.shift();\n}",
+            "python": "def dequeue(queue):\n    if not queue: return 'Underflow'\n    return queue.pop(0)",
+            "java": "public int dequeue(int[] queue, int front, int rear) {\n    if (front > rear) throw new Error(\"Underflow\");\n    return queue[front++];\n}",
+            "cpp": "int dequeue(int queue[], int &front, int rear) {\n    if (front > rear) return -1;\n    return queue[front++];\n}"
+        },
+        "practice": {
+            "theory": [
+                "What is Queue Underflow?",
+                "How does Front change on Dequeue?"
+            ],
+            "coding": "Implement Dequeue in a linked list based queue.",
+            "interview": "Design a queue that supports enqueue, dequeue, and retrieving the maximum element in constant time."
         }
     }
 ]

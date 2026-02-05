@@ -1,0 +1,60 @@
+[
+    {
+        "id": "queue-enqueue",
+        "name": "Queue Enqueue",
+        "category": "queues",
+        "complexity": {
+            "time": "O(1)",
+            "space": "O(1)"
+        },
+        "description": "Adds an element to the rear of the queue.",
+        "operations": [
+            "check-overflow",
+            "update-rear",
+            "insert-element"
+        ],
+        "code": {
+            "javascript": "function enqueue(queue, value, maxSize) {\n  if (queue.length >= maxSize) return 'Overflow';\n  queue.push(value);\n  return queue;\n}",
+            "python": "def enqueue(queue, value, max_size):\n    if len(queue) >= max_size: return 'Overflow'\n    queue.append(value)\n    return queue",
+            "java": "public void enqueue(int[] queue, int rear, int value, int maxSize) {\n    if (rear >= maxSize - 1) throw new Error(\"Overflow\");\n    queue[++rear] = value;\n}",
+            "cpp": "void enqueue(int queue[], int &rear, int value, int maxSize) {\n    if (rear >= maxSize - 1) return;\n    queue[++rear] = value;\n}"
+        },
+        "practice": {
+            "theory": [
+                "What is Queue Overflow?",
+                "How does Rear change on Enqueue?"
+            ],
+            "coding": "Implement Enqueue in a circular queue.",
+            "interview": "How would you implement a Queue using only one Stack?"
+        }
+    },
+    {
+        "id": "queue-dequeue",
+        "name": "Queue Dequeue",
+        "category": "queues",
+        "complexity": {
+            "time": "O(1)",
+            "space": "O(1)"
+        },
+        "description": "Removes the front element from the queue.",
+        "operations": [
+            "check-underflow",
+            "access-front",
+            "update-front"
+        ],
+        "code": {
+            "javascript": "function dequeue(queue) {\n  if (queue.length === 0) return 'Underflow';\n  return queue.shift();\n}",
+            "python": "def dequeue(queue):\n    if not queue: return 'Underflow'\n    return queue.pop(0)",
+            "java": "public int dequeue(int[] queue, int front, int rear) {\n    if (front > rear) throw new Error(\"Underflow\");\n    return queue[front++];\n}",
+            "cpp": "int dequeue(int queue[], int &front, int rear) {\n    if (front > rear) return -1;\n    return queue[front++];\n}"
+        },
+        "practice": {
+            "theory": [
+                "What is Queue Underflow?",
+                "How does Front change on Dequeue?"
+            ],
+            "coding": "Implement Dequeue in a linked list based queue.",
+            "interview": "Design a queue that supports enqueue, dequeue, and retrieving the maximum element in constant time."
+        }
+    }
+]

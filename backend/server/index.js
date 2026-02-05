@@ -9,7 +9,6 @@ import { config } from 'dotenv'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { exec } from 'child_process'
 
-// Load environment variables
 config()
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -17,7 +16,6 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const app = express()
 const PORT = process.env.PORT || 3000
 
-// Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
 
 // System prompts for AI endpoints
