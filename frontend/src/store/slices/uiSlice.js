@@ -57,7 +57,7 @@ const uiSlice = createSlice({
 
         showNotification: (state, action) => {
             state.notification = {
-                type: action.payload.type, // 'success', 'error', 'info', 'warning'
+                type: action.payload.type, 
                 message: action.payload.message,
                 duration: action.payload.duration || 3000,
             }

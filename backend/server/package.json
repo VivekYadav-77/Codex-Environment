@@ -1,5 +1,5 @@
 {
-    "name": "code-odyssey-server",
+    "name": "codex-environment-server",
     "version": "1.0.0",
     "type": "module",
     "scripts": {

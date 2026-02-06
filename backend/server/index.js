@@ -8,6 +8,7 @@ import { dirname, join } from 'path'
 import { config } from 'dotenv'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { exec } from 'child_process'
+import os from 'os'
 
 config()
 
@@ -19,7 +20,7 @@ const PORT = process.env.PORT || 3000
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
 
 // System prompts for AI endpoints
-const HINT_SYSTEM_PROMPT = `You are a Socratic teaching assistant for a Data Structures and Algorithms learning platform called Code-Odyssey. Your role is to help students learn by guiding them to discover solutions on their own.
+const HINT_SYSTEM_PROMPT = `You are a Socratic teaching assistant for a Data Structures and Algorithms learning platform called Codex Environment. Your role is to help students learn by guiding them to discover solutions on their own.
 
 CRITICAL RULES - YOU MUST FOLLOW THESE EXACTLY:
 1. NEVER provide the actual solution code under any circumstances
@@ -42,7 +43,7 @@ RESPONSE FORMAT:
 
 Remember: Your goal is to help students LEARN, not to solve problems for them. A student who discovers the solution themselves will learn far more than one who is given the answer.`
 
-const CODE_REVIEW_SYSTEM_PROMPT = `You are a strict, concise code reviewer for Code-Odyssey DSA platform.
+const CODE_REVIEW_SYSTEM_PROMPT = `You are a strict, concise code reviewer for Codex Environment DSA platform.
 
 **OUTPUT FORMAT:**
 
@@ -73,7 +74,20 @@ const CODE_REVIEW_SYSTEM_PROMPT = `You are a strict, concise code reviewer for C
 // Security middleware
 app.use(helmet())
 app.use(cors({
-    origin: [process.env.FRONTEND_URL || 'http://localhost:5173', 'http://localhost:3000'],
+    origin: (origin, callback) => {
+        const allowedOrigins = [
+            'http://localhost:5173',
+            'http://localhost:3000',
+            process.env.FRONTEND_URL
+        ].filter(Boolean)
+
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true)
+        } else {
+            console.warn(`Blocked by CORS: ${origin}`)
+            callback(new Error('Not allowed by CORS'))
+        }
+    },
     credentials: true
 }))
 app.use(express.json())
@@ -215,7 +229,8 @@ app.post('/api/run', executionLimiter, async (req, res) => {
             return res.status(400).json({ error: 'Java code must contain a class definition (e.g., "class Main" or "public class Solution")' })
         }
     }
-    const tempFile = join(__dirname, `${fileName}.${ext}`)
+    const tempDir = os.tmpdir()
+    const tempFile = join(tempDir, `${fileName}.${ext}`)
 
     try {
         // Prepare code
@@ -237,13 +252,13 @@ app.post('/api/run', executionLimiter, async (req, res) => {
                 break
             case 'java':
                 // Compile then run Java with correct classpath
-                const classFile = join(__dirname, `${fileName}.class`)
+                const classFile = join(tempDir, `${fileName}.class`)
                 cleanupFiles.push(classFile)
-                command = `javac "${tempFile}" && java -cp "${__dirname}" ${fileName}`
+                command = `javac "${tempFile}" && java -cp "${tempDir}" ${fileName}`
                 break
             case 'cpp':
                 // Compile then run C++
-                const exeFile = join(__dirname, `${fileName}.exe`)
+                const exeFile = join(tempDir, `${fileName}.exe`)
                 cleanupFiles.push(exeFile)
                 command = `g++ "${tempFile}" -o "${exeFile}" && "${exeFile}"`
                 break
@@ -422,6 +437,6 @@ app.use((req, res) => {
     res.status(404).json({ error: 'Not found' })
 })
 
-app.listen(PORT, () => {
-    console.log(`🚀 Codex Environment API running on http://localhost:${PORT}`)
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Codex Environment API running on port ${PORT}`)
 })

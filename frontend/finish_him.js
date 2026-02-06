@@ -4,8 +4,7 @@ try {
     let lines = fs.readFileSync(path, 'utf8').split(/\r?\n/);
     let modified = false;
 
-    // Find garbage marker
-    // loop backwards to safely splice? or just find index first
+   
     const garbageIndex = lines.findIndex((l, i) => l.trim() === '// GARBAGE_HERE' && i > 0 && lines[i - 1].trim() === 'const steps = []');
 
     if (garbageIndex !== -1) {
@@ -24,7 +23,6 @@ try {
         console.log('Garbage Block marker not found in context.');
     }
 
-    // Fix accidental match in graph-bfs if any
     lines.forEach((l, i) => {
         if (l.includes('// GARBAGE_HERE') && l.includes('just array (fallback)')) {
             lines[i] = '        // Data is expected to be { nodes: [], edges: [] } or just array (fallback)';

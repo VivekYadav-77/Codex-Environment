@@ -38,14 +38,13 @@ export default function Navbar() {
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
                     <Link to="/" className="flex items-center gap-3">
-                        {/* <motion.div
-                            className="w-10 h-10 rounded-xl bg-gradient-to-br from-google-blue via-google-red to-google-yellow flex items-center justify-center"
+                        <motion.div
                             whileHover={{ rotate: 180 }}
                             transition={{ duration: 0.5 }}
                         >
-                            <Code2 size={24} className="text-white" />
-                        </motion.div> */}
                         <img src={logo} alt="" style={{ width: "90px", height: "90px" }} />
+                        </motion.div> 
+                        
                         <span className="text-xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
                             Codex Environment
                         </span>

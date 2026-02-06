@@ -85,7 +85,7 @@ export default function Sidebar() {
     const { sidebarOpen } = useSelector(state => state.ui)
     const [openSections, setOpenSections] = useState({})
 
-    // Auto-open section based on current path
+
     useEffect(() => {
         const activeSection = menuSections.find(section =>
             location.pathname.startsWith(section.path)

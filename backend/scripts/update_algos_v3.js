@@ -1,15 +1,15 @@
 const fs = require('fs');
-const path = 'd:\\web devfiles\\Codex Environment\\backend\\server\\data\\algorithms.json';
+const pathModule = require('path');
 
-const newAlgorithms = [
+const path = pathModule.join(__dirname, '../server/data/algorithms.json');
+console.log('Target path:', path);
+
+const newAlgos = [
     {
         "id": "stack-impl",
         "name": "Stack Implementation",
         "category": "stacks",
-        "complexity": {
-            "time": "O(1)",
-            "space": "O(n)"
-        },
+        "complexity": { "time": "O(1)", "space": "O(n)" },
         "description": "LIFO (Last-In-First-Out) data structure. Elements are added and removed from the same end called TOP.",
         "operations": ["push", "pop", "peek", "isEmpty"],
         "code": {
@@ -28,10 +28,7 @@ const newAlgorithms = [
         "id": "stack-push",
         "name": "Stack Push",
         "category": "stacks",
-        "complexity": {
-            "time": "O(1)",
-            "space": "O(1)"
-        },
+        "complexity": { "time": "O(1)", "space": "O(1)" },
         "description": "Adds an element to the top of the stack. Requires checking for overflow in fixed-size implementations.",
         "operations": ["check-overflow", "increment-top", "insert-element"],
         "code": {
@@ -50,10 +47,7 @@ const newAlgorithms = [
         "id": "stack-pop",
         "name": "Stack Pop",
         "category": "stacks",
-        "complexity": {
-            "time": "O(1)",
-            "space": "O(1)"
-        },
+        "complexity": { "time": "O(1)", "space": "O(1)" },
         "description": "Removes the top element from the stack. Requires checking for underflow if the stack is empty.",
         "operations": ["check-underflow", "access-top", "decrement-top"],
         "code": {
@@ -72,15 +66,12 @@ const newAlgorithms = [
         "id": "queue-impl",
         "name": "Queue Implementation",
         "category": "queues",
-        "complexity": {
-            "time": "O(1) amortized",
-            "space": "O(n)"
-        },
+        "complexity": { "time": "O(1) amortized", "space": "O(n)" },
         "description": "FIFO (First-In-First-Out) data structure. Elements are added at the REAR and removed from the FRONT.",
         "operations": ["enqueue", "dequeue", "front", "rear"],
         "code": {
             "javascript": "class Queue {\n  constructor() { this.items = []; }\n  enqueue(element) { this.items.push(element); }\n  dequeue() { return this.items.shift(); }\n  front() { return this.items[0]; }\n}",
-            "python": "from collections import deque\nclass Queue:\n    def __init__(self): self.items = deque()\n    def enqueue(self, item): self.items.append(item)\n    def dequeue(self): return self.items.popleft()",
+            "python": "from collections import deque\nclass Queue:\n    def __init__(self): self.items = deque()\n    def enqueue(self, item): self.items.append(item)\n    def dequeue(): return self.items.popleft()",
             "java": "class Queue {\n    private LinkedList<Integer> items = new LinkedList<>();\n    public void enqueue(int item) { items.addLast(item); }\n    public int dequeue() { return items.removeFirst(); }\n}",
             "cpp": "class Queue {\n    queue<int> items;\npublic:\n    void enqueue(int item) { items.push(item); }\n    void dequeue() { items.pop(); }\n}"
         },
@@ -93,15 +84,17 @@ const newAlgorithms = [
 ];
 
 try {
-    if (!fs.existsSync(path)) {
-        throw new Error(`File not found: ${path}`);
+    let raw = fs.readFileSync(path, 'utf8');
+    raw = raw.trim();
+    if (raw.endsWith(']')) {
+        const lastBracketIndex = raw.lastIndexOf(']');
+        const prefix = raw.substring(0, lastBracketIndex);
+        const suffix = ',\n' + newAlgos.map(a => JSON.stringify(a, null, 4)).join(',\n') + '\n]';
+        fs.writeFileSync(path, prefix + suffix, 'utf8');
+        console.log('Successfully updated file at', path);
+    } else {
+        console.error('File does not end with ]');
     }
-    const raw = fs.readFileSync(path, 'utf8');
-    const data = JSON.parse(raw);
-    data.push(...newAlgorithms);
-    fs.writeFileSync(path, JSON.stringify(data, null, 4), 'utf8');
-    console.log('Successfully updated algorithms.json');
 } catch (e) {
-    console.error('ERROR:', e.message);
-    process.exit(1);
+    console.error('Error:', e.message);
 }

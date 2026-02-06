@@ -1,5 +1,6 @@
 const fs = require('fs');
-const path = 'd:\\web devfiles\\Codex Environment\\backend\\server\\data\\algorithms.json';
+const pathModule = require('path');
+const path = pathModule.join(__dirname, '../server/data/algorithms.json');
 
 const newAlgorithms = [
     {
@@ -93,12 +94,15 @@ const newAlgorithms = [
 ];
 
 try {
-    let raw = fs.readFileSync(path, 'utf8');
-    let data = JSON.parse(raw);
+    if (!fs.existsSync(path)) {
+        throw new Error(`File not found: ${path}`);
+    }
+    const raw = fs.readFileSync(path, 'utf8');
+    const data = JSON.parse(raw);
     data.push(...newAlgorithms);
     fs.writeFileSync(path, JSON.stringify(data, null, 4), 'utf8');
     console.log('Successfully updated algorithms.json');
 } catch (e) {
-    console.error('Error updating algorithms.json:', e);
+    console.error('ERROR:', e.message);
     process.exit(1);
 }

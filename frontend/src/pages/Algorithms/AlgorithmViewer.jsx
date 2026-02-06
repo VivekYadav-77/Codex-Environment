@@ -26,14 +26,11 @@ import {
     setInputData,
 } from '../../store/slices/executionSlice'
 
-// ============ VISUALIZATION COMPONENTS ============
 
-// Array Visualization - Shows array elements as boxes with indices
 const ArrayVisualization = ({ step, maxValue }) => {
     const arr = step.array || []
     return (
         <div className="flex flex-col items-center gap-4">
-            {/* Array boxes */}
             <div className="flex items-end justify-center gap-1 min-h-[200px]">
                 <AnimatePresence mode="popLayout">
                     {arr.map((value, index) => {
@@ -83,7 +80,6 @@ const ArrayVisualization = ({ step, maxValue }) => {
                     })}
                 </AnimatePresence>
             </div>
-            {/* Range indicator for binary search */}
             {step.range && (
                 <div className="text-sm text-gray-400">
                     Range: [{step.range[0]}, {step.range[1]}] {step.target && `| Target: ${step.target}`}
@@ -93,30 +89,18 @@ const ArrayVisualization = ({ step, maxValue }) => {
     )
 }
 
-// Tree Visualization - Shows binary tree structure
-// Tree Visualization - Shows binary tree structure
-// Tree Visualization - Shows binary tree structure with refined layout
 const TreeVisualization = ({ step }) => {
     const nodes = step.treeNodes || step.array || []
     const currentNode = step.currentNode
     const visitedNodes = step.visitedNodes || []
-
-    // Calculate positions using standard binary tree layout (Heap/Array representation)
     const positions = {}
 
-    // Recursive function to calculate node coordinates
-    // x, y are percentages. dx is the horizontal spread at current level.
     const calculatePos = (idx, x, y, dx) => {
-        if (idx >= 31) return // Cap at depth 5 for visibility
+        if (idx >= 31) return
         positions[idx] = { x, y }
-
-        // Children positions
-        // Reduce spread by half for each level to prevent overlap
         calculatePos(2 * idx + 1, x - dx, y + 16, dx / 1.8)
         calculatePos(2 * idx + 2, x + dx, y + 16, dx / 1.8)
     }
-
-    // Initialize layout: Root at 50% width, 10% height, initial spread 20%
     calculatePos(0, 50, 10, 20)
 
     return (
@@ -135,7 +119,6 @@ const TreeVisualization = ({ step }) => {
                     const right = 2 * i + 2
                     const edges = []
 
-                    // Draw edge to Left Child
                     if (positions[i] && positions[left] && nodes[left] !== null) {
                         edges.push(
                             <motion.line
@@ -151,7 +134,6 @@ const TreeVisualization = ({ step }) => {
                             />
                         )
                     }
-                    // Draw edge to Right Child
                     if (positions[i] && positions[right] && nodes[right] !== null) {
                         edges.push(
                             <motion.line
@@ -173,26 +155,22 @@ const TreeVisualization = ({ step }) => {
                 {/* Nodes Layer */}
                 {nodes.map((node, i) => {
                     if (node === null || node === undefined) return null
-                    // Skip if position wasn't calculated (beyond max depth)
                     if (!positions[i]) return null
 
                     const pos = positions[i]
                     const isVisited = visitedNodes.includes(i)
                     const isCurrent = currentNode === i
 
-                    // Define Colors
-                    let fillColor = "#4285F4" // Default: Google Blue
+                    let fillColor = "#4285F4"
                     let textColor = "#FFFFFF"
                     let radius = 6
-
-                    // State-based styling
                     if (isVisited) {
-                        fillColor = "#34A853" // Visited: Google Green
+                        fillColor = "#34A853"
                     }
                     if (isCurrent) {
-                        fillColor = "#FBBC04" // Current: Google Yellow
-                        textColor = "#000000" // Black text on yellow
-                        radius = 7 // Slightly larger
+                        fillColor = "#FBBC04"
+                        textColor = "#000000"
+                        radius = 7
                     }
 
                     return (
@@ -234,7 +212,7 @@ const TreeVisualization = ({ step }) => {
                             {/* Node Value */}
                             <motion.text
                                 x={pos.x} y={pos.y}
-                                dy="2" // Vertical center adjustment
+                                dy="2"
                                 textAnchor="middle"
                                 fontSize="3.5"
                                 fontWeight="bold"
@@ -243,9 +221,6 @@ const TreeVisualization = ({ step }) => {
                             >
                                 {node}
                             </motion.text>
-
-                            {/* Node Index (Subscript) - Optional, helps debugging but maybe clutter? 
-                                Let's skip for cleaner aesthetics as requested */}
                         </motion.g>
                     )
                 })}
@@ -539,7 +514,6 @@ const HashTableVisualization = ({ step }) => {
     const key = step.key
     const operation = step.operation
 
-    // If no buckets data, create from array
     const displayBuckets = step.buckets || step.array?.map((v, i) => i === currentHash ? [v] : []) || Array(7).fill([])
 
     return (
@@ -1552,12 +1526,12 @@ const arraysGenerators = {
             steps.push({
                 array: [...arr],
                 comparing: [i],
-                swapping: [i + 1], // Suggesting movement
+                swapping: [i + 1],
                 message: `Shift Right: Moving ${arr[i]} from index ${i} to ${i + 1}.`,
                 line: 2
             })
             arr[i + 1] = arr[i]
-            arr[i] = null // distinct clear for visual
+            arr[i] = null
             steps.push({
                 array: [...arr],
                 found: [i + 1],
@@ -1772,8 +1746,6 @@ const dpGenerators = {
         const dp = Array(m + 1).fill().map(() => Array(n + 1).fill(0))
         const steps = []
 
-        // In this simplified viewer, we flatten the 2D array or just show the active row.
-        // We'll show the flattened array for the visualizer state.
         const flatten = () => dp.reduce((acc, row) => acc.concat(row), [])
 
         steps.push({
@@ -1853,54 +1825,7 @@ const dpGenerators = {
         })
         return steps
     },
-    'lcs': () => {
-        const steps = []
-        const s1 = "ABCD"
-        const s2 = "AEBD"
-        const m = s1.length, n = s2.length
-        const dp = Array(m + 1).fill(0).map(() => Array(n + 1).fill(0))
 
-        steps.push({
-            array: [0],
-            comparing: [],
-            swapping: [],
-            sorted: [],
-            strings: [s1, s2],
-            message: `LCS of "${s1}" and "${s2}"`,
-            line: 1,
-        })
-
-        for (let i = 1; i <= m; i++) {
-            for (let j = 1; j <= n; j++) {
-                if (s1[i - 1] === s2[j - 1]) {
-                    dp[i][j] = dp[i - 1][j - 1] + 1
-                    steps.push({
-                        array: dp.flat(),
-                        comparing: [],
-                        swapping: [],
-                        sorted: [],
-                        pos: [i, j],
-                        match: true,
-                        message: `Match! s1[${i - 1}]='${s1[i - 1]}' == s2[${j - 1}]='${s2[j - 1]}', dp[${i}][${j}] = ${dp[i][j]}`,
-                        line: 4,
-                    })
-                } else {
-                    dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1])
-                }
-            }
-        }
-
-        steps.push({
-            array: [dp[m][n]],
-            comparing: [],
-            swapping: [],
-            sorted: [],
-            found: [],
-            message: `LCS length = ${dp[m][n]}`,
-            line: 8,
-        })
-        return steps
-    },
 }
 
 // Step generators for backtracking algorithms  
@@ -2259,7 +2184,7 @@ const stacksGenerators = {
         steps.push({
             array: newStack,
             top: newStack.length - 1,
-            swapping: [newStack.length], // Visual cue for where it was
+            swapping: [newStack.length],
             message: `Pop complete! ${poppedValue} removed from stack.`,
             line: 5,
         })
@@ -2531,7 +2456,7 @@ const queuesGenerators = {
             array: newQueue,
             front: 0,
             rear: newQueue.length - 1,
-            swapping: [0], // Visual cue for where it was
+            swapping: [0],
             message: `Dequeue complete! ${dequeuedValue} removed from front.`,
             line: 5,
         })
@@ -3244,7 +3169,6 @@ const bitManipulationGenerators = {
     },
     'xor-tricks': (arr) => {
         const steps = []
-        // Create array with one unique element
         const nums = [2, 3, 2, 4, 3]
 
         steps.push({
@@ -3328,7 +3252,7 @@ const advancedGenerators = {
 
         let root = 2
         while (parent[root] !== root) {
-            parent[root] = parent[parent[root]] // Path compression
+            parent[root] = parent[parent[root]]
             root = parent[root]
         }
 
@@ -3357,7 +3281,6 @@ const advancedGenerators = {
             line: 1,
         })
 
-        // Build tree (simplified)
         for (let i = 0; i < n; i++) {
             tree[n + i] = nums[i]
         }
@@ -3408,7 +3331,6 @@ const advancedGenerators = {
 const graphsGenerators = {
     'graph-bfs': (data) => {
         const steps = []
-        // GARBAGE_HERE just array (fallback)
         const nodes = data.nodes || [0, 1, 2, 3, 4, 5]
         const edges = data.edges || [[0, 1], [0, 2], [1, 3], [1, 4], [2, 5]]
         const startNode = nodes[0]
@@ -3541,11 +3463,9 @@ const graphsGenerators = {
     },
     'dijkstra': (data) => {
         const steps = []
-        // Support {nodes, edges} from generateNewArray OR array from fallback
         const nodes = data.nodes || (Array.isArray(data) ? data.slice(0, 5) : [0, 1, 2, 3, 4])
         const edges = data.edges || []
 
-        // Setup distance/visited
         const dist = nodes.map(() => Infinity)
         dist[0] = 0
         const visited = []
@@ -3571,20 +3491,13 @@ const graphsGenerators = {
             if (u === -1) break
             visited.push(u)
 
-            // Update distances
-            // If we have edges, use them. Else assume connectivity?
-            // Fallback: If no edges, assume linear chain logic or random?
-            // Old code assumed linear chain?
-            // Let's use edges if available.
-
             const neighbors = edges.filter(e => e.includes(u)).map(e => e[0] === u ? e[1] : e[0])
 
-            // If no edges (array input), use logical edges (e.g. i -> i+1)
             const effectiveNeighbors = edges.length > 0 ? neighbors : [(u + 1) % nodes.length]
 
             for (const v of effectiveNeighbors) {
                 if (!visited.includes(v)) {
-                    const weight = 1 // Simplified weight
+                    const weight = 1
                     if (dist[u] + weight < dist[v]) {
                         dist[v] = dist[u] + weight
                     }
@@ -3621,8 +3534,6 @@ const graphsGenerators = {
 
         steps.push({
             graphNodes: nodes,
-            // topological sort applies to DAG. 
-            // Visualization shows generic graph. 
             visited: [],
             message: `Topological Sort: order tasks with dependencies`,
             line: 1,
@@ -3639,8 +3550,6 @@ const graphsGenerators = {
                 line: 2
             })
 
-            // Neighbors?
-            // If no edges, just iterate
         }
 
         for (let i = nodes.length - 1; i >= 0; i--) {
@@ -3813,20 +3722,9 @@ const treesGenerators = {
     },
     'bst-impl': (data) => {
         const steps = []
-        // BST implementation expects an array of numbers to insert
         const elements = Array.isArray(data) ? data.slice(0, 10) : (data.array || [10, 5, 15, 3, 7, 12, 18]).slice(0, 10)
-        const tree = [] // Array representation of BST logic needed or just visualizing insertion?
-        // The old code visualized insertion into a 'tree' array that looked like InOrder?
-        // "Insert ${val} into BST. Tree (inorder): ..."
-        // It was a sorted array visualization, not a tree structure visualization?
-        // No, `TreeVisualization` takes `treeNodes`.
-        // To visualize BST properly, we need to calculate positions (indices in array)
-        // 0 is root. 2*i+1 is left.
-
-        // Re-implementing simplified BST logic for visualization:
-        // We will maintain a 'tree' array where tree[0] is root.
-
-        const treeArray = new Array(31).fill(null) // Max depth 5
+        const tree = []
+        const treeArray = new Array(31).fill(null)
 
         steps.push({
             treeNodes: [...treeArray],
@@ -3852,10 +3750,9 @@ const treesGenerators = {
                 if (val < treeArray[curr]) curr = 2 * curr + 1
                 else curr = 2 * curr + 2
 
-                // Highlight path
                 steps.push({
                     treeNodes: [...treeArray],
-                    visitedNodes: [], // Keep previous path?
+                    visitedNodes: [],
                     currentNode: curr,
                     message: `Checking index ${curr} for ${val}`,
                     line: 2
@@ -3867,7 +3764,6 @@ const treesGenerators = {
     'tree-height': (data) => {
         const steps = []
         const nodes = Array.isArray(data) ? data : (data.array || [1, 2, 3, 4, 5, 6, 7])
-        // Simplified Logic
         const n = nodes.length
         const height = Math.floor(Math.log2(n)) + 1
 
@@ -4077,7 +3973,6 @@ const hashingGenerators = {
     },
 
     'hash-table': (arr) => {
-        // Generic visualization of inserting items
         const steps = []
         const nums = arr.slice(0, 10)
         const buckets = Array(7).fill(null).map(() => [])
@@ -4263,7 +4158,6 @@ export default function AlgorithmViewer() {
     const [arraySize, setArraySize] = useState(10)
     const [selectedLanguage, setSelectedLanguage] = useState('javascript')
 
-    // Fetch algorithms from API when category changes
     useEffect(() => {
         const fetchAlgorithms = async () => {
             setLoading(true)
@@ -4306,15 +4200,11 @@ export default function AlgorithmViewer() {
         if (algoCategory.includes('graph')) {
             newArray = generateRandomGraph(arraySize)
         } else if (algoCategory.includes('tree')) {
-            // For trees, we generate an array that represents level-order traversal
-            // Size is limited to prevent massive trees (depth 4 max -> 15 nodes, depth 5 -> 31)
             const treeSize = Math.min(arraySize, 15)
             newArray = generateRandomArray(treeSize, 99)
         } else if (algoCategory.includes('hashing')) {
-            // Hashing uses array of numbers
             newArray = generateRandomArray(arraySize, 999)
         } else {
-            // Default (Sorting, Searching, Greedy, DP, etc.)
             newArray = generateRandomArray(arraySize)
         }
 
@@ -4326,7 +4216,6 @@ export default function AlgorithmViewer() {
             const newSteps = generator(newArray)
             dispatch(setSteps(newSteps))
         } else {
-            // For algorithms without generators yet
             dispatch(setSteps([{
                 array: newArray,
                 comparing: [],

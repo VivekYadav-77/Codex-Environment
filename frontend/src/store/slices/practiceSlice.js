@@ -46,7 +46,6 @@ const practiceSlice = createSlice({
 
         setLanguage: (state, action) => {
             state.language = action.payload
-            // Update code to new language's starter if available
             if (state.currentQuestion?.starterCode?.[action.payload]) {
                 state.code = state.currentQuestion.starterCode[action.payload]
             }

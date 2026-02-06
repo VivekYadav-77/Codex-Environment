@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const filePath = 'd:\\web devfiles\\Codex Environment\\backend\\server\\data\\algorithms.json';
+const filePath = path.join(__dirname, '../server/data/algorithms.json');
 
 const newAlgos = [
     {

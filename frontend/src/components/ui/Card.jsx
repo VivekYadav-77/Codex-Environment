@@ -6,7 +6,7 @@ export function Card({
     title,
     subtitle,
     icon: Icon,
-    accent = 'blue', // blue, green, red, yellow
+    accent = 'blue', 
     onClick,
     ...props
 }) {
