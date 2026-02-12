@@ -5,7 +5,6 @@ import {
     BookOpen,
     Play,
     PenTool,
-    ChevronRight,
     ChevronDown,
     BarChart3,
     GitBranch,
@@ -14,8 +13,6 @@ import {
     Binary,
     Search,
     Layers,
-    X,
-    Database,
     Hash,
     LayoutList,
     ArrowLeftRight,
@@ -25,12 +22,20 @@ import {
     Target,
     RotateCcw,
     Cpu,
-    Zap
+    Zap,
+    Sparkles // Imported Sparkles
 } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 import { setSidebarOpen } from '../../store/slices/uiSlice'
 
 const menuSections = [
+    // 1. Added Home Route here
+    {
+        title: 'Home', // Matched 'label' to 'title' for consistency
+        icon: Sparkles,
+        path: '/',
+        // No 'items' array implies this is a direct link
+    },
     {
         title: 'Tutorial',
         icon: BookOpen,
@@ -84,25 +89,25 @@ export default function Sidebar() {
     const dispatch = useDispatch()
     const { sidebarOpen } = useSelector(state => state.ui)
     const [openSections, setOpenSections] = useState({})
+
     useEffect(() => {
-    const handleResize = () => {
-        if (window.innerWidth < 768) {
-            dispatch(setSidebarOpen(false));
-        } else {
-            dispatch(setSidebarOpen(true));
-        }
-    };
+        const handleResize = () => {
+            if (window.innerWidth < 768) {
+                dispatch(setSidebarOpen(false));
+            } else {
+                dispatch(setSidebarOpen(true));
+            }
+        };
 
-    // Run once on mount
-    handleResize();
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-}, [dispatch]);
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, [dispatch]);
 
     useEffect(() => {
         const activeSection = menuSections.find(section =>
-            location.pathname.startsWith(section.path)
+            // Only auto-expand if the section has items
+            section.items && location.pathname.startsWith(section.path)
         )
         if (activeSection) {
             setOpenSections(prev => ({
@@ -139,25 +144,50 @@ export default function Sidebar() {
             {/* Sidebar */}
             <motion.aside
                 className={`
-        fixed left-0 top-16 bottom-0 w-64 z-40
-        glass border-r border-white/5
-        transition-transform duration-300 ease-in-out
-        /* Logic: Hide by default on mobile, show by default on desktop. 
-           Only use Redux state to override on mobile. */
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
-        md:translate-x-0
-    `}
+                    fixed left-0 top-16 bottom-0 w-64 z-40
+                    glass border-r border-white/5
+                    transition-transform duration-300 ease-in-out
+                    ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
+                    md:translate-x-0
+                `}
             >
                 <div className="h-full overflow-y-auto py-6 px-4">
-                    {/* Mobile Close Button */}
                     <div className="space-y-4">
                         {menuSections.map((section) => {
-                            const isSectionActive = location.pathname.startsWith(section.path)
+                            // Check if this is the active route (exact match for Home, startsWith for others)
+                            const isSectionActive = section.path === '/' 
+                                ? location.pathname === '/' 
+                                : location.pathname.startsWith(section.path)
+                            
                             const isOpen = openSections[section.title]
 
+                            // 2. NEW LOGIC: If no items, render a direct Link (Home)
+                            if (!section.items) {
+                                return (
+                                    <Link 
+                                        key={section.title} 
+                                        to={section.path} 
+                                        onClick={closeSidebar}
+                                        className="block rounded-xl overflow-hidden"
+                                    >
+                                        <div className={`
+                                            w-full flex items-center gap-3 px-3 py-3 text-sm font-semibold 
+                                            transition-all duration-200 uppercase tracking-wider
+                                            ${isSectionActive
+                                                ? 'text-white bg-white/10'
+                                                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                            }
+                                        `}>
+                                            <section.icon size={18} className={isSectionActive ? 'text-google-blue' : ''} />
+                                            <span>{section.title}</span>
+                                        </div>
+                                    </Link>
+                                )
+                            }
+
+                            // 3. Existing logic for Collapsible Sections
                             return (
                                 <div key={section.title} className="rounded-xl overflow-hidden">
-                                    {/* Section Header */}
                                     <button
                                         onClick={() => toggleSection(section.title)}
                                         className={`
@@ -177,7 +207,6 @@ export default function Sidebar() {
                                         />
                                     </button>
 
-                                    {/* Section Items (Collapsible) */}
                                     <AnimatePresence initial={false}>
                                         {isOpen && (
                                             <motion.div
