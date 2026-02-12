@@ -6,8 +6,7 @@ const initialState = {
 
     // Navigation
     activeRoute: '/',
-    sidebarOpen: true,
-
+sidebarOpen: typeof window !== 'undefined' ? window.innerWidth >= 768 : true,
     // Modal states
     activeModal: null,
 

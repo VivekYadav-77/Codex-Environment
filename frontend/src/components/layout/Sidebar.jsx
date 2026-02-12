@@ -84,7 +84,21 @@ export default function Sidebar() {
     const dispatch = useDispatch()
     const { sidebarOpen } = useSelector(state => state.ui)
     const [openSections, setOpenSections] = useState({})
+    useEffect(() => {
+    const handleResize = () => {
+        if (window.innerWidth < 768) {
+            dispatch(setSidebarOpen(false));
+        } else {
+            dispatch(setSidebarOpen(true));
+        }
+    };
 
+    // Run once on mount
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+}, [dispatch]);
 
     useEffect(() => {
         const activeSection = menuSections.find(section =>
@@ -125,21 +139,17 @@ export default function Sidebar() {
             {/* Sidebar */}
             <motion.aside
                 className={`
-          fixed left-0 top-16 bottom-0 w-64 z-40
-          glass border-r border-white/5
-          transform transition-transform duration-300 ease-in-out
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-        `}
+        fixed left-0 top-16 bottom-0 w-64 z-40
+        glass border-r border-white/5
+        transition-transform duration-300 ease-in-out
+        /* Logic: Hide by default on mobile, show by default on desktop. 
+           Only use Redux state to override on mobile. */
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
+        md:translate-x-0
+    `}
             >
                 <div className="h-full overflow-y-auto py-6 px-4">
                     {/* Mobile Close Button */}
-                    <button
-                        className="md:hidden absolute top-4 right-4 p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/10"
-                        onClick={closeSidebar}
-                    >
-                        <X size={20} />
-                    </button>
-
                     <div className="space-y-4">
                         {menuSections.map((section) => {
                             const isSectionActive = location.pathname.startsWith(section.path)

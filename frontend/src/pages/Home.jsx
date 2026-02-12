@@ -114,12 +114,18 @@ export default function Home() {
                 {stats.map(({ label, value, icon: Icon }) => (
                     <motion.div
                         key={label}
-                        className="glass-card p-6 text-center"
+                        className="glass-card p-6 flex flex-col items-center justify-center text-center overflow-hidden"
                         variants={itemVariants}
                     >
-                        <Icon size={28} className="text-google-blue mx-auto mb-3" />
-                        <p className="text-3xl md:text-4xl font-bold text-white mb-1">{value}</p>
-                        <p className="text-sm text-gray-400">{label}</p>
+                        <Icon size={28} className="text-google-blue mb-3 flex-shrink-0" />
+
+                        <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 break-words max-w-full">
+                            {value}
+                        </p>
+
+                        <p className="text-xs sm:text-sm text-gray-400 break-words max-w-full">
+                            {label}
+                        </p>
                     </motion.div>
                 ))}
             </motion.section>

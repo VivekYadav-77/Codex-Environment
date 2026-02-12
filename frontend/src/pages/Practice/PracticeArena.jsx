@@ -242,7 +242,7 @@ export default function PracticeArena() {
         return (
             <div className="flex flex-col items-center justify-center h-64 gap-4">
                 <Loader2 className="w-8 h-8 animate-spin text-google-blue" />
-                <p className="text-gray-400">Loading questions for {topic}...</p>
+                <p className="text-gray-400">Loading questions for {topic} Please wait for 60 seconds...</p>
             </div>
         )
     }

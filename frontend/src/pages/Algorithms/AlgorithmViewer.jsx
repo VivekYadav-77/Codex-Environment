@@ -4263,7 +4263,7 @@ export default function AlgorithmViewer() {
         return (
             <div className="flex items-center justify-center h-96">
                 <Loader2 className="w-8 h-8 animate-spin text-google-blue" />
-                <span className="ml-3 text-lg">Loading algorithms...</span>
+                <span className="ml-3 text-lg">Loading algorithms Please Wait 60 seconds...</span>
             </div>
         )
     }
@@ -4273,7 +4273,7 @@ export default function AlgorithmViewer() {
         return (
             <div className="flex flex-col items-center justify-center h-96">
                 <p className="text-red-400 text-lg mb-4">Error: {error}</p>
-                <p className="text-gray-400">Make sure the server is running on port 3000</p>
+                <p className="text-gray-400">Server error</p>
                 <Button
                     variant="blue"
                     className="mt-4"
