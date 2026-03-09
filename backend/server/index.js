@@ -9,7 +9,7 @@ import { config } from 'dotenv'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { exec } from 'child_process'
 import os from 'os'
-import verfiyRequest from './middleware/verifyMiddleware'
+import verfiyRequest from './middleware/verifyMiddleware.js'
 
 config()
 
