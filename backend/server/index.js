@@ -9,6 +9,7 @@ import { config } from 'dotenv'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { exec } from 'child_process'
 import os from 'os'
+import verfiyRequest from './middleware/verifyMiddleware'
 
 config()
 
@@ -99,13 +100,7 @@ const aiLimiter = rateLimit({
     message: { error: 'Too many requests, please try again later.' }
 })
 //validating the actual request
-const verfiyRequest=(req,res,next)=>{
-    const clientkey = req.headers['x-api-key'];
-    if(!clientkey||clientkey!==process.env.REQUESTAPISECRET){
-        return res.status(401).json({error:'Unauthorized: Invalid API Key'});
-    }
-    next();
-}
+app.use(verfiyRequest);
 
 
 // Load JSON data
