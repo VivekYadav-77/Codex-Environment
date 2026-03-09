@@ -4163,8 +4163,7 @@ export default function AlgorithmViewer() {
             setLoading(true)
             setError(null)
             try {
-                const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-                const response = await fetch(`${apiBase}/api/algorithms/${category}`)
+                const response = await fetch(`/api/proxy?endpoint=/api/algorithms/${category}`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch algorithms')
                 }

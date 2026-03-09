@@ -98,6 +98,15 @@ const aiLimiter = rateLimit({
     max: 10, // 10 requests per minute
     message: { error: 'Too many requests, please try again later.' }
 })
+//validating the actual request
+const verfiyRequest=(req,res,next)=>{
+    const clientkey = req.headers['x-api-key'];
+    if(!clientkey||clientkey!==process.env.REQUESTAPISECRET){
+        return res.status(401).json({error:'Unauthorized: Invalid API Key'});
+    }
+    next();
+}
+
 
 // Load JSON data
 const loadData = (filename) => {
@@ -109,8 +118,8 @@ const loadData = (filename) => {
 }
 
 // Health check
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() })
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() }).end();
 })
 
 // ============ ALGORITHMS API ============

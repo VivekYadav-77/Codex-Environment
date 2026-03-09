@@ -85,12 +85,10 @@ const SimpleMarkdown = ({ content }) => {
     return <div className="space-y-0">{lines.map(renderLine)}</div>
 }
 
-const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:3000') + '/api'
 
-// Fetch questions from API
 const fetchQuestions = async (topic) => {
     try {
-        const response = await fetch(`${API_BASE}/questions/${topic}`)
+        const response = await fetch(`/api/proxy?endpoint=/api/questions/${topic}`)
         if (!response.ok) throw new Error('Failed to fetch questions')
         return await response.json()
     } catch (error) {
@@ -102,7 +100,7 @@ const fetchQuestions = async (topic) => {
 // Request AI hint via API
 const requestAIHint = async (code, question, previousHints) => {
     try {
-        const response = await fetch(`${API_BASE}/ai/hint`, {
+        const response = await fetch(`/api/proxy?endpoint=/api/ai/hint`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ code, question, previousHints })
@@ -120,7 +118,7 @@ const requestAIHint = async (code, question, previousHints) => {
 const requestAIReview = async (code, question, language) => {
     try {
         console.log('Sending review request...', { code: code?.substring(0, 50), question: question?.title, language })
-        const response = await fetch(`${API_BASE}/ai/review`, {
+        const response = await fetch(`/api/proxy?endpoint=/api/ai/review`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ code, question, language })
@@ -145,7 +143,7 @@ const requestAIReview = async (code, question, language) => {
 // Run code via API
 const runCode = async (code, language) => {
     try {
-        const response = await fetch(`${API_BASE}/run`, {
+        const response = await fetch(`/api/proxy?endpoint=/api/run`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ code, language })
