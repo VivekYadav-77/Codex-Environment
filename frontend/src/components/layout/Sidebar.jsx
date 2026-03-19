@@ -151,7 +151,7 @@ export default function Sidebar() {
                     md:translate-x-0
                 `}
             >
-                <div className="h-full overflow-y-auto py-6 px-4">
+                <div className="h-full overflow-y-auto py-6 px-4 ">
                     <div className="space-y-4">
                         {menuSections.map((section) => {
                             // Check if this is the active route (exact match for Home, startsWith for others)
@@ -168,13 +168,13 @@ export default function Sidebar() {
                                         key={section.title} 
                                         to={section.path} 
                                         onClick={closeSidebar}
-                                        className="block rounded-xl overflow-hidden"
+                                        className="block rounded-xl overflow-hidden text to-blue-700"
                                     >
                                         <div className={`
                                             w-full flex items-center gap-3 px-3 py-3 text-sm font-semibold 
                                             transition-all duration-200 uppercase tracking-wider
                                             ${isSectionActive
-                                                ? 'text-white bg-white/10'
+                                                ? 'text-blue-500 bg-white/10'
                                                 : 'text-gray-400 hover:text-white hover:bg-white/5'
                                             }
                                         `}>
@@ -187,7 +187,7 @@ export default function Sidebar() {
 
                             // 3. Existing logic for Collapsible Sections
                             return (
-                                <div key={section.title} className="rounded-xl overflow-hidden">
+                                <div key={section.title} className="rounded-xl overflow-hidde">
                                     <button
                                         onClick={() => toggleSection(section.title)}
                                         className={`
@@ -195,7 +195,7 @@ export default function Sidebar() {
                                             transition-all duration-200 uppercase tracking-wider
                                             ${isSectionActive
                                                 ? 'text-white bg-white/10'
-                                                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                                : 'text-gray-400 hover:text-green-500 hover:bg-white/5'
                                             }
                                         `}
                                     >

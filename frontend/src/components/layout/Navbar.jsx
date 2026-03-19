@@ -38,14 +38,12 @@ export default function Navbar() {
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
                     <Link to="/" className="flex items-center gap-3">
-                        <motion.div
-                            whileHover={{ rotate: 180 }}
-                            transition={{ duration: 0.5 }}
+                        <div className="mb-2"
                         >
                         <img src={logo} alt="" style={{ width: "90px", height: "90px" }} />
-                        </motion.div> 
+                        </div> 
                         
-                        <span className="text-xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                        <span className="text-xl font-bold bg-gradient-to-r from-google-blue via-google-red to-google-yellow bg-clip-text text-transparent">
                             Codex Environment
                         </span>
                     </Link>
@@ -61,7 +59,7 @@ export default function Navbar() {
                                     className="relative px-4 py-2 rounded-lg transition-colors"
                                 >
                                     <motion.div
-                                        className={`flex items-center gap-2 ${isActive ? 'text-white' : 'text-gray-400 hover:text-white'
+                                        className={`flex items-center gap-2 ${isActive ? 'text-green-500' : 'text-white hover:text-white'
                                             }`}
                                     >
                                         <Icon size={18} />

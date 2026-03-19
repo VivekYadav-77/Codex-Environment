@@ -1,3 +1,5 @@
+<img src="frontend/src/assets/logo.svg" alt="Project Logo" width="300" />
+
 #   Codex Environment
 
 Codex Environment is a comprehensive Data Structures and Algorithms (DSA) learning platform designed to provide an interactive and immersive educational experience. It features algorithm visualizations, an AI-powered practice arena with Socratic hints, and a multi-language code execution engine.
