@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { useSearchParams } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useSelector } from 'react-redux'
 import Editor from '@monaco-editor/react'
 import {
-    CheckCircle,
     AlertCircle,
-    Loader2,
+    CheckCircle,
+    FileText,
     Lightbulb,
+    Loader2,
     Lock,
     PenTool,
     Play,
@@ -19,6 +19,28 @@ import {
 import { Button } from '../../components/ui/Button'
 import { GlassPanel } from '../../components/ui/Glass'
 import { apiFetch } from '../../api/client'
+
+const tabs = [
+    { id: 'problem', label: 'Problem', icon: FileText },
+    { id: 'approach', label: 'Approach', icon: PenTool },
+    { id: 'tests', label: 'Tests', icon: Terminal },
+    { id: 'review', label: 'Review', icon: CheckCircle },
+]
+
+const emptyApproach = {
+    bruteForce: '',
+    optimized: '',
+    timeComplexity: '',
+    spaceComplexity: '',
+}
+
+const statusConfig = {
+    accepted: { label: 'Accepted', color: 'text-google-green', border: 'border-google-green/30 bg-google-green/5' },
+    wrong_answer: { label: 'Wrong Answer', color: 'text-google-red', border: 'border-google-red/30 bg-google-red/5' },
+    runtime_error: { label: 'Runtime Error', color: 'text-google-red', border: 'border-google-red/30 bg-google-red/5' },
+    time_limit_exceeded: { label: 'Time Limit Exceeded', color: 'text-google-yellow', border: 'border-google-yellow/30 bg-google-yellow/5' },
+    compile_error: { label: 'Judge Error', color: 'text-google-yellow', border: 'border-google-yellow/30 bg-google-yellow/5' },
+}
 
 const SimpleMarkdown = ({ content }) => {
     if (!content) return null
@@ -35,20 +57,12 @@ const SimpleMarkdown = ({ content }) => {
             {content.split('\n').map((line, index) => {
                 if (line.startsWith('## ')) return <h2 key={index} className="text-xl font-bold text-white mt-4">{renderInline(line.slice(3))}</h2>
                 if (line.startsWith('### ')) return <h3 key={index} className="text-lg font-semibold text-google-blue mt-3">{renderInline(line.slice(4))}</h3>
-                if (line.startsWith('- ')) return <p key={index} className="text-gray-300">• {renderInline(line.slice(2))}</p>
+                if (line.startsWith('- ')) return <p key={index} className="text-gray-300">- {renderInline(line.slice(2))}</p>
                 if (!line.trim()) return <div key={index} className="h-1" />
                 return <p key={index} className="text-gray-300">{renderInline(line)}</p>
             })}
         </div>
     )
-}
-
-const statusConfig = {
-    accepted: { label: 'Accepted', color: 'text-google-green', border: 'border-google-green/30 bg-google-green/5' },
-    wrong_answer: { label: 'Wrong Answer', color: 'text-google-red', border: 'border-google-red/30 bg-google-red/5' },
-    runtime_error: { label: 'Runtime Error', color: 'text-google-red', border: 'border-google-red/30 bg-google-red/5' },
-    time_limit_exceeded: { label: 'Time Limit Exceeded', color: 'text-google-yellow', border: 'border-google-yellow/30 bg-google-yellow/5' },
-    compile_error: { label: 'Judge Error', color: 'text-google-yellow', border: 'border-google-yellow/30 bg-google-yellow/5' },
 }
 
 const TestResult = ({ result }) => (
@@ -73,6 +87,18 @@ const TestResult = ({ result }) => (
     </div>
 )
 
+const ApproachField = ({ label, value, onChange, placeholder }) => (
+    <label className="block">
+        <span className="block text-sm font-semibold text-gray-300 mb-2">{label}</span>
+        <textarea
+            className="glass-input w-full min-h-[88px] resize-y"
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            placeholder={placeholder}
+        />
+    </label>
+)
+
 export default function PracticeArena() {
     const { topic = 'hashing' } = useParams()
     const [searchParams] = useSearchParams()
@@ -92,8 +118,14 @@ export default function PracticeArena() {
     const [review, setReview] = useState(null)
     const [summary, setSummary] = useState(null)
     const [currentPattern, setCurrentPattern] = useState(null)
+    const [activeTab, setActiveTab] = useState('problem')
+    const [approach, setApproach] = useState(emptyApproach)
 
     const currentQuestion = questions[selectedIdx]
+    const approachKey = useMemo(() => {
+        if (!currentQuestion) return ''
+        return `codex_approach_${user?.id || 'guest'}_${currentQuestion.slug || currentQuestion.id}`
+    }, [currentQuestion, user])
 
     useEffect(() => {
         const loadQuestions = async () => {
@@ -121,6 +153,8 @@ export default function PracticeArena() {
         setSubmissionResult(null)
         setHints([])
         setReview(null)
+        setActiveTab('problem')
+
         if (currentQuestion.primaryPattern) {
             apiFetch(`/api/patterns/${currentQuestion.primaryPattern}`)
                 .then((data) => setCurrentPattern(data.pattern))
@@ -129,6 +163,21 @@ export default function PracticeArena() {
             setCurrentPattern(null)
         }
     }, [currentQuestion, language])
+
+    useEffect(() => {
+        if (!approachKey) return
+        try {
+            const saved = localStorage.getItem(approachKey)
+            setApproach(saved ? { ...emptyApproach, ...JSON.parse(saved) } : emptyApproach)
+        } catch (err) {
+            setApproach(emptyApproach)
+        }
+    }, [approachKey])
+
+    useEffect(() => {
+        if (!approachKey) return
+        localStorage.setItem(approachKey, JSON.stringify(approach))
+    }, [approach, approachKey])
 
     useEffect(() => {
         const loadSummary = async () => {
@@ -157,6 +206,7 @@ export default function PracticeArena() {
                 testResults: [],
                 error: 'This problem is visible for learning but not judge-enabled yet.',
             })
+            setActiveTab('tests')
             return
         }
 
@@ -168,6 +218,7 @@ export default function PracticeArena() {
                 body: { questionId: currentQuestion.slug || currentQuestion.id, language, code },
             })
             setSubmissionResult(result)
+            setActiveTab('tests')
         } catch (err) {
             setSubmissionResult({
                 status: 'runtime_error',
@@ -177,6 +228,7 @@ export default function PracticeArena() {
                 testResults: [],
                 error: err.message,
             })
+            setActiveTab('tests')
         } finally {
             setRunning(false)
         }
@@ -188,7 +240,7 @@ export default function PracticeArena() {
         try {
             const result = await apiFetch('/api/ai/hint', {
                 method: 'POST',
-                body: { code, question: currentQuestion, previousHints: hints },
+                body: { code, question: { ...currentQuestion, pattern: currentPattern, approach }, previousHints: hints },
             })
             setHints((items) => [...items, { id: Date.now(), content: result.hint }])
         } catch (err) {
@@ -204,11 +256,13 @@ export default function PracticeArena() {
         try {
             const result = await apiFetch('/api/ai/review', {
                 method: 'POST',
-                body: { code, question: { ...currentQuestion, pattern: currentPattern }, language, submissionResult },
+                body: { code, question: { ...currentQuestion, pattern: currentPattern, approach }, language, submissionResult },
             })
             setReview(result.reviewText)
+            setActiveTab('review')
         } catch (err) {
             setReview(`Review unavailable: ${err.message}`)
+            setActiveTab('review')
         } finally {
             setReviewLoading(false)
         }
@@ -218,6 +272,10 @@ export default function PracticeArena() {
         setCode(currentQuestion?.starterCode?.[language] || '')
         setSubmissionResult(null)
         setReview(null)
+    }
+
+    const updateApproach = (field, value) => {
+        setApproach((current) => ({ ...current, [field]: value }))
     }
 
     if (loading) {
@@ -247,7 +305,7 @@ export default function PracticeArena() {
                     <PenTool className="inline mr-3 text-google-red" />
                     Practice Arena
                 </h1>
-                <p className="text-gray-400">Solve judged DSA problems with progress tracking and Socratic AI support.</p>
+                <p className="text-gray-400">Reason through the approach, code, test, then review your DSA solution.</p>
             </motion.div>
 
             {!user && (
@@ -257,7 +315,7 @@ export default function PracticeArena() {
                             <Lock className="text-google-yellow" />
                             <div>
                                 <h2 className="font-semibold">Login required for judged submissions</h2>
-                                <p className="text-sm text-gray-400">You can read problems, but tests and progress need an account.</p>
+                                <p className="text-sm text-gray-400">You can read problems and write an approach, but tests and progress need an account.</p>
                             </div>
                         </div>
                         <Link to="/login"><Button size="sm">Login</Button></Link>
@@ -286,57 +344,128 @@ export default function PracticeArena() {
             </div>
 
             <div className="grid lg:grid-cols-2 gap-6">
-                <div className="space-y-6">
-                    <GlassPanel>
-                        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-                            <h2 className="text-xl font-bold">{currentQuestion.title}</h2>
-                            <div className="flex items-center gap-2">
-                                <span className={`text-sm px-3 py-1 rounded-full ${currentQuestion.difficulty === 'Easy' ? 'bg-google-green/20 text-google-green' : currentQuestion.difficulty === 'Medium' ? 'bg-google-yellow/20 text-google-yellow' : 'bg-google-red/20 text-google-red'}`}>
-                                    {currentQuestion.difficulty}
-                                </span>
-                                <span className={`text-sm px-3 py-1 rounded-full ${currentQuestion.hasJudge ? 'bg-google-blue/20 text-google-blue' : 'bg-white/10 text-gray-400'}`}>
-                                    {currentQuestion.hasJudge ? 'Judge ready' : 'Learning only'}
-                                </span>
-                            </div>
-                        </div>
-                        {currentPattern && (
-                            <Link to={`/roadmap/${currentPattern.slug}`} className="block mb-4">
-                                <div className="p-3 rounded-lg bg-google-blue/10 border border-google-blue/20">
-                                    <p className="text-sm text-google-blue font-semibold">Pattern: {currentPattern.name}</p>
-                                    <p className="text-xs text-gray-400 mt-1">{currentPattern.whenToUse}</p>
-                                </div>
-                            </Link>
-                        )}
-                        <p className="text-gray-300 whitespace-pre-line mb-4">{currentQuestion.description}</p>
-                        {currentQuestion.examples?.map((example, index) => (
-                            <div key={index} className="bg-white/5 rounded-lg p-4 mb-3">
-                                <p className="text-sm text-gray-400 mb-1">Example {index + 1}</p>
-                                <p className="font-mono text-sm"><span className="text-gray-400">Input: </span>{example.input}</p>
-                                <p className="font-mono text-sm"><span className="text-gray-400">Output: </span><span className="text-google-green">{example.output}</span></p>
-                                {example.explanation && <p className="text-sm text-gray-400 mt-1">{example.explanation}</p>}
-                            </div>
+                <GlassPanel className="min-h-[640px]">
+                    <div className="flex flex-wrap gap-2 mb-5">
+                        {tabs.map(({ id, label, icon: Icon }) => (
+                            <button
+                                key={id}
+                                onClick={() => setActiveTab(id)}
+                                className={`px-3 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors ${activeTab === id ? 'bg-white/15 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
+                            >
+                                <Icon size={16} />
+                                {label}
+                            </button>
                         ))}
-                    </GlassPanel>
+                    </div>
 
-                    <GlassPanel>
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-semibold flex items-center gap-2"><Lightbulb size={20} className="text-google-yellow" />AI Hints</h3>
-                            <Button variant="glass" size="sm" onClick={handleHint} loading={hintLoading} icon={Lightbulb}>Get Hint</Button>
-                        </div>
-                        {hints.length === 0 ? <p className="text-gray-400 text-sm">Ask for a nudge when you are stuck.</p> : (
-                            <div className="space-y-3">
-                                {hints.map((hint) => <div key={hint.id} className="p-3 rounded-lg bg-google-yellow/10 border border-google-yellow/20 text-sm text-gray-300">{hint.content}</div>)}
+                    {activeTab === 'problem' && (
+                        <div>
+                            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                                <h2 className="text-xl font-bold">{currentQuestion.title}</h2>
+                                <div className="flex items-center gap-2">
+                                    <span className={`text-sm px-3 py-1 rounded-full ${currentQuestion.difficulty === 'Easy' ? 'bg-google-green/20 text-google-green' : currentQuestion.difficulty === 'Medium' ? 'bg-google-yellow/20 text-google-yellow' : 'bg-google-red/20 text-google-red'}`}>
+                                        {currentQuestion.difficulty}
+                                    </span>
+                                    <span className={`text-sm px-3 py-1 rounded-full ${currentQuestion.hasJudge ? 'bg-google-blue/20 text-google-blue' : 'bg-white/10 text-gray-400'}`}>
+                                        {currentQuestion.hasJudge ? 'Judge ready' : 'Learning only'}
+                                    </span>
+                                </div>
                             </div>
-                        )}
-                    </GlassPanel>
-
-                    {review && (
-                        <GlassPanel className="border border-google-blue/30">
-                            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><CheckCircle size={20} className="text-google-blue" />AI Code Review</h3>
-                            <SimpleMarkdown content={review} />
-                        </GlassPanel>
+                            {currentPattern && (
+                                <Link to={`/roadmap/${currentPattern.slug}`} className="block mb-4">
+                                    <div className="p-3 rounded-lg bg-google-blue/10 border border-google-blue/20">
+                                        <p className="text-sm text-google-blue font-semibold">Pattern: {currentPattern.name}</p>
+                                        <p className="text-xs text-gray-400 mt-1">{currentPattern.whenToUse}</p>
+                                    </div>
+                                </Link>
+                            )}
+                            <p className="text-gray-300 whitespace-pre-line mb-4">{currentQuestion.description}</p>
+                            {currentQuestion.examples?.map((example, index) => (
+                                <div key={index} className="bg-white/5 rounded-lg p-4 mb-3">
+                                    <p className="text-sm text-gray-400 mb-1">Example {index + 1}</p>
+                                    <p className="font-mono text-sm"><span className="text-gray-400">Input: </span>{example.input}</p>
+                                    <p className="font-mono text-sm"><span className="text-gray-400">Output: </span><span className="text-google-green">{example.output}</span></p>
+                                    {example.explanation && <p className="text-sm text-gray-400 mt-1">{example.explanation}</p>}
+                                </div>
+                            ))}
+                        </div>
                     )}
-                </div>
+
+                    {activeTab === 'approach' && (
+                        <div className="space-y-4">
+                            <div>
+                                <h2 className="text-xl font-bold mb-2">Plan Before Coding</h2>
+                                <p className="text-sm text-gray-400">Write your thinking like an interview. These notes stay in this browser for this problem.</p>
+                            </div>
+                            <ApproachField label="Brute force idea" value={approach.bruteForce} onChange={(value) => updateApproach('bruteForce', value)} placeholder="What is the simplest correct approach?" />
+                            <ApproachField label="Optimized idea" value={approach.optimized} onChange={(value) => updateApproach('optimized', value)} placeholder="Which pattern or data structure improves it?" />
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <ApproachField label="Expected time complexity" value={approach.timeComplexity} onChange={(value) => updateApproach('timeComplexity', value)} placeholder="Example: O(n)" />
+                                <ApproachField label="Expected space complexity" value={approach.spaceComplexity} onChange={(value) => updateApproach('spaceComplexity', value)} placeholder="Example: O(n)" />
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'tests' && (
+                        <div>
+                            <h2 className="text-xl font-bold mb-4">Test Results</h2>
+                            {!submissionResult ? (
+                                <p className="text-gray-400">Run tests to see visible and hidden-case feedback.</p>
+                            ) : (
+                                <div className={`rounded-lg border p-4 ${config.border}`}>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <Terminal size={16} className={config.color} />
+                                        <span className={`text-sm font-semibold ${config.color}`}>{config.label}</span>
+                                        <span className="text-xs text-gray-500 ml-auto">
+                                            {submissionResult.passedCount}/{submissionResult.totalCount} passed - {submissionResult.runtimeMs}ms
+                                        </span>
+                                    </div>
+                                    {submissionResult.patternProgress && (
+                                        <div className="mb-3 p-3 rounded-lg bg-white/5 border border-white/10">
+                                            <div className="flex justify-between text-sm mb-2">
+                                                <span>Pattern mastery impact</span>
+                                                <span>{submissionResult.patternProgress.masteryScore}%</span>
+                                            </div>
+                                            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                                                <div className="h-full bg-google-blue" style={{ width: `${submissionResult.patternProgress.masteryScore}%` }} />
+                                            </div>
+                                            <p className="text-xs text-gray-400 mt-2">Status: {submissionResult.patternProgress.status}</p>
+                                        </div>
+                                    )}
+                                    {submissionResult.error && <p className="text-sm text-gray-300 mb-3">{submissionResult.error}</p>}
+                                    <div className="space-y-3">
+                                        {submissionResult.testResults?.map((result, index) => <TestResult key={`${result.name}-${index}`} result={result} />)}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === 'review' && (
+                        <div className="space-y-5">
+                            <div className="flex items-center justify-between gap-3">
+                                <div>
+                                    <h2 className="text-xl font-bold">AI Review</h2>
+                                    <p className="text-sm text-gray-400">Review includes your code, pattern context, approach notes, and latest test result.</p>
+                                </div>
+                                <Button variant="blue" size="sm" icon={Send} onClick={handleReview} loading={reviewLoading}>Review</Button>
+                            </div>
+                            {review ? <SimpleMarkdown content={review} /> : <p className="text-gray-400">Submit for review after drafting your approach or running tests.</p>}
+
+                            <div className="pt-5 border-t border-white/10">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-semibold flex items-center gap-2"><Lightbulb size={20} className="text-google-yellow" />AI Hints</h3>
+                                    <Button variant="glass" size="sm" onClick={handleHint} loading={hintLoading} icon={Lightbulb}>Get Hint</Button>
+                                </div>
+                                {hints.length === 0 ? <p className="text-gray-400 text-sm">Ask for a nudge when you are stuck.</p> : (
+                                    <div className="space-y-3">
+                                        {hints.map((hint) => <div key={hint.id} className="p-3 rounded-lg bg-google-yellow/10 border border-google-yellow/20 text-sm text-gray-300">{hint.content}</div>)}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </GlassPanel>
 
                 <GlassPanel className="h-full flex flex-col">
                     <div className="flex items-center justify-between mb-4">
@@ -347,7 +476,7 @@ export default function PracticeArena() {
                         <Button variant="glass" size="sm" icon={RefreshCw} onClick={resetCode}>Reset</Button>
                     </div>
 
-                    <div className="flex-1 rounded-lg overflow-hidden border border-white/10 min-h-[420px]">
+                    <div className="flex-1 rounded-lg overflow-hidden border border-white/10 min-h-[520px]">
                         <Editor
                             height="100%"
                             language={language}
@@ -370,34 +499,6 @@ export default function PracticeArena() {
                         <Button variant="green" className="flex-1" icon={Play} onClick={handleRunTests} loading={running} disabled={!user}>Run Tests</Button>
                         <Button variant="blue" className="flex-1" icon={Send} onClick={handleReview} loading={reviewLoading}>AI Review</Button>
                     </div>
-
-                    {submissionResult && (
-                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`mt-4 rounded-lg border p-4 ${config.border}`}>
-                            <div className="flex items-center gap-2 mb-3">
-                                <Terminal size={16} className={config.color} />
-                                <span className={`text-sm font-semibold ${config.color}`}>{config.label}</span>
-                                <span className="text-xs text-gray-500 ml-auto">
-                                    {submissionResult.passedCount}/{submissionResult.totalCount} passed • {submissionResult.runtimeMs}ms
-                                </span>
-                            </div>
-                            {submissionResult.patternProgress && (
-                                <div className="mb-3 p-3 rounded-lg bg-white/5 border border-white/10">
-                                    <div className="flex justify-between text-sm mb-2">
-                                        <span>Pattern mastery impact</span>
-                                        <span>{submissionResult.patternProgress.masteryScore}%</span>
-                                    </div>
-                                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                                        <div className="h-full bg-google-blue" style={{ width: `${submissionResult.patternProgress.masteryScore}%` }} />
-                                    </div>
-                                    <p className="text-xs text-gray-400 mt-2">Status: {submissionResult.patternProgress.status}</p>
-                                </div>
-                            )}
-                            {submissionResult.error && <p className="text-sm text-gray-300 mb-3">{submissionResult.error}</p>}
-                            <div className="space-y-3">
-                                {submissionResult.testResults?.map((result, index) => <TestResult key={`${result.name}-${index}`} result={result} />)}
-                            </div>
-                        </motion.div>
-                    )}
                 </GlassPanel>
             </div>
         </div>

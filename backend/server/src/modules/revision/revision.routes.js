@@ -2,6 +2,8 @@ import { Router } from 'express'
 import { requireAuth } from '../../middleware/authMiddleware.js'
 import { asyncHandler } from '../../middleware/asyncHandler.js'
 import { RevisionItem } from './revisionItem.model.js'
+import { validateRequest } from '../../middleware/validateRequest.js'
+import { z } from 'zod'
 
 const router = Router()
 
@@ -14,9 +16,18 @@ router.get('/me', asyncHandler(async (req, res) => {
     res.json(items)
 }))
 
-router.patch('/me/:id', asyncHandler(async (req, res) => {
-    const allowed = ['completed', 'skipped', 'queued']
-    const status = allowed.includes(req.body.status) ? req.body.status : 'completed'
+const updateRevisionSchema = z.object({
+    body: z.object({
+        status: z.enum(['completed', 'skipped', 'queued']),
+    }),
+    params: z.object({
+        id: z.string().min(1),
+    }),
+    query: z.object({}),
+})
+
+router.patch('/me/:id', validateRequest(updateRevisionSchema), asyncHandler(async (req, res) => {
+    const status = req.body.status
     const item = await RevisionItem.findOneAndUpdate(
         { _id: req.params.id, userId: req.user._id },
         { $set: { status } },

@@ -3,6 +3,8 @@ import { asyncHandler } from '../../middleware/asyncHandler.js'
 import { requireAuth } from '../../middleware/authMiddleware.js'
 import { Progress } from './progress.model.js'
 import { Question } from '../questions/question.model.js'
+import { validateRequest } from '../../middleware/validateRequest.js'
+import { z } from 'zod'
 
 const router = Router()
 
@@ -38,15 +40,24 @@ router.get('/me/summary', asyncHandler(async (req, res) => {
     })
 }))
 
-router.patch('/me/:questionId', asyncHandler(async (req, res) => {
+const updateProgressSchema = z.object({
+    body: z.object({
+        status: z.enum(['not_started', 'attempted', 'solved', 'needs_revision']),
+    }),
+    params: z.object({
+        questionId: z.string().min(1),
+    }),
+    query: z.object({}),
+})
+
+router.patch('/me/:questionId', validateRequest(updateProgressSchema), asyncHandler(async (req, res) => {
     const question = await Question.findOne(questionLookup(req.params.questionId))
 
     if (!question) {
         return res.status(404).json({ error: 'Question not found' })
     }
 
-    const allowed = ['not_started', 'attempted', 'solved', 'needs_revision']
-    const status = allowed.includes(req.body.status) ? req.body.status : 'needs_revision'
+    const status = req.body.status
 
     const progress = await Progress.findOneAndUpdate(
         { userId: req.user._id, questionId: question._id },

@@ -1,7 +1,9 @@
 import { Router } from 'express'
 import { requireAuth } from '../../middleware/authMiddleware.js'
 import { asyncHandler } from '../../middleware/asyncHandler.js'
+import { validateRequest } from '../../middleware/validateRequest.js'
 import { getDashboard, getMastery, getTodayPlan, recalculateAllProgress } from './coach.service.js'
+import { z } from 'zod'
 
 const router = Router()
 
@@ -19,7 +21,13 @@ router.get('/me/mastery', asyncHandler(async (req, res) => {
     res.json(await getMastery(req.user._id))
 }))
 
-router.post('/me/recalculate', asyncHandler(async (req, res) => {
+const recalculateSchema = z.object({
+    body: z.object({}).passthrough(),
+    params: z.object({}),
+    query: z.object({}),
+})
+
+router.post('/me/recalculate', validateRequest(recalculateSchema), asyncHandler(async (req, res) => {
     const results = await recalculateAllProgress(req.user._id)
     res.json({ updated: results.filter(Boolean).length })
 }))

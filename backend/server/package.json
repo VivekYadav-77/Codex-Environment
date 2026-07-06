@@ -5,7 +5,10 @@
     "scripts": {
         "start": "node src/server.js",
         "dev": "node --watch src/server.js",
-        "seed": "node src/scripts/seedDatabase.js"
+        "seed": "node src/scripts/seedDatabase.js",
+        "check": "node --check src/server.js",
+        "test": "vitest run",
+        "test:watch": "vitest"
     },
     "dependencies": {
         "@google/generative-ai": "^0.2.0",
@@ -16,6 +19,11 @@
         "express-rate-limit": "^7.1.5",
         "helmet": "^7.1.0",
         "jsonwebtoken": "^9.0.2",
-        "mongoose": "^8.9.5"
+        "mongoose": "^8.9.5",
+        "zod": "^4.4.3"
+    },
+    "devDependencies": {
+        "supertest": "^7.2.2",
+        "vitest": "^4.1.10"
     }
 }

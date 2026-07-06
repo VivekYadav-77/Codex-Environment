@@ -7,6 +7,8 @@ import { Progress } from '../progress/progress.model.js'
 import { runJudgedSubmission } from '../execution/execution.service.js'
 import { Submission } from './submission.model.js'
 import { updateCoachAfterSubmission } from '../coach/coach.service.js'
+import { validateRequest } from '../../middleware/validateRequest.js'
+import { z } from 'zod'
 
 const router = Router()
 
@@ -18,16 +20,18 @@ const questionLookup = (value) => {
     return { $or: lookup }
 }
 
-router.post('/run', submissionLimiter, asyncHandler(async (req, res) => {
+const runSubmissionSchema = z.object({
+    body: z.object({
+        questionId: z.string().min(1),
+        language: z.enum(['javascript', 'python']),
+        code: z.string().min(1).max(50000),
+    }),
+    params: z.object({}),
+    query: z.object({}),
+})
+
+router.post('/run', submissionLimiter, validateRequest(runSubmissionSchema), asyncHandler(async (req, res) => {
     const { questionId, language, code } = req.body
-
-    if (!questionId || !language || !code) {
-        return res.status(400).json({ error: 'questionId, language, and code are required' })
-    }
-
-    if (!['javascript', 'python'].includes(language)) {
-        return res.status(400).json({ error: 'Only JavaScript and Python are supported in V1 judging' })
-    }
 
     const question = await Question.findOne(questionLookup(questionId))
 

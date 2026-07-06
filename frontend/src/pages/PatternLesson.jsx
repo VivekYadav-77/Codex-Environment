@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { BookOpen, Target } from 'lucide-react'
+import { BookOpen, Loader2, Target } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { GlassPanel } from '../components/ui/Glass'
 import { apiFetch } from '../api/client'
@@ -16,8 +16,24 @@ export default function PatternLesson() {
             .catch((err) => setError(err.message))
     }, [patternSlug])
 
-    if (error) return <p className="text-google-red">{error}</p>
-    if (!data) return <p className="text-gray-400">Loading pattern...</p>
+    if (error) {
+        return (
+            <div className="max-w-3xl mx-auto">
+                <GlassPanel className="border border-google-red/30">
+                    <p className="font-semibold text-google-red">Could not load pattern</p>
+                    <p className="text-sm text-gray-400 mt-1">{error}</p>
+                </GlassPanel>
+            </div>
+        )
+    }
+    if (!data) {
+        return (
+            <div className="h-64 flex items-center justify-center gap-3 text-gray-400">
+                <Loader2 className="animate-spin text-google-blue" />
+                Loading pattern...
+            </div>
+        )
+    }
 
     const { pattern, questions } = data
 
@@ -33,6 +49,20 @@ export default function PatternLesson() {
 
             <div className="grid lg:grid-cols-3 gap-6">
                 <GlassPanel className="lg:col-span-2 space-y-6">
+                    <div className="grid md:grid-cols-3 gap-3">
+                        <div className="p-3 rounded-lg bg-white/5">
+                            <p className="text-xs text-gray-400">Category</p>
+                            <p className="font-semibold">{pattern.category}</p>
+                        </div>
+                        <div className="p-3 rounded-lg bg-white/5">
+                            <p className="text-xs text-gray-400">Level</p>
+                            <p className="font-semibold capitalize">{pattern.difficultyBand}</p>
+                        </div>
+                        <div className="p-3 rounded-lg bg-white/5">
+                            <p className="text-xs text-gray-400">Practice Set</p>
+                            <p className="font-semibold">{questions.length} problems</p>
+                        </div>
+                    </div>
                     <section>
                         <h2 className="text-xl font-bold mb-2">When To Use</h2>
                         <p className="text-gray-300">{pattern.whenToUse}</p>

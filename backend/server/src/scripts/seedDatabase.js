@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
+import { pathToFileURL } from 'url'
 import mongoose from 'mongoose'
 import { connectDatabase } from '../config/db.js'
 import { Question } from '../modules/questions/question.model.js'
@@ -13,7 +14,7 @@ const dataDir = join(__dirname, '..', '..', 'data')
 
 const readJson = (filename) => JSON.parse(readFileSync(join(dataDir, filename), 'utf-8'))
 
-const corePatterns = [
+export const corePatterns = [
     {
         slug: 'hash-map-lookup',
         name: 'Hash Map Lookup',
@@ -198,7 +199,7 @@ const corePatterns = [
     },
 ]
 
-const trackSeed = {
+export const trackSeed = {
     slug: 'dsa-foundations-to-interview-ready',
     title: 'DSA Foundations to Interview Ready',
     level: 'beginner',
@@ -207,7 +208,7 @@ const trackSeed = {
     patterns: corePatterns.map((pattern) => ({ patternSlug: pattern.slug, order: pattern.order })),
 }
 
-const topicDefaults = {
+export const topicDefaults = {
     hashing: 'hash-map-lookup',
     searching: 'binary-search',
     stacks: 'stack-pattern',
@@ -218,7 +219,7 @@ const topicDefaults = {
     sorting: 'two-pointers',
 }
 
-const questionPatternOverrides = {
+export const questionPatternOverrides = {
     'two-sum': 'hash-map-lookup',
     'contains-duplicate': 'frequency-map',
     'first-unique-char': 'frequency-map',
@@ -244,7 +245,7 @@ const questionPatternOverrides = {
     'merge-intervals': 'two-pointers',
 }
 
-const hashingJudge = {
+export const hashingJudge = {
     'two-sum': {
         functionName: 'twoSum',
         patterns: ['hash-map', 'one-pass'],
@@ -366,7 +367,7 @@ const hashingJudge = {
     },
 }
 
-const enrichQuestion = (question) => {
+export const enrichQuestion = (question) => {
     const judge = hashingJudge[question.id] || {}
     const primaryPattern = questionPatternOverrides[question.id] || topicDefaults[question.topic] || 'hash-map-lookup'
     const patternList = Array.from(new Set([primaryPattern, ...(judge.patterns || [])]))
@@ -394,7 +395,7 @@ const enrichQuestion = (question) => {
     }
 }
 
-async function seed() {
+export async function seed() {
     await connectDatabase()
 
     const questions = readJson('questions.json').map(enrichQuestion)
@@ -422,8 +423,12 @@ async function seed() {
     await mongoose.disconnect()
 }
 
-seed().catch(async (error) => {
-    console.error('Seed failed:', error)
-    await mongoose.disconnect()
-    process.exit(1)
-})
+const isDirectRun = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href
+
+if (isDirectRun) {
+    seed().catch(async (error) => {
+        console.error('Seed failed:', error)
+        await mongoose.disconnect()
+        process.exit(1)
+    })
+}
