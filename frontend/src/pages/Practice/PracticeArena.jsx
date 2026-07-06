@@ -1,507 +1,372 @@
-import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import Editor from '@monaco-editor/react'
 import {
-    PenTool,
-    Lightbulb,
-    Send,
     CheckCircle,
-    RefreshCw,
+    AlertCircle,
     Loader2,
+    Lightbulb,
+    Lock,
+    PenTool,
     Play,
-    Terminal
+    RefreshCw,
+    Send,
+    Terminal,
 } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { GlassPanel } from '../../components/ui/Glass'
-import {
-    setCurrentQuestion,
-    setCode,
-    setLanguage,
-    requestHint,
-    addHint,
-    submitForReview,
-    setReviewResult,
-    setEditorReady,
-} from '../../store/slices/practiceSlice'
+import { apiFetch } from '../../api/client'
 
-// Simple Markdown Renderer Component
 const SimpleMarkdown = ({ content }) => {
     if (!content) return null
 
-    const renderLine = (line, index) => {
-        // H2 headers (## )
-        if (line.startsWith('## ')) {
-            return <h2 key={index} className="text-xl font-bold text-white mt-4 mb-2">{renderInline(line.slice(3))}</h2>
+    const renderInline = (text) => text.split(/(\*\*[^*]+\*\*)/g).map((part, index) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+            return <strong key={index} className="text-white font-semibold">{part.slice(2, -2)}</strong>
         }
-        // H3 headers (### )
-        if (line.startsWith('### ')) {
-            return <h3 key={index} className="text-lg font-semibold text-google-blue mt-3 mb-2">{renderInline(line.slice(4))}</h3>
-        }
-        // Horizontal rule
-        if (line.trim() === '---') {
-            return <hr key={index} className="border-white/20 my-3" />
-        }
-        // Bullet points
-        if (line.startsWith('- ')) {
-            return (
-                <div key={index} className="flex items-start gap-2 ml-2 my-1">
-                    <span className="text-google-blue mt-1">•</span>
-                    <span className="text-gray-300">{renderInline(line.slice(2))}</span>
-                </div>
-            )
-        }
-        // Empty lines
-        if (line.trim() === '') {
-            return <div key={index} className="h-2" />
-        }
-        // Regular text
-        return <p key={index} className="text-gray-300 my-1">{renderInline(line)}</p>
-    }
+        return part
+    })
 
-    const renderInline = (text) => {
-        // Bold (**text**)
-        const parts = text.split(/(\*\*[^*]+\*\*)/g)
-        return parts.map((part, i) => {
-            if (part.startsWith('**') && part.endsWith('**')) {
-                return <strong key={i} className="text-white font-semibold">{part.slice(2, -2)}</strong>
-            }
-            // Inline code (`code`)
-            if (part.includes('`')) {
-                const codeParts = part.split(/(`[^`]+`)/g)
-                return codeParts.map((cp, j) => {
-                    if (cp.startsWith('`') && cp.endsWith('`')) {
-                        return <code key={j} className="bg-white/10 px-1 rounded text-google-yellow font-mono text-sm">{cp.slice(1, -1)}</code>
-                    }
-                    return cp
-                })
-            }
-            return part
-        })
-    }
-
-    const lines = content.split('\n')
-    return <div className="space-y-0">{lines.map(renderLine)}</div>
+    return (
+        <div className="space-y-2">
+            {content.split('\n').map((line, index) => {
+                if (line.startsWith('## ')) return <h2 key={index} className="text-xl font-bold text-white mt-4">{renderInline(line.slice(3))}</h2>
+                if (line.startsWith('### ')) return <h3 key={index} className="text-lg font-semibold text-google-blue mt-3">{renderInline(line.slice(4))}</h3>
+                if (line.startsWith('- ')) return <p key={index} className="text-gray-300">• {renderInline(line.slice(2))}</p>
+                if (!line.trim()) return <div key={index} className="h-1" />
+                return <p key={index} className="text-gray-300">{renderInline(line)}</p>
+            })}
+        </div>
+    )
 }
 
-
-const fetchQuestions = async (topic) => {
-    try {
-        const response = await fetch(`/api/proxy?endpoint=/api/questions/${topic}`)
-        if (!response.ok) throw new Error('Failed to fetch questions')
-        return await response.json()
-    } catch (error) {
-        console.error('Error fetching questions:', error)
-        return []
-    }
+const statusConfig = {
+    accepted: { label: 'Accepted', color: 'text-google-green', border: 'border-google-green/30 bg-google-green/5' },
+    wrong_answer: { label: 'Wrong Answer', color: 'text-google-red', border: 'border-google-red/30 bg-google-red/5' },
+    runtime_error: { label: 'Runtime Error', color: 'text-google-red', border: 'border-google-red/30 bg-google-red/5' },
+    time_limit_exceeded: { label: 'Time Limit Exceeded', color: 'text-google-yellow', border: 'border-google-yellow/30 bg-google-yellow/5' },
+    compile_error: { label: 'Judge Error', color: 'text-google-yellow', border: 'border-google-yellow/30 bg-google-yellow/5' },
 }
 
-// Request AI hint via API
-const requestAIHint = async (code, question, previousHints) => {
-    try {
-        const response = await fetch(`/api/proxy?endpoint=/api/ai/hint`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code, question, previousHints })
-        })
-        if (!response.ok) throw new Error('Failed to get hint')
-        const data = await response.json()
-        return data.hint
-    } catch (error) {
-        console.error('Error getting hint:', error)
-        return "💡 Try breaking down the problem into smaller steps."
-    }
-}
-
-// Request AI code review via API
-const requestAIReview = async (code, question, language) => {
-    try {
-        console.log('Sending review request...', { code: code?.substring(0, 50), question: question?.title, language })
-        const response = await fetch(`/api/proxy?endpoint=/api/ai/review`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code, question, language })
-        })
-        console.log('Response status:', response.status)
-        if (!response.ok) {
-            const errorText = await response.text()
-            console.error('Response error:', errorText)
-            throw new Error('Failed to get review')
-        }
-        const result = await response.json()
-        console.log('Review result:', result)
-        return result
-    } catch (error) {
-        console.error('Error getting review:', error)
-        return {
-            reviewText: "⚠️ Could not get review. Please make sure the server is running and try again."
-        }
-    }
-}
-
-// Run code via API
-const runCode = async (code, language) => {
-    try {
-        const response = await fetch(`/api/proxy?endpoint=/api/run`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code, language })
-        })
-        if (!response.ok) throw new Error('Failed to run code')
-        return await response.json()
-    } catch (error) {
-        console.error('Error running code:', error)
-        return {
-            success: false,
-            output: '',
-            error: "⚠️ Could not run code. Make sure the server is running."
-        }
-    }
-}
+const TestResult = ({ result }) => (
+    <div className={`rounded-lg border p-3 ${result.passed ? 'border-google-green/20 bg-google-green/5' : 'border-google-red/20 bg-google-red/5'}`}>
+        <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+                {result.passed ? <CheckCircle size={16} className="text-google-green" /> : <AlertCircle size={16} className="text-google-red" />}
+                <span className="font-semibold text-sm">{result.name}</span>
+            </div>
+            <span className="text-xs text-gray-400">{result.visible ? 'Visible' : result.category || 'Hidden'}</span>
+        </div>
+        {result.visible ? (
+            <div className="mt-3 grid gap-2 text-xs font-mono text-gray-300">
+                <pre className="overflow-x-auto bg-black/30 rounded p-2">Input: {JSON.stringify(result.input)}</pre>
+                <pre className="overflow-x-auto bg-black/30 rounded p-2">Expected: {JSON.stringify(result.expected)}</pre>
+                <pre className="overflow-x-auto bg-black/30 rounded p-2">Actual: {JSON.stringify(result.actual)}</pre>
+                {result.error && <pre className="overflow-x-auto bg-black/30 rounded p-2 text-google-red">Error: {result.error}</pre>}
+            </div>
+        ) : !result.passed && (
+            <p className="text-xs text-gray-400 mt-2">{result.error || 'Hidden test failed'}</p>
+        )}
+    </div>
+)
 
 export default function PracticeArena() {
     const { topic = 'hashing' } = useParams()
-    const dispatch = useDispatch()
-    const {
-        currentQuestion,
-        code,
-        language,
-        aiHints,
-        isRequestingHint,
-        reviewResult,
-        isSubmitting,
-        editorReady,
-    } = useSelector((state) => state.practice)
+    const { user } = useSelector((state) => state.auth)
 
-    const [selectedQuestionIdx, setSelectedQuestionIdx] = useState(0)
-    const [topicQuestions, setTopicQuestions] = useState([])
+    const [questions, setQuestions] = useState([])
+    const [selectedIdx, setSelectedIdx] = useState(0)
+    const [language, setLanguage] = useState('javascript')
+    const [code, setCode] = useState('')
     const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
-    const [executionOutput, setExecutionOutput] = useState(null)
-    const [isRunning, setIsRunning] = useState(false)
+    const [error, setError] = useState('')
+    const [running, setRunning] = useState(false)
+    const [submissionResult, setSubmissionResult] = useState(null)
+    const [hints, setHints] = useState([])
+    const [hintLoading, setHintLoading] = useState(false)
+    const [reviewLoading, setReviewLoading] = useState(false)
+    const [review, setReview] = useState(null)
+    const [summary, setSummary] = useState(null)
 
-    // Fetch questions when topic changes
+    const currentQuestion = questions[selectedIdx]
+
     useEffect(() => {
         const loadQuestions = async () => {
             setLoading(true)
-            setError(null)
-            const questions = await fetchQuestions(topic)
-            if (questions.length === 0) {
-                setError(`No questions found for topic: ${topic}`)
+            setError('')
+            try {
+                const data = await apiFetch(`/api/questions?topic=${encodeURIComponent(topic)}`)
+                setQuestions(data)
+                setSelectedIdx(0)
+            } catch (err) {
+                setError(err.message)
+            } finally {
+                setLoading(false)
             }
-            setTopicQuestions(questions)
-            setSelectedQuestionIdx(0)
-            setLoading(false)
         }
+
         loadQuestions()
     }, [topic])
 
-    // Update current question when selection changes
     useEffect(() => {
-        if (topicQuestions[selectedQuestionIdx]) {
-            dispatch(setCurrentQuestion(topicQuestions[selectedQuestionIdx]))
-            dispatch(setCode(topicQuestions[selectedQuestionIdx].starterCode?.[language] || '// Start coding here'))
+        if (!currentQuestion) return
+        setCode(currentQuestion.starterCode?.[language] || '// Start coding here')
+        setSubmissionResult(null)
+        setHints([])
+        setReview(null)
+    }, [currentQuestion, language])
+
+    useEffect(() => {
+        const loadSummary = async () => {
+            if (!user) {
+                setSummary(null)
+                return
+            }
+
+            try {
+                setSummary(await apiFetch('/api/progress/me/summary'))
+            } catch (err) {
+                setSummary(null)
+            }
         }
-    }, [topicQuestions, selectedQuestionIdx, dispatch, language])
 
-    const handleEditorChange = (value) => {
-        dispatch(setCode(value || ''))
+        loadSummary()
+    }, [user, submissionResult])
+
+    const handleRunTests = async () => {
+        if (!currentQuestion?.hasJudge) {
+            setSubmissionResult({
+                status: 'compile_error',
+                passedCount: 0,
+                totalCount: 0,
+                runtimeMs: 0,
+                testResults: [],
+                error: 'This problem is visible for learning but not judge-enabled yet.',
+            })
+            return
+        }
+
+        setRunning(true)
+        setSubmissionResult(null)
+        try {
+            const result = await apiFetch('/api/submissions/run', {
+                method: 'POST',
+                body: { questionId: currentQuestion.slug || currentQuestion.id, language, code },
+            })
+            setSubmissionResult(result)
+        } catch (err) {
+            setSubmissionResult({
+                status: 'runtime_error',
+                passedCount: 0,
+                totalCount: 0,
+                runtimeMs: 0,
+                testResults: [],
+                error: err.message,
+            })
+        } finally {
+            setRunning(false)
+        }
     }
 
-    const handleGetHint = async () => {
-        dispatch(requestHint())
-        const hint = await requestAIHint(code, currentQuestion, aiHints)
-        dispatch(addHint(hint))
+    const handleHint = async () => {
+        if (!currentQuestion) return
+        setHintLoading(true)
+        try {
+            const result = await apiFetch('/api/ai/hint', {
+                method: 'POST',
+                body: { code, question: currentQuestion, previousHints: hints },
+            })
+            setHints((items) => [...items, { id: Date.now(), content: result.hint }])
+        } catch (err) {
+            setHints((items) => [...items, { id: Date.now(), content: `Hint unavailable: ${err.message}` }])
+        } finally {
+            setHintLoading(false)
+        }
     }
 
-    const handleSubmit = async () => {
-        dispatch(submitForReview())
-        const result = await requestAIReview(code, currentQuestion, language)
-        dispatch(setReviewResult(result))
+    const handleReview = async () => {
+        if (!currentQuestion) return
+        setReviewLoading(true)
+        try {
+            const result = await apiFetch('/api/ai/review', {
+                method: 'POST',
+                body: { code, question: currentQuestion, language, submissionResult },
+            })
+            setReview(result.reviewText)
+        } catch (err) {
+            setReview(`Review unavailable: ${err.message}`)
+        } finally {
+            setReviewLoading(false)
+        }
     }
 
-    const handleReset = () => {
-        dispatch(setCode(currentQuestion?.starterCode?.[language] || '// Start coding here'))
-        dispatch(setReviewResult(null))
-        setExecutionOutput(null)
+    const resetCode = () => {
+        setCode(currentQuestion?.starterCode?.[language] || '')
+        setSubmissionResult(null)
+        setReview(null)
     }
 
-    const handleRun = async () => {
-        setIsRunning(true)
-        setExecutionOutput(null)
-        const result = await runCode(code, language)
-        setExecutionOutput(result)
-        setIsRunning(false)
-    }
-
-    // Loading state
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center h-64 gap-4">
                 <Loader2 className="w-8 h-8 animate-spin text-google-blue" />
-                <p className="text-gray-400">Loading questions for {topic} Please wait for 60 seconds...</p>
+                <p className="text-gray-400">Loading questions...</p>
             </div>
         )
     }
 
-    // Error state
     if (error || !currentQuestion) {
         return (
             <div className="flex flex-col items-center justify-center h-64 gap-4">
                 <p className="text-gray-400">{error || 'No questions available'}</p>
-                <p className="text-sm text-gray-500">Make sure the backend server is running on port 3000</p>
+                <p className="text-sm text-gray-500">Start MongoDB, seed the database, and run the backend.</p>
             </div>
         )
     }
 
+    const config = statusConfig[submissionResult?.status] || statusConfig.compile_error
+
     return (
         <div className="max-w-7xl mx-auto">
-            {/* Header */}
-            <motion.div
-                className="mb-6"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-            >
+            <motion.div className="mb-6" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                 <h1 className="text-3xl md:text-4xl font-bold mb-2">
                     <PenTool className="inline mr-3 text-google-red" />
                     Practice Arena
                 </h1>
-                <p className="text-gray-400">
-                    Solve problems with AI-powered Socratic hints
-                </p>
+                <p className="text-gray-400">Solve judged DSA problems with progress tracking and Socratic AI support.</p>
             </motion.div>
 
-            {/* Question Selector */}
-            <motion.div
-                className="flex flex-wrap gap-2 mb-6"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.1 }}
-            >
-                {topicQuestions.map((q, idx) => (
-                    <Button
-                        key={q.id}
-                        variant={selectedQuestionIdx === idx ? 'blue' : 'glass'}
-                        size="sm"
-                        onClick={() => setSelectedQuestionIdx(idx)}
-                    >
+            {!user && (
+                <GlassPanel className="mb-6 border border-google-yellow/30">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            <Lock className="text-google-yellow" />
+                            <div>
+                                <h2 className="font-semibold">Login required for judged submissions</h2>
+                                <p className="text-sm text-gray-400">You can read problems, but tests and progress need an account.</p>
+                            </div>
+                        </div>
+                        <Link to="/login"><Button size="sm">Login</Button></Link>
+                    </div>
+                </GlassPanel>
+            )}
+
+            {summary && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div className="glass-card p-4"><p className="text-sm text-gray-400">Solved</p><p className="text-2xl font-bold text-google-green">{summary.solved}</p></div>
+                    <div className="glass-card p-4"><p className="text-sm text-gray-400">Attempted</p><p className="text-2xl font-bold text-google-yellow">{summary.attempted}</p></div>
+                    <div className="glass-card p-4"><p className="text-sm text-gray-400">Total</p><p className="text-2xl font-bold">{summary.totalQuestions}</p></div>
+                    <div className="glass-card p-4"><p className="text-sm text-gray-400">This Topic</p><p className="text-2xl font-bold text-google-blue">{summary.byTopic?.[topic]?.solved || 0}</p></div>
+                </div>
+            )}
+
+            <div className="flex flex-wrap gap-2 mb-6">
+                {questions.map((q, idx) => (
+                    <Button key={q.slug || q.id} variant={idx === selectedIdx ? 'blue' : 'glass'} size="sm" onClick={() => setSelectedIdx(idx)}>
                         {q.title}
-                        <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${q.difficulty === 'Easy' ? 'bg-google-green/20 text-google-green' :
-                            q.difficulty === 'Medium' ? 'bg-google-yellow/20 text-google-yellow' :
-                                'bg-google-red/20 text-google-red'
-                            }`}>
+                        <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${q.difficulty === 'Easy' ? 'bg-google-green/20 text-google-green' : q.difficulty === 'Medium' ? 'bg-google-yellow/20 text-google-yellow' : 'bg-google-red/20 text-google-red'}`}>
                             {q.difficulty}
                         </span>
                     </Button>
                 ))}
-            </motion.div>
+            </div>
 
             <div className="grid lg:grid-cols-2 gap-6">
-                {/* Left Panel - Question & Hints */}
                 <div className="space-y-6">
-                    {/* Question Description */}
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2 }}
-                    >
-                        <GlassPanel>
-                            <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-xl font-bold">{currentQuestion.title}</h2>
-                                <span className={`text-sm px-3 py-1 rounded-full ${currentQuestion.difficulty === 'Easy' ? 'bg-google-green/20 text-google-green' :
-                                    currentQuestion.difficulty === 'Medium' ? 'bg-google-yellow/20 text-google-yellow' :
-                                        'bg-google-red/20 text-google-red'
-                                    }`}>
+                    <GlassPanel>
+                        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                            <h2 className="text-xl font-bold">{currentQuestion.title}</h2>
+                            <div className="flex items-center gap-2">
+                                <span className={`text-sm px-3 py-1 rounded-full ${currentQuestion.difficulty === 'Easy' ? 'bg-google-green/20 text-google-green' : currentQuestion.difficulty === 'Medium' ? 'bg-google-yellow/20 text-google-yellow' : 'bg-google-red/20 text-google-red'}`}>
                                     {currentQuestion.difficulty}
                                 </span>
+                                <span className={`text-sm px-3 py-1 rounded-full ${currentQuestion.hasJudge ? 'bg-google-blue/20 text-google-blue' : 'bg-white/10 text-gray-400'}`}>
+                                    {currentQuestion.hasJudge ? 'Judge ready' : 'Learning only'}
+                                </span>
                             </div>
-
-                            <div className="prose prose-invert max-w-none">
-                                <p className="text-gray-300 whitespace-pre-line mb-4">
-                                    {currentQuestion.description}
-                                </p>
-
-                                {currentQuestion.examples.map((ex, idx) => (
-                                    <div key={idx} className="bg-white/5 rounded-lg p-4 mb-3">
-                                        <p className="text-sm text-gray-400 mb-1">Example {idx + 1}:</p>
-                                        <p className="font-mono text-sm">
-                                            <span className="text-gray-400">Input: </span>
-                                            <span className="text-white">{ex.input}</span>
-                                        </p>
-                                        <p className="font-mono text-sm">
-                                            <span className="text-gray-400">Output: </span>
-                                            <span className="text-google-green">{ex.output}</span>
-                                        </p>
-                                        {ex.explanation && (
-                                            <p className="text-sm text-gray-400 mt-1">{ex.explanation}</p>
-                                        )}
-                                    </div>
-                                ))}
+                        </div>
+                        <p className="text-gray-300 whitespace-pre-line mb-4">{currentQuestion.description}</p>
+                        {currentQuestion.examples?.map((example, index) => (
+                            <div key={index} className="bg-white/5 rounded-lg p-4 mb-3">
+                                <p className="text-sm text-gray-400 mb-1">Example {index + 1}</p>
+                                <p className="font-mono text-sm"><span className="text-gray-400">Input: </span>{example.input}</p>
+                                <p className="font-mono text-sm"><span className="text-gray-400">Output: </span><span className="text-google-green">{example.output}</span></p>
+                                {example.explanation && <p className="text-sm text-gray-400 mt-1">{example.explanation}</p>}
                             </div>
+                        ))}
+                    </GlassPanel>
+
+                    <GlassPanel>
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-semibold flex items-center gap-2"><Lightbulb size={20} className="text-google-yellow" />AI Hints</h3>
+                            <Button variant="glass" size="sm" onClick={handleHint} loading={hintLoading} icon={Lightbulb}>Get Hint</Button>
+                        </div>
+                        {hints.length === 0 ? <p className="text-gray-400 text-sm">Ask for a nudge when you are stuck.</p> : (
+                            <div className="space-y-3">
+                                {hints.map((hint) => <div key={hint.id} className="p-3 rounded-lg bg-google-yellow/10 border border-google-yellow/20 text-sm text-gray-300">{hint.content}</div>)}
+                            </div>
+                        )}
+                    </GlassPanel>
+
+                    {review && (
+                        <GlassPanel className="border border-google-blue/30">
+                            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><CheckCircle size={20} className="text-google-blue" />AI Code Review</h3>
+                            <SimpleMarkdown content={review} />
                         </GlassPanel>
-                    </motion.div>
-
-                    {/* AI Hints */}
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.3 }}
-                    >
-                        <GlassPanel>
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-lg font-semibold flex items-center gap-2">
-                                    <Lightbulb size={20} className="text-google-yellow" />
-                                    AI Hints
-                                </h3>
-                                <Button
-                                    variant="glass"
-                                    size="sm"
-                                    onClick={handleGetHint}
-                                    loading={isRequestingHint}
-                                    icon={Lightbulb}
-                                >
-                                    Get Hint
-                                </Button>
-                            </div>
-
-                            {aiHints.length === 0 ? (
-                                <p className="text-gray-400 text-sm">
-                                    Stuck? Ask for a hint! The AI will guide you without giving away the answer.
-                                </p>
-                            ) : (
-                                <div className="space-y-3">
-                                    {aiHints.map((hint) => (
-                                        <motion.div
-                                            key={hint.id}
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            className="p-3 rounded-lg bg-google-yellow/10 border border-google-yellow/20"
-                                        >
-                                            <p className="text-sm text-gray-300">{hint.content}</p>
-                                        </motion.div>
-                                    ))}
-                                </div>
-                            )}
-                        </GlassPanel>
-                    </motion.div>
-
-                    {/* Review Result */}
-                    {reviewResult && (
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                        >
-                            <GlassPanel className="border border-google-blue/30">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <CheckCircle size={20} className="text-google-blue" />
-                                    <h3 className="text-lg font-semibold">AI Code Review</h3>
-                                </div>
-                                <div className="max-w-none">
-                                    <SimpleMarkdown content={reviewResult.reviewText || reviewResult.error || 'No feedback available'} />
-                                </div>
-                            </GlassPanel>
-                        </motion.div>
                     )}
                 </div>
 
-                {/* Right Panel - Editor */}
-                <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.2 }}
-                >
-                    <GlassPanel className="h-full flex flex-col">
-                        {/* Editor Header */}
-                        <div className="flex items-center justify-between mb-4">
-                            <select
-                                value={language}
-                                onChange={(e) => dispatch(setLanguage(e.target.value))}
-                                className="glass-input px-3 py-2 text-sm"
-                            >
-                                <option value="javascript">JavaScript</option>
-                                <option value="python">Python</option>
-                                <option value="java">Java</option>
-                                <option value="cpp">C++</option>
-                            </select>
-                            <Button
-                                variant="glass"
-                                size="sm"
-                                icon={RefreshCw}
-                                onClick={handleReset}
-                            >
-                                Reset
-                            </Button>
-                        </div>
+                <GlassPanel className="h-full flex flex-col">
+                    <div className="flex items-center justify-between mb-4">
+                        <select value={language} onChange={(e) => setLanguage(e.target.value)} className="glass-input px-3 py-2 text-sm">
+                            <option value="javascript">JavaScript</option>
+                            <option value="python">Python</option>
+                        </select>
+                        <Button variant="glass" size="sm" icon={RefreshCw} onClick={resetCode}>Reset</Button>
+                    </div>
 
-                        {/* Monaco Editor */}
-                        <div className="flex-1 rounded-lg overflow-hidden border border-white/10 min-h-[400px]">
-                            <Editor
-                                height="100%"
-                                language={language}
-                                value={code}
-                                onChange={handleEditorChange}
-                                onMount={() => dispatch(setEditorReady(true))}
-                                theme="vs-dark"
-                                options={{
-                                    fontSize: 14,
-                                    fontFamily: 'JetBrains Mono, Fira Code, monospace',
-                                    minimap: { enabled: false },
-                                    scrollBeyondLastLine: false,
-                                    padding: { top: 16 },
-                                    lineNumbers: 'on',
-                                    automaticLayout: true,
-                                }}
-                            />
-                        </div>
+                    <div className="flex-1 rounded-lg overflow-hidden border border-white/10 min-h-[420px]">
+                        <Editor
+                            height="100%"
+                            language={language}
+                            value={code}
+                            onChange={(value) => setCode(value || '')}
+                            theme="vs-dark"
+                            options={{
+                                fontSize: 14,
+                                fontFamily: 'JetBrains Mono, Fira Code, monospace',
+                                minimap: { enabled: false },
+                                scrollBeyondLastLine: false,
+                                padding: { top: 16 },
+                                lineNumbers: 'on',
+                                automaticLayout: true,
+                            }}
+                        />
+                    </div>
 
-                        {/* Action Buttons */}
-                        <div className="mt-4 flex gap-3">
-                            <Button
-                                variant="green"
-                                className="flex-1"
-                                icon={Play}
-                                onClick={handleRun}
-                                loading={isRunning}
-                            >
-                                Run Code
-                            </Button>
-                            <Button
-                                variant="blue"
-                                className="flex-1"
-                                icon={Send}
-                                onClick={handleSubmit}
-                                loading={isSubmitting}
-                            >
-                                AI Review
-                            </Button>
-                        </div>
+                    <div className="mt-4 flex gap-3">
+                        <Button variant="green" className="flex-1" icon={Play} onClick={handleRunTests} loading={running} disabled={!user}>Run Tests</Button>
+                        <Button variant="blue" className="flex-1" icon={Send} onClick={handleReview} loading={reviewLoading}>AI Review</Button>
+                    </div>
 
-                        {/* Execution Output */}
-                        {executionOutput && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="mt-4"
-                            >
-                                <div className={`rounded-lg border ${executionOutput.success ? 'border-google-green/30 bg-google-green/5' : 'border-google-red/30 bg-google-red/5'} p-4`}>
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <Terminal size={16} className={executionOutput.success ? 'text-google-green' : 'text-google-red'} />
-                                        <span className="text-sm font-semibold">
-                                            {executionOutput.success ? 'Output' : 'Error'}
-                                        </span>
-                                        <span className="text-xs text-gray-500 ml-auto">
-                                            {executionOutput.executionTime}
-                                        </span>
-                                    </div>
-                                    <pre className="font-mono text-sm text-gray-300 whitespace-pre-wrap overflow-x-auto">
-                                        {executionOutput.output || executionOutput.error || 'No output'}
-                                    </pre>
-                                </div>
-                            </motion.div>
-                        )}
-                    </GlassPanel>
-                </motion.div>
+                    {submissionResult && (
+                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`mt-4 rounded-lg border p-4 ${config.border}`}>
+                            <div className="flex items-center gap-2 mb-3">
+                                <Terminal size={16} className={config.color} />
+                                <span className={`text-sm font-semibold ${config.color}`}>{config.label}</span>
+                                <span className="text-xs text-gray-500 ml-auto">
+                                    {submissionResult.passedCount}/{submissionResult.totalCount} passed • {submissionResult.runtimeMs}ms
+                                </span>
+                            </div>
+                            {submissionResult.error && <p className="text-sm text-gray-300 mb-3">{submissionResult.error}</p>}
+                            <div className="space-y-3">
+                                {submissionResult.testResults?.map((result, index) => <TestResult key={`${result.name}-${index}`} result={result} />)}
+                            </div>
+                        </motion.div>
+                    )}
+                </GlassPanel>
             </div>
         </div>
     )

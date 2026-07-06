@@ -10,10 +10,13 @@ import {
     Menu,
     X,
     Github,
-    Sparkles
+    Sparkles,
+    LogOut,
+    LogIn
 } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 import { toggleSidebar } from '../../store/slices/uiSlice'
+import { logout } from '../../store/slices/authSlice'
 
 const navLinks = [
     { path: '/', label: 'Home', icon: Sparkles },
@@ -26,6 +29,7 @@ export default function Navbar() {
     const location = useLocation()
     const dispatch = useDispatch()
     const { sidebarOpen } = useSelector(state => state.ui)
+    const { user } = useSelector(state => state.auth)
 
     return (
         <motion.nav
@@ -79,6 +83,26 @@ export default function Navbar() {
 
                     {/* Right Side */}
                     <div className="flex items-center gap-4">
+                        {user ? (
+                            <div className="hidden sm:flex items-center gap-2">
+                                <span className="text-sm text-gray-300 max-w-32 truncate">{user.name}</span>
+                                <button
+                                    className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                                    onClick={() => dispatch(logout())}
+                                    title="Logout"
+                                >
+                                    <LogOut size={20} />
+                                </button>
+                            </div>
+                        ) : (
+                            <Link
+                                to="/login"
+                                className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+                            >
+                                <LogIn size={18} />
+                                <span className="text-sm font-medium">Login</span>
+                            </Link>
+                        )}
                         <motion.a
                             href="https://github.com/VivekYadav-77"
                             target="_blank"

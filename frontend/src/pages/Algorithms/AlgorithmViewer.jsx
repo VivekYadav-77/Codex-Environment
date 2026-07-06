@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { Button, IconButton } from '../../components/ui/Button'
 import { GlassPanel } from '../../components/ui/Glass'
+import { apiFetch } from '../../api/client'
 import {
     setSteps,
     setCurrentStep,
@@ -4163,11 +4164,7 @@ export default function AlgorithmViewer() {
             setLoading(true)
             setError(null)
             try {
-                const response = await fetch(`/api/proxy?endpoint=/api/algorithms/${category}`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch algorithms')
-                }
-                const data = await response.json()
+                const data = await apiFetch(`/api/algorithms/${category}`)
                 setAlgorithms(data)
 
                 // Select the first algorithm or the one from URL

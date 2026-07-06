@@ -6,6 +6,8 @@ import ComplexityModule from './pages/Tutorial/ComplexityModule'
 import FlowModule from './pages/Tutorial/FlowModule'
 import AlgorithmViewer from './pages/Algorithms/AlgorithmViewer'
 import PracticeArena from './pages/Practice/PracticeArena'
+import Login from './pages/Auth/Login'
+import Register from './pages/Auth/Register'
 
 export default function App() {
     return (
@@ -19,6 +21,8 @@ export default function App() {
                     <Routes>
                         {/* Home */}
                         <Route path="/" element={<Home />} />
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/register" element={<Register />} />
 
                         {/* Tutorial Routes */}
                         <Route path="/tutorial" element={<ComplexityModule />} />
