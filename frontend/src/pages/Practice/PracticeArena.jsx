@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useSelector } from 'react-redux'
 import Editor from '@monaco-editor/react'
@@ -74,6 +75,7 @@ const TestResult = ({ result }) => (
 
 export default function PracticeArena() {
     const { topic = 'hashing' } = useParams()
+    const [searchParams] = useSearchParams()
     const { user } = useSelector((state) => state.auth)
 
     const [questions, setQuestions] = useState([])
@@ -89,6 +91,7 @@ export default function PracticeArena() {
     const [reviewLoading, setReviewLoading] = useState(false)
     const [review, setReview] = useState(null)
     const [summary, setSummary] = useState(null)
+    const [currentPattern, setCurrentPattern] = useState(null)
 
     const currentQuestion = questions[selectedIdx]
 
@@ -99,7 +102,9 @@ export default function PracticeArena() {
             try {
                 const data = await apiFetch(`/api/questions?topic=${encodeURIComponent(topic)}`)
                 setQuestions(data)
-                setSelectedIdx(0)
+                const requestedQuestion = searchParams.get('question')
+                const requestedIdx = requestedQuestion ? data.findIndex((q) => q.slug === requestedQuestion || q.id === requestedQuestion) : -1
+                setSelectedIdx(requestedIdx >= 0 ? requestedIdx : 0)
             } catch (err) {
                 setError(err.message)
             } finally {
@@ -108,7 +113,7 @@ export default function PracticeArena() {
         }
 
         loadQuestions()
-    }, [topic])
+    }, [topic, searchParams])
 
     useEffect(() => {
         if (!currentQuestion) return
@@ -116,6 +121,13 @@ export default function PracticeArena() {
         setSubmissionResult(null)
         setHints([])
         setReview(null)
+        if (currentQuestion.primaryPattern) {
+            apiFetch(`/api/patterns/${currentQuestion.primaryPattern}`)
+                .then((data) => setCurrentPattern(data.pattern))
+                .catch(() => setCurrentPattern(null))
+        } else {
+            setCurrentPattern(null)
+        }
     }, [currentQuestion, language])
 
     useEffect(() => {
@@ -192,7 +204,7 @@ export default function PracticeArena() {
         try {
             const result = await apiFetch('/api/ai/review', {
                 method: 'POST',
-                body: { code, question: currentQuestion, language, submissionResult },
+                body: { code, question: { ...currentQuestion, pattern: currentPattern }, language, submissionResult },
             })
             setReview(result.reviewText)
         } catch (err) {
@@ -287,6 +299,14 @@ export default function PracticeArena() {
                                 </span>
                             </div>
                         </div>
+                        {currentPattern && (
+                            <Link to={`/roadmap/${currentPattern.slug}`} className="block mb-4">
+                                <div className="p-3 rounded-lg bg-google-blue/10 border border-google-blue/20">
+                                    <p className="text-sm text-google-blue font-semibold">Pattern: {currentPattern.name}</p>
+                                    <p className="text-xs text-gray-400 mt-1">{currentPattern.whenToUse}</p>
+                                </div>
+                            </Link>
+                        )}
                         <p className="text-gray-300 whitespace-pre-line mb-4">{currentQuestion.description}</p>
                         {currentQuestion.examples?.map((example, index) => (
                             <div key={index} className="bg-white/5 rounded-lg p-4 mb-3">
@@ -360,6 +380,18 @@ export default function PracticeArena() {
                                     {submissionResult.passedCount}/{submissionResult.totalCount} passed • {submissionResult.runtimeMs}ms
                                 </span>
                             </div>
+                            {submissionResult.patternProgress && (
+                                <div className="mb-3 p-3 rounded-lg bg-white/5 border border-white/10">
+                                    <div className="flex justify-between text-sm mb-2">
+                                        <span>Pattern mastery impact</span>
+                                        <span>{submissionResult.patternProgress.masteryScore}%</span>
+                                    </div>
+                                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                                        <div className="h-full bg-google-blue" style={{ width: `${submissionResult.patternProgress.masteryScore}%` }} />
+                                    </div>
+                                    <p className="text-xs text-gray-400 mt-2">Status: {submissionResult.patternProgress.status}</p>
+                                </div>
+                            )}
                             {submissionResult.error && <p className="text-sm text-gray-300 mb-3">{submissionResult.error}</p>}
                             <div className="space-y-3">
                                 {submissionResult.testResults?.map((result, index) => <TestResult key={`${result.name}-${index}`} result={result} />)}

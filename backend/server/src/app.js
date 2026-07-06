@@ -9,6 +9,10 @@ import algorithmRoutes from './modules/algorithms/algorithm.routes.js'
 import submissionRoutes from './modules/submissions/submission.routes.js'
 import progressRoutes from './modules/progress/progress.routes.js'
 import aiTutorRoutes from './modules/aiTutor/aiTutor.routes.js'
+import patternRoutes from './modules/patterns/pattern.routes.js'
+import trackRoutes from './modules/tracks/track.routes.js'
+import coachRoutes from './modules/coach/coach.routes.js'
+import revisionRoutes from './modules/revision/revision.routes.js'
 
 export function createApp() {
     const app = express()
@@ -34,6 +38,10 @@ export function createApp() {
     app.use('/api/submissions', submissionRoutes)
     app.use('/api/progress', progressRoutes)
     app.use('/api/ai', aiTutorRoutes)
+    app.use('/api/patterns', patternRoutes)
+    app.use('/api/tracks', trackRoutes)
+    app.use('/api/coach', coachRoutes)
+    app.use('/api/revision', revisionRoutes)
 
     app.use(notFound)
     app.use(errorMiddleware)

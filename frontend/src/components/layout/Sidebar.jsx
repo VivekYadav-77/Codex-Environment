@@ -24,6 +24,9 @@ import {
     Cpu,
     Zap,
     Sparkles // Imported Sparkles
+    ,
+    Compass,
+    Map
 } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 import { setSidebarOpen } from '../../store/slices/uiSlice'
@@ -35,6 +38,16 @@ const menuSections = [
         icon: Sparkles,
         path: '/',
         // No 'items' array implies this is a direct link
+    },
+    {
+        title: 'Dashboard',
+        icon: Compass,
+        path: '/dashboard',
+    },
+    {
+        title: 'Roadmap',
+        icon: Map,
+        path: '/roadmap',
     },
     {
         title: 'Tutorial',

@@ -12,7 +12,9 @@ import {
     Github,
     Sparkles,
     LogOut,
-    LogIn
+    LogIn,
+    Compass,
+    Map
 } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 import { toggleSidebar } from '../../store/slices/uiSlice'
@@ -20,6 +22,8 @@ import { logout } from '../../store/slices/authSlice'
 
 const navLinks = [
     { path: '/', label: 'Home', icon: Sparkles },
+    { path: '/dashboard', label: 'Dashboard', icon: Compass },
+    { path: '/roadmap', label: 'Roadmap', icon: Map },
     { path: '/tutorial', label: 'Tutorial', icon: BookOpen },
     { path: '/algorithms', label: 'Visualizer', icon: Play },
     { path: '/practice', label: 'Practice', icon: PenTool },

@@ -8,6 +8,9 @@ import AlgorithmViewer from './pages/Algorithms/AlgorithmViewer'
 import PracticeArena from './pages/Practice/PracticeArena'
 import Login from './pages/Auth/Login'
 import Register from './pages/Auth/Register'
+import Dashboard from './pages/Dashboard'
+import Roadmap from './pages/Roadmap'
+import PatternLesson from './pages/PatternLesson'
 
 export default function App() {
     return (
@@ -21,6 +24,9 @@ export default function App() {
                     <Routes>
                         {/* Home */}
                         <Route path="/" element={<Home />} />
+                        <Route path="/dashboard" element={<Dashboard />} />
+                        <Route path="/roadmap" element={<Roadmap />} />
+                        <Route path="/roadmap/:patternSlug" element={<PatternLesson />} />
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<Register />} />
 

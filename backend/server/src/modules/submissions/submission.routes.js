@@ -6,6 +6,7 @@ import { Question } from '../questions/question.model.js'
 import { Progress } from '../progress/progress.model.js'
 import { runJudgedSubmission } from '../execution/execution.service.js'
 import { Submission } from './submission.model.js'
+import { updateCoachAfterSubmission } from '../coach/coach.service.js'
 
 const router = Router()
 
@@ -64,6 +65,12 @@ router.post('/run', submissionLimiter, asyncHandler(async (req, res) => {
         { upsert: true, new: true }
     )
 
+    const patternProgress = await updateCoachAfterSubmission({
+        userId: req.user._id,
+        question,
+        result,
+    })
+
     res.json({
         submissionId: submission._id,
         status: result.status,
@@ -72,6 +79,7 @@ router.post('/run', submissionLimiter, asyncHandler(async (req, res) => {
         runtimeMs: result.runtimeMs,
         testResults: result.testResults,
         error: result.error,
+        patternProgress,
     })
 }))
 
