@@ -32,13 +32,18 @@ const tabs = [
 ]
 
 const emptyApproach = {
+    restatedProblem: '',
+    constraints: '',
     bruteForce: '',
     optimized: '',
     patternGuess: '',
     edgeCases: '',
+    confidenceBeforeSubmit: 3,
     timeComplexity: '',
     spaceComplexity: '',
 }
+
+const workflowSteps = ['Understand', 'Plan', 'Code', 'Test', 'Reflect']
 
 const statusConfig = {
     accepted: { label: 'Accepted', color: 'text-google-green', border: 'border-google-green/30 bg-google-green/5' },
@@ -120,6 +125,7 @@ export default function PracticeArena() {
     const [submissionResult, setSubmissionResult] = useState(null)
     const [hints, setHints] = useState([])
     const [hintLoading, setHintLoading] = useState(false)
+    const [hintLevel, setHintLevel] = useState(1)
     const [reviewLoading, setReviewLoading] = useState(false)
     const [review, setReview] = useState(null)
     const [summary, setSummary] = useState(null)
@@ -131,6 +137,15 @@ export default function PracticeArena() {
     const [mentorSession, setMentorSession] = useState(null)
     const [mentorLoading, setMentorLoading] = useState(false)
     const [timeline, setTimeline] = useState([])
+    const [reflection, setReflection] = useState({
+        patternUsed: '',
+        whyItWorked: '',
+        keyInvariant: '',
+        dangerousEdgeCase: '',
+        interviewExplanation: '',
+        confidenceAfterSolve: 3,
+    })
+    const [reflectionSaved, setReflectionSaved] = useState(false)
 
     const currentQuestion = questions[selectedIdx]
     const approachKey = useMemo(() => {
@@ -164,7 +179,9 @@ export default function PracticeArena() {
         setCode(currentQuestion.starterCode?.[language] || '// Start coding here')
         setSubmissionResult(null)
         setHints([])
+        setHintLevel(1)
         setReview(null)
+        setReflectionSaved(false)
         setActiveTab('problem')
 
         if (currentQuestion.primaryPattern && practiceMode !== 'mixed') {
@@ -230,6 +247,19 @@ export default function PracticeArena() {
             return
         }
 
+        if (practiceMode === 'mixed' && !approach.patternGuess.trim()) {
+            setSubmissionResult({
+                status: 'compile_error',
+                passedCount: 0,
+                totalCount: 0,
+                runtimeMs: 0,
+                testResults: [],
+                error: 'Mixed practice requires a pattern guess before running tests.',
+            })
+            setActiveTab('approach')
+            return
+        }
+
         setRunning(true)
         setSubmissionResult(null)
         try {
@@ -273,9 +303,10 @@ export default function PracticeArena() {
         try {
             const result = await apiFetch('/api/ai/hint', {
                 method: 'POST',
-                body: { code, question: { ...currentQuestion, pattern: currentPattern, approach }, previousHints: hints },
+                body: { code, question: { ...currentQuestion, pattern: currentPattern, approach }, previousHints: hints, hintLevel, mode: practiceMode, approach, submissionResult },
             })
-            setHints((items) => [...items, { id: Date.now(), content: result.hint }])
+            setHints((items) => [...items, { id: Date.now(), content: result.hint, hintLevel: result.hintLevel }])
+            if (result.nextHintAvailable) setHintLevel((level) => Math.min(6, level + 1))
         } catch (err) {
             setHints((items) => [...items, { id: Date.now(), content: `Hint unavailable: ${err.message}` }])
         } finally {
@@ -337,6 +368,19 @@ export default function PracticeArena() {
         setApproach((current) => ({ ...current, [field]: value }))
     }
 
+    const saveReflection = async () => {
+        if (!currentQuestion) return
+        await apiFetch('/api/reflections', {
+            method: 'POST',
+            body: {
+                ...reflection,
+                questionId: currentQuestion.slug || currentQuestion.id,
+                submissionId: submissionResult?.submissionId,
+            },
+        })
+        setReflectionSaved(true)
+    }
+
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center h-64 gap-4">
@@ -378,6 +422,20 @@ export default function PracticeArena() {
                         <option value="revision">Revision</option>
                         <option value="mixed">Mixed Pattern</option>
                     </select>
+                </div>
+            </GlassPanel>
+
+            <GlassPanel className="mb-6">
+                <div className="grid grid-cols-5 gap-2">
+                    {workflowSteps.map((step, index) => {
+                        const active = (activeTab === 'problem' && index === 0) || (activeTab === 'approach' && index === 1) || (index === 2 && activeTab === 'problem') || (activeTab === 'tests' && index === 3) || (activeTab === 'review' && index === 4)
+                        const complete = index === 0 || (index === 1 && Object.values(approach).some(Boolean)) || (index === 3 && submissionResult)
+                        return (
+                            <div key={step} className={`rounded-lg p-2 text-center text-xs border ${active ? 'border-google-blue bg-google-blue/10 text-white' : complete ? 'border-google-green/30 bg-google-green/5 text-google-green' : 'border-white/10 bg-white/5 text-gray-400'}`}>
+                                {step}
+                            </div>
+                        )
+                    })}
                 </div>
             </GlassPanel>
 
@@ -477,6 +535,8 @@ export default function PracticeArena() {
                                 <p className="text-sm text-gray-400">Write your thinking like an interview. These notes stay in this browser for this problem.</p>
                             </div>
                             <ApproachField label="Brute force idea" value={approach.bruteForce} onChange={(value) => updateApproach('bruteForce', value)} placeholder="What is the simplest correct approach?" />
+                            <ApproachField label="Restate the problem" value={approach.restatedProblem} onChange={(value) => updateApproach('restatedProblem', value)} placeholder="Explain the input, output, and goal in your own words." />
+                            <ApproachField label="Constraints and signals" value={approach.constraints} onChange={(value) => updateApproach('constraints', value)} placeholder="Input size, sorted/unsorted, duplicates, monotonic condition..." />
                             <ApproachField label="Optimized idea" value={approach.optimized} onChange={(value) => updateApproach('optimized', value)} placeholder="Which pattern or data structure improves it?" />
                             <ApproachField label="Pattern guess" value={approach.patternGuess} onChange={(value) => updateApproach('patternGuess', value)} placeholder="Example: hash-map-lookup" />
                             <ApproachField label="Edge cases to test" value={approach.edgeCases} onChange={(value) => updateApproach('edgeCases', value)} placeholder="Empty input, duplicates, single item, no answer..." />
@@ -484,6 +544,10 @@ export default function PracticeArena() {
                                 <ApproachField label="Expected time complexity" value={approach.timeComplexity} onChange={(value) => updateApproach('timeComplexity', value)} placeholder="Example: O(n)" />
                                 <ApproachField label="Expected space complexity" value={approach.spaceComplexity} onChange={(value) => updateApproach('spaceComplexity', value)} placeholder="Example: O(n)" />
                             </div>
+                            <label className="block">
+                                <span className="block text-sm font-semibold text-gray-300 mb-2">Confidence before submit: {approach.confidenceBeforeSubmit}/5</span>
+                                <input className="w-full" type="range" min="1" max="5" value={approach.confidenceBeforeSubmit} onChange={(event) => updateApproach('confidenceBeforeSubmit', Number(event.target.value))} />
+                            </label>
                         </div>
                     )}
 
@@ -547,14 +611,33 @@ export default function PracticeArena() {
                             <div className="pt-5 border-t border-white/10">
                                 <div className="flex items-center justify-between mb-4">
                                     <h3 className="text-lg font-semibold flex items-center gap-2"><Lightbulb size={20} className="text-google-yellow" />AI Hints</h3>
-                                    <Button variant="glass" size="sm" onClick={handleHint} loading={hintLoading} icon={Lightbulb}>Get Hint</Button>
+                                    <Button variant="glass" size="sm" onClick={handleHint} loading={hintLoading} icon={Lightbulb}>Hint Level {hintLevel}</Button>
                                 </div>
                                 {hints.length === 0 ? <p className="text-gray-400 text-sm">Ask for a nudge when you are stuck.</p> : (
                                     <div className="space-y-3">
-                                        {hints.map((hint) => <div key={hint.id} className="p-3 rounded-lg bg-google-yellow/10 border border-google-yellow/20 text-sm text-gray-300">{hint.content}</div>)}
+                                        {hints.map((hint) => <div key={hint.id} className="p-3 rounded-lg bg-google-yellow/10 border border-google-yellow/20 text-sm text-gray-300"><p className="text-xs text-google-yellow mb-1">Level {hint.hintLevel || 1}</p>{hint.content}</div>)}
                                     </div>
                                 )}
                             </div>
+                            {submissionResult?.status === 'accepted' && (
+                                <div className="pt-5 border-t border-white/10 space-y-3">
+                                    <h3 className="text-lg font-semibold">Post-Solve Reflection</h3>
+                                    {[
+                                        ['patternUsed', 'Pattern used'],
+                                        ['whyItWorked', 'Why it worked'],
+                                        ['keyInvariant', 'Key invariant'],
+                                        ['dangerousEdgeCase', 'Dangerous edge case'],
+                                        ['interviewExplanation', 'Interview explanation'],
+                                    ].map(([field, label]) => (
+                                        <textarea key={field} className="glass-input w-full min-h-[72px]" value={reflection[field]} onChange={(event) => setReflection((current) => ({ ...current, [field]: event.target.value }))} placeholder={label} />
+                                    ))}
+                                    <label className="block">
+                                        <span className="block text-sm text-gray-400 mb-1">Confidence after solve: {reflection.confidenceAfterSolve}/5</span>
+                                        <input className="w-full" type="range" min="1" max="5" value={reflection.confidenceAfterSolve} onChange={(event) => setReflection((current) => ({ ...current, confidenceAfterSolve: Number(event.target.value) }))} />
+                                    </label>
+                                    <Button variant="green" size="sm" onClick={saveReflection} disabled={reflectionSaved}>{reflectionSaved ? 'Reflection Saved' : 'Save Reflection'}</Button>
+                                </div>
+                            )}
                         </div>
                     )}
 

@@ -6,6 +6,7 @@ import { Question } from '../questions/question.model.js'
 import { Pattern } from '../patterns/pattern.model.js'
 import { ConceptCheck } from '../conceptChecks/conceptCheck.model.js'
 import { LearningTrack } from '../tracks/learningTrack.model.js'
+import { scoreQuestionQuality } from './contentQuality.service.js'
 
 const router = Router()
 router.use(requireAuth, requireAdmin)
@@ -31,5 +32,17 @@ router.use('/questions', crud(Question))
 router.use('/patterns', crud(Pattern))
 router.use('/concept-checks', crud(ConceptCheck))
 router.use('/tracks', crud(LearningTrack))
+
+router.get('/questions/:id/quality', asyncHandler(async (req, res) => {
+    const question = await Question.findById(req.params.id)
+    if (!question) return res.status(404).json({ error: 'Question not found' })
+    res.json(await scoreQuestionQuality(question))
+}))
+
+router.post('/questions/:id/validate', asyncHandler(async (req, res) => {
+    const question = await Question.findById(req.params.id)
+    if (!question) return res.status(404).json({ error: 'Question not found' })
+    res.json(await scoreQuestionQuality(question))
+}))
 
 export default router

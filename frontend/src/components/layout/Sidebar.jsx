@@ -24,6 +24,7 @@ import {
     Brain,
     Briefcase,
     Shield,
+    AlertTriangle,
     RotateCcw,
     Cpu,
     Zap,
@@ -49,6 +50,11 @@ const menuSections = [
         path: '/dashboard',
     },
     {
+        title: 'Today',
+        icon: Play,
+        path: '/session/today',
+    },
+    {
         title: 'Roadmap',
         icon: Map,
         path: '/roadmap',
@@ -62,6 +68,11 @@ const menuSections = [
         title: 'Skill Profile',
         icon: Brain,
         path: '/profile/skills',
+    },
+    {
+        title: 'Misconceptions',
+        icon: AlertTriangle,
+        path: '/misconceptions',
     },
     {
         title: 'Interview',

@@ -9,6 +9,7 @@ import { Submission } from '../submissions/submission.model.js'
 import { MistakeInsight } from '../insights/mistakeInsight.model.js'
 import { MentorSession } from './mentorSession.model.js'
 import { LearningTimelineEvent } from '../timeline/learningTimelineEvent.model.js'
+import { recordLearningEvent } from '../events/event.service.js'
 
 const router = Router()
 const genAI = new GoogleGenerativeAI(env.geminiApiKey)
@@ -17,6 +18,14 @@ const HINT_SYSTEM_PROMPT = `You are a Socratic teaching assistant for a DSA lear
 
 const CODE_REVIEW_SYSTEM_PROMPT = `You are a strict DSA code reviewer. Be concise. Use submission test context when provided. Explain correctness, complexity, and the next fix without writing full solution code.`
 const MENTOR_SYSTEM_PROMPT = `You are a strict Socratic DSA mentor. Do not provide full solution code before the learner solves the problem. Ask one useful question or give one small nudge at a time. Help the learner explain the next move.`
+const hintLadder = [
+    'Clarify constraints',
+    'Identify pattern signal',
+    'Suggest data structure',
+    'Point to invariant',
+    'Highlight edge case',
+    'Pseudocode-level nudge',
+]
 
 const ensureAiConfigured = (res) => {
     if (!env.geminiApiKey || env.geminiApiKey === 'your_gemini_api_key_here') {
@@ -26,24 +35,49 @@ const ensureAiConfigured = (res) => {
     return true
 }
 
-router.post('/hint', aiLimiter, asyncHandler(async (req, res) => {
+router.post('/hint', requireAuth, aiLimiter, asyncHandler(async (req, res) => {
     if (!ensureAiConfigured(res)) return
 
-    const { code, question, previousHints = [] } = req.body
+    const { code, question, previousHints = [], hintLevel = 1, mode = 'practice', approach = {}, submissionResult = null } = req.body
     if (!code || !question) {
         return res.status(400).json({ error: 'Code and question are required' })
     }
+    const safeHintLevel = Math.max(1, Math.min(6, Number(hintLevel) || 1))
 
     const model = genAI.getGenerativeModel({
         model: 'gemini-2.5-flash',
         systemInstruction: HINT_SYSTEM_PROMPT,
     })
 
-    const prompt = `Problem: ${question.title}\n${question.description}\n\nCurrent code:\n${code}\n\nPrevious hints:\n${previousHints.map((h) => h.content || h).join('\n')}\n\nGive the next Socratic hint.`
+    const prompt = `Problem: ${question.title}\n${question.description}
+
+Mode: ${mode}
+Hint level ${safeHintLevel}: ${hintLadder[safeHintLevel - 1]}
+Approach notes: ${JSON.stringify(approach)}
+Submission result: ${JSON.stringify(submissionResult || {})}
+
+Current code:
+${code}
+
+Previous hints:
+${previousHints.map((h) => h.content || h).join('\n')}
+
+Give one concise Socratic hint for this level. Do not provide full solution code.`
     const result = await model.generateContent(prompt)
     const response = await result.response
+    const event = await recordLearningEvent({
+        userId: req.user._id,
+        type: 'hint_requested',
+        questionId: question._id,
+        metadata: { hintLevel: safeHintLevel, mode },
+    })
 
-    res.json({ hint: response.text() })
+    res.json({
+        hint: response.text(),
+        hintLevel: safeHintLevel,
+        nextHintAvailable: safeHintLevel < hintLadder.length,
+        learningEventId: event?._id,
+    })
 }))
 
 router.post('/review', aiLimiter, asyncHandler(async (req, res) => {
@@ -144,6 +178,12 @@ Respond with one Socratic mentor message.`
         type: 'mentor_message',
         title: 'Mentor exchange',
         details: { message, mentorText },
+    })
+    await recordLearningEvent({
+        userId: req.user._id,
+        type: 'mentor_message_sent',
+        questionId: question._id,
+        metadata: { mode },
     })
 
     res.json({ message: mentorText, session })

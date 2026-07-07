@@ -17,6 +17,8 @@ const Revision = lazy(() => import('./pages/Revision'))
 const SkillProfile = lazy(() => import('./pages/SkillProfile'))
 const Interview = lazy(() => import('./pages/Interview'))
 const AdminContent = lazy(() => import('./pages/AdminContent'))
+const DailySession = lazy(() => import('./pages/DailySession'))
+const Misconceptions = lazy(() => import('./pages/Misconceptions'))
 
 const PageLoader = () => (
     <div className="min-h-[50vh] flex items-center justify-center">
@@ -38,12 +40,15 @@ export default function App() {
                             {/* Home */}
                             <Route path="/" element={<Home />} />
                             <Route path="/dashboard" element={<Dashboard />} />
+                            <Route path="/session/today" element={<DailySession />} />
                             <Route path="/roadmap" element={<Roadmap />} />
                             <Route path="/roadmap/:patternSlug" element={<PatternLesson />} />
                             <Route path="/revision" element={<Revision />} />
                             <Route path="/profile/skills" element={<SkillProfile />} />
                             <Route path="/interview" element={<Interview />} />
                             <Route path="/admin/content" element={<AdminContent />} />
+                            <Route path="/misconceptions" element={<Misconceptions />} />
+                            <Route path="/misconceptions/:slug" element={<Misconceptions />} />
                             <Route path="/login" element={<Login />} />
                             <Route path="/register" element={<Register />} />
 

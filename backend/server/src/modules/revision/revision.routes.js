@@ -4,6 +4,7 @@ import { asyncHandler } from '../../middleware/asyncHandler.js'
 import { RevisionItem } from './revisionItem.model.js'
 import { validateRequest } from '../../middleware/validateRequest.js'
 import { z } from 'zod'
+import { recordLearningEvent } from '../events/event.service.js'
 
 const router = Router()
 
@@ -49,6 +50,7 @@ router.post('/me/:id/complete', asyncHandler(async (req, res) => {
     item.lastResult = 'successful_revision'
     item.intervalDays = nextInterval
     await item.save()
+    await recordLearningEvent({ userId: req.user._id, type: 'revision_completed', questionId: item.questionId, metadata: { patternSlug: item.patternSlug } })
 
     res.json(item)
 }))

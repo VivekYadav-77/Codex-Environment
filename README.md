@@ -37,6 +37,18 @@ Important API areas:
 - `/api/interview/start`, `/api/interview/:id/run`, `/api/interview/:id/finish`, `/api/interview/me`
 - `/api/admin/questions`, `/api/admin/patterns`, `/api/admin/concept-checks`, `/api/admin/tracks`
 
+### Learning Operating System V1
+
+The latest learning layer adds a complete habit loop around the coach:
+
+1. **Daily Session**: `/session/today` gives learners a focused plan with revision, concept check, practice, and reflection tasks.
+2. **Learning Events**: `/api/events` records structured activity such as sessions, hints, submissions, reflections, revisions, and interviews.
+3. **Guided Practice**: Practice Arena now follows Understand → Plan → Code → Test → Reflect, including confidence and pattern recognition signals.
+4. **Reflections**: Accepted solves can store pattern, invariant, edge-case, explanation, and confidence data.
+5. **Misconceptions**: `/api/misconceptions/me` maps recurring mistake signals to corrections and recommended actions.
+6. **Readiness Levels**: Skill Profile now reports readiness levels, missing requirements, and the next best action.
+7. **Content Quality**: Admin question quality endpoints score publish readiness and missing metadata.
+
 ## 🛠️ Tech Stack
 
 ### Frontend

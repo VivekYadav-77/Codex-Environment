@@ -8,6 +8,9 @@ import { RevisionItem } from '../revision/revisionItem.model.js'
 import { MistakeInsight } from '../insights/mistakeInsight.model.js'
 import { ConceptCheck } from '../conceptChecks/conceptCheck.model.js'
 import { ConceptCheckAttempt } from '../conceptChecks/conceptCheckAttempt.model.js'
+import { Reflection } from '../reflections/reflection.model.js'
+import { getLearnerMisconceptions } from '../misconceptions/misconception.service.js'
+import { recordLearningEvent } from '../events/event.service.js'
 
 const addDays = (date, days) => new Date(date.getTime() + days * 24 * 60 * 60 * 1000)
 const startOfWeek = (date) => {
@@ -353,12 +356,14 @@ export async function getNextActions(userId) {
 }
 
 export async function getSkillProfile(userId) {
-    const [mastery, mistakes, progressRows, submissions, revisions] = await Promise.all([
+    const [mastery, mistakes, progressRows, submissions, revisions, reflections, misconceptions] = await Promise.all([
         getMastery(userId),
         getMistakes(userId),
         Progress.find({ userId }),
         Submission.find({ userId }).sort({ createdAt: 1 }).populate('questionId', 'slug title topic difficulty primaryPattern'),
         RevisionItem.find({ userId }),
+        Reflection.find({ userId }).sort({ createdAt: -1 }).limit(100),
+        getLearnerMisconceptions(userId),
     ])
 
     const solved = progressRows.filter((row) => row.status === 'solved').length
@@ -379,7 +384,10 @@ export async function getSkillProfile(userId) {
     const mixedScore = mixed.length ? Math.round((mixedAccepted.length / mixed.length) * 15) : 0
     const hintScore = submissions.length ? Math.max(0, 15 - Math.round(hintTotal / submissions.length) * 3) : 5
     const revisionScore = revisions.length ? Math.round((revisionCompleted / revisions.length) * 10) : 3
-    const readinessScore = Math.max(0, Math.min(100, breadthScore + successScore + mixedScore + hintScore + revisionScore))
+    const reflectionScore = reflections.length
+        ? Math.min(10, Math.round((reflections.filter((item) => (item.interviewExplanation || '').length > 40).length / reflections.length) * 10))
+        : 0
+    const readinessScore = Math.max(0, Math.min(100, breadthScore + successScore + mixedScore + hintScore + revisionScore + reflectionScore))
     const blockers = []
     if (mastered < 3) blockers.push('Build mastery in at least 3 core patterns.')
     if (mistakes.byTag[0]) blockers.push(`${mistakes.byTag[0].title}: ${mistakes.byTag[0].advice}`)
@@ -402,8 +410,20 @@ export async function getSkillProfile(userId) {
         if (submission.status === 'accepted') trendMap[key].accepted += 1
     }
 
+    const readinessLevel = buildReadinessLevel({
+        readinessScore,
+        mastered,
+        mixed,
+        mixedGuesses,
+        mixedCorrectGuesses,
+        submissions,
+        reflections,
+        revisionQueued,
+    })
+
     return {
         readinessScore,
+        readinessLevel,
         solved,
         attempted,
         solveConsistency: submissions.length ? Math.round((accepted.length / submissions.length) * 100) : 0,
@@ -423,6 +443,63 @@ export async function getSkillProfile(userId) {
         weakSpots: mastery.filter((row) => row.masteryScore < 60).slice(0, 5),
         mastery,
         progressTrend: Object.values(trendMap),
+        misconceptions,
+    }
+}
+
+function buildReadinessLevel({ readinessScore, mastered, mixed, mixedGuesses, mixedCorrectGuesses, submissions, reflections, revisionQueued }) {
+    const levels = [
+        {
+            id: 'foundation_ready',
+            label: 'Foundation Ready',
+            requirements: [
+                { label: 'Solve at least 3 problems', met: submissions.filter((row) => row.status === 'accepted').length >= 3 },
+                { label: 'Keep revision queue below 5', met: revisionQueued < 5 },
+            ],
+        },
+        {
+            id: 'pattern_ready',
+            label: 'Pattern Ready',
+            requirements: [
+                { label: 'Master at least 3 patterns', met: mastered >= 3 },
+                { label: 'Submit at least 2 reflections', met: reflections.length >= 2 },
+            ],
+        },
+        {
+            id: 'mixed_practice_ready',
+            label: 'Mixed Practice Ready',
+            requirements: [
+                { label: 'Attempt at least 3 mixed problems', met: mixed.length >= 3 },
+                { label: 'Pattern recognition at least 60%', met: mixedGuesses.length > 0 && (mixedCorrectGuesses.length / mixedGuesses.length) >= 0.6 },
+            ],
+        },
+        {
+            id: 'interview_ready',
+            label: 'Interview Ready',
+            requirements: [
+                { label: 'Readiness score at least 70%', met: readinessScore >= 70 },
+                { label: 'Write at least 3 interview explanations', met: reflections.filter((item) => (item.interviewExplanation || '').length > 40).length >= 3 },
+            ],
+        },
+        {
+            id: 'job_ready_practice',
+            label: 'Job-Ready Practice',
+            requirements: [
+                { label: 'Readiness score at least 85%', met: readinessScore >= 85 },
+                { label: 'No urgent revision backlog', met: revisionQueued <= 1 },
+            ],
+        },
+    ]
+
+    const current = [...levels].reverse().find((level) => level.requirements.every((requirement) => requirement.met)) || levels[0]
+    const next = levels.find((level) => !level.requirements.every((requirement) => requirement.met)) || levels.at(-1)
+    return {
+        current: current.id,
+        label: current.label,
+        score: readinessScore,
+        levels,
+        nextMissingRequirement: next.requirements.find((requirement) => !requirement.met)?.label || 'Maintain consistency with mixed practice and interviews.',
+        recommendedAction: next.id === 'mixed_practice_ready' ? '/practice/mixed?mode=mixed' : next.id === 'interview_ready' ? '/interview' : '/session/today',
     }
 }
 
@@ -435,6 +512,11 @@ export async function recordConceptCheckAttempt({ userId, conceptCheckId, select
         patternSlug: check.patternSlug,
         selectedIndex,
         correct: selectedIndex === check.correctIndex,
+    })
+    await recordLearningEvent({
+        userId,
+        type: 'concept_check_attempted',
+        metadata: { conceptCheckId, patternSlug: check.patternSlug, correct: attempt.correct },
     })
     return {
         attempt,

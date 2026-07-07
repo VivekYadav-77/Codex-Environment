@@ -15,6 +15,10 @@ import coachRoutes from './modules/coach/coach.routes.js'
 import revisionRoutes from './modules/revision/revision.routes.js'
 import interviewRoutes from './modules/interview/interview.routes.js'
 import adminRoutes from './modules/admin/admin.routes.js'
+import eventRoutes from './modules/events/event.routes.js'
+import sessionRoutes from './modules/sessions/session.routes.js'
+import reflectionRoutes from './modules/reflections/reflection.routes.js'
+import misconceptionRoutes from './modules/misconceptions/misconception.routes.js'
 
 export function createApp() {
     const app = express()
@@ -46,6 +50,10 @@ export function createApp() {
     app.use('/api/revision', revisionRoutes)
     app.use('/api/interview', interviewRoutes)
     app.use('/api/admin', adminRoutes)
+    app.use('/api/events', eventRoutes)
+    app.use('/api/session', sessionRoutes)
+    app.use('/api/reflections', reflectionRoutes)
+    app.use('/api/misconceptions', misconceptionRoutes)
 
     app.use(notFound)
     app.use(errorMiddleware)

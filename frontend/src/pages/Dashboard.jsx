@@ -82,7 +82,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="glass-card p-4"><p className="text-sm text-gray-400">Solved</p><p className="text-3xl font-bold text-google-green">{today?.summary?.solved || 0}</p></div>
                 <div className="glass-card p-4"><p className="text-sm text-gray-400">Attempted</p><p className="text-3xl font-bold text-google-yellow">{today?.summary?.attempted || 0}</p></div>
-                <div className="glass-card p-4"><p className="text-sm text-gray-400">Readiness</p><p className="text-3xl font-bold text-google-blue">{skillProfile?.readinessScore || 0}%</p></div>
+                <div className="glass-card p-4"><p className="text-sm text-gray-400">Readiness</p><p className="text-3xl font-bold text-google-blue">{skillProfile?.readinessScore || 0}%</p><p className="text-xs text-gray-400">{skillProfile?.readinessLevel?.label || 'Foundation Ready'}</p></div>
                 <div className="glass-card p-4"><p className="text-sm text-gray-400">Top Mistake</p><p className="text-sm font-semibold text-google-yellow capitalize">{topMistake?.tag?.replaceAll('_', ' ') || 'No data yet'}</p></div>
             </div>
 

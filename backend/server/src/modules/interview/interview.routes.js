@@ -7,6 +7,7 @@ import { Question } from '../questions/question.model.js'
 import { Submission } from '../submissions/submission.model.js'
 import { runJudgedSubmission } from '../execution/execution.service.js'
 import { InterviewSession } from './interviewSession.model.js'
+import { recordLearningEvent } from '../events/event.service.js'
 
 const router = Router()
 router.use(requireAuth)
@@ -107,6 +108,12 @@ router.post('/:id/finish', asyncHandler(async (req, res) => {
         ? 'Strong interview attempt. Keep practicing concise explanation and edge-case coverage.'
         : 'Good practice signal. Review the pattern, explain the invariant, then retry a similar problem.'
     await session.save()
+    await recordLearningEvent({
+        userId: req.user._id,
+        type: 'interview_finished',
+        questionId: session.questionId,
+        metadata: { finalScore: session.finalScore, scoreBreakdown: session.scoreBreakdown },
+    })
 
     res.json(session)
 }))

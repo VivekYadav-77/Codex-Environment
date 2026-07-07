@@ -23,10 +23,20 @@ export default function SkillProfile() {
             </div>
             <div className="grid md:grid-cols-4 gap-4">
                 <div className="glass-card p-4"><p className="text-sm text-gray-400">Readiness</p><p className="text-3xl font-bold text-google-green">{profile.readinessScore}%</p></div>
+                <div className="glass-card p-4"><p className="text-sm text-gray-400">Level</p><p className="text-lg font-bold text-google-blue">{profile.readinessLevel?.label || 'Foundation Ready'}</p></div>
                 <div className="glass-card p-4"><p className="text-sm text-gray-400">Solved</p><p className="text-3xl font-bold">{profile.solved}</p></div>
                 <div className="glass-card p-4"><p className="text-sm text-gray-400">Consistency</p><p className="text-3xl font-bold text-google-blue">{profile.solveConsistency}%</p></div>
-                <div className="glass-card p-4"><p className="text-sm text-gray-400">Revision Queue</p><p className="text-3xl font-bold text-google-yellow">{profile.revisionHealth?.queued || 0}</p></div>
             </div>
+            <GlassPanel>
+                <h2 className="text-xl font-bold mb-3">Readiness Path</h2>
+                <p className="text-sm text-gray-400 mb-4">Next missing requirement: {profile.readinessLevel?.nextMissingRequirement}</p>
+                <div className="grid md:grid-cols-5 gap-2">
+                    {profile.readinessLevel?.levels?.map((level) => {
+                        const met = level.requirements.every((requirement) => requirement.met)
+                        return <div key={level.id} className={`p-3 rounded-lg border text-sm ${met ? 'border-google-green/30 bg-google-green/5 text-google-green' : 'border-white/10 bg-white/5 text-gray-400'}`}>{level.label}</div>
+                    })}
+                </div>
+            </GlassPanel>
             <div className="grid lg:grid-cols-2 gap-6">
                 <GlassPanel>
                     <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Compass size={20} />Recommended Path</h2>
@@ -54,6 +64,17 @@ export default function SkillProfile() {
                     <div className="p-4 rounded-lg bg-white/5"><p className="text-sm text-gray-400">Mixed Attempts</p><p className="text-2xl font-bold">{profile.mixedPractice?.attempted || 0}</p></div>
                     <div className="p-4 rounded-lg bg-white/5"><p className="text-sm text-gray-400">Pattern Guesses</p><p className="text-2xl font-bold">{profile.mixedPractice?.guesses || 0}</p></div>
                     <div className="p-4 rounded-lg bg-white/5"><p className="text-sm text-gray-400">Recognition Accuracy</p><p className="text-2xl font-bold text-google-blue">{profile.mixedPractice?.recognitionAccuracy || 0}%</p></div>
+                </div>
+            </GlassPanel>
+            <GlassPanel>
+                <h2 className="text-xl font-bold mb-4">Detected Misconceptions</h2>
+                <div className="space-y-3">
+                    {profile.misconceptions?.length ? profile.misconceptions.map((item) => (
+                        <Link key={item.slug} to={`/misconceptions/${item.slug}`} className="block p-3 rounded-lg bg-white/5 hover:bg-white/10">
+                            <p className="font-semibold">{item.title}</p>
+                            <p className="text-sm text-gray-400">{item.correction}</p>
+                        </Link>
+                    )) : <p className="text-gray-400">No clear misconception pattern yet.</p>}
                 </div>
             </GlassPanel>
             <div className="grid lg:grid-cols-3 gap-6">

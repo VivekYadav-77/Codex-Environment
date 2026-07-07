@@ -18,6 +18,7 @@ const { Question } = await import('../src/modules/questions/question.model.js')
 const { Pattern } = await import('../src/modules/patterns/pattern.model.js')
 const { LearningTrack } = await import('../src/modules/tracks/learningTrack.model.js')
 const { RevisionItem } = await import('../src/modules/revision/revisionItem.model.js')
+const { ConceptCheck } = await import('../src/modules/conceptChecks/conceptCheck.model.js')
 const { corePatterns, enrichQuestion, hashingJudge, trackSeed } = await import('../src/scripts/seedDatabase.js')
 
 const app = createApp()
@@ -247,6 +248,7 @@ describe('coach and revision flow', () => {
         expect(profile.body).toHaveProperty('mistakeDistribution')
         expect(profile.body).toHaveProperty('recommendedPlan')
         expect(profile.body).toHaveProperty('blockers')
+        expect(profile.body).toHaveProperty('readinessLevel')
     })
 
     it('serves mixed practice with hidden pattern metadata', async () => {
@@ -274,6 +276,128 @@ describe('coach and revision flow', () => {
 
         expect(run.status).toBe(200)
         expect(run.body.revealedPattern.correctGuess).toBe(true)
+    })
+})
+
+describe('learning operating system flow', () => {
+    it('records learning events and returns event summaries', async () => {
+        await seedMinimalCoachData()
+        const token = await register()
+
+        const event = await request(app)
+            .post('/api/events')
+            .set('Authorization', `Bearer ${token}`)
+            .send({ type: 'approach_written', metadata: { fields: ['bruteForce'] } })
+
+        expect(event.status).toBe(201)
+
+        const summary = await request(app)
+            .get('/api/events/me/summary')
+            .set('Authorization', `Bearer ${token}`)
+
+        expect(summary.status).toBe(200)
+        expect(summary.body.byType.some((item) => item.type === 'approach_written')).toBe(true)
+    })
+
+    it('builds, starts, completes, and finishes a daily session', async () => {
+        await seedMinimalCoachData()
+        await ConceptCheck.create({
+            patternSlug: 'hash-map-lookup',
+            question: 'What does a hash map help remember?',
+            options: ['Previous values', 'Only sorted order', 'Recursive calls'],
+            correctIndex: 0,
+            explanation: 'Hash maps help remember values or indexes for fast lookup.',
+        })
+        const token = await register()
+
+        const planned = await request(app)
+            .get('/api/session/today')
+            .set('Authorization', `Bearer ${token}`)
+
+        expect(planned.status).toBe(200)
+        expect(planned.body.tasks.length).toBeGreaterThan(0)
+
+        const started = await request(app)
+            .post('/api/session/start')
+            .set('Authorization', `Bearer ${token}`)
+
+        expect(started.status).toBe(200)
+        expect(started.body.status).toBe('active')
+
+        const completed = await request(app)
+            .post(`/api/session/${started.body._id}/complete-task`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({ taskId: started.body.tasks[0]._id })
+
+        expect(completed.status).toBe(200)
+        expect(completed.body.tasks[0].status).toBe('completed')
+
+        const finished = await request(app)
+            .post(`/api/session/${started.body._id}/finish`)
+            .set('Authorization', `Bearer ${token}`)
+
+        expect(finished.status).toBe(200)
+        expect(finished.body.status).toBe('completed')
+        expect(finished.body.summary.completed).toBeGreaterThan(0)
+    })
+
+    it('stores reflections and queues low-confidence revision', async () => {
+        await seedMinimalCoachData()
+        const token = await register()
+
+        const reflection = await request(app)
+            .post('/api/reflections')
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                questionId: 'two-sum',
+                patternUsed: 'hash-map-lookup',
+                whyItWorked: 'It remembers complements.',
+                keyInvariant: 'Seen values map to indexes.',
+                dangerousEdgeCase: 'Duplicates',
+                interviewExplanation: 'Use a map to check each complement in O(n).',
+                confidenceAfterSolve: 1,
+            })
+
+        expect(reflection.status).toBe(201)
+
+        const revisions = await request(app)
+            .get('/api/revision/me')
+            .set('Authorization', `Bearer ${token}`)
+
+        expect(revisions.body.some((item) => item.lastResult === 'low_confidence_reflection')).toBe(true)
+    })
+
+    it('detects misconceptions from mistake insights', async () => {
+        await seedMinimalCoachData()
+        const token = await register()
+
+        await request(app)
+            .post('/api/submissions/run')
+            .set('Authorization', `Bearer ${token}`)
+            .send({ questionId: 'two-sum', language: 'javascript', code: 'function twoSum(){ return [0, 2] }' })
+
+        const misconceptions = await request(app)
+            .get('/api/misconceptions/me')
+            .set('Authorization', `Bearer ${token}`)
+
+        expect(misconceptions.status).toBe(200)
+        expect(misconceptions.body.length).toBeGreaterThan(0)
+    })
+
+    it('scores admin question content quality', async () => {
+        await seedMinimalCoachData()
+        const token = await register()
+        const me = await request(app).get('/api/auth/me').set('Authorization', `Bearer ${token}`)
+        await User.findByIdAndUpdate(me.body.user.id, { $set: { role: 'admin' } })
+        const question = await Question.findOne({ slug: 'two-sum' })
+
+        const quality = await request(app)
+            .get(`/api/admin/questions/${question._id}/quality`)
+            .set('Authorization', `Bearer ${token}`)
+
+        expect(quality.status).toBe(200)
+        expect(quality.body).toHaveProperty('score')
+        expect(quality.body).toHaveProperty('missing')
     })
 })
 

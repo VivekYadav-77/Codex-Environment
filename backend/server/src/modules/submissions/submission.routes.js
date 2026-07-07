@@ -8,6 +8,7 @@ import { runJudgedSubmission } from '../execution/execution.service.js'
 import { Submission } from './submission.model.js'
 import { updateCoachAfterSubmission } from '../coach/coach.service.js'
 import { recordLearningOutcome } from '../insights/insight.service.js'
+import { recordLearningEvent } from '../events/event.service.js'
 import { validateRequest } from '../../middleware/validateRequest.js'
 import { z } from 'zod'
 
@@ -30,8 +31,11 @@ const runSubmissionSchema = z.object({
         approachSnapshot: z.object({
             bruteForce: z.string().optional(),
             optimized: z.string().optional(),
+            restatedProblem: z.string().optional(),
+            constraints: z.string().optional(),
             patternGuess: z.string().optional(),
             edgeCases: z.string().optional(),
+            confidenceBeforeSubmit: z.number().int().min(1).max(5).optional(),
             timeComplexity: z.string().optional(),
             spaceComplexity: z.string().optional(),
         }).optional(),
@@ -52,6 +56,13 @@ router.post('/run', submissionLimiter, validateRequest(runSubmissionSchema), asy
     }
 
     const result = await runJudgedSubmission({ code, language, question })
+
+    await recordLearningEvent({
+        userId: req.user._id,
+        type: 'test_run_submitted',
+        questionId: question._id,
+        metadata: { mode, language, patternGuess: patternGuess || approachSnapshot?.patternGuess },
+    })
 
     const submission = await Submission.create({
         userId: req.user._id,
@@ -83,6 +94,31 @@ router.post('/run', submissionLimiter, validateRequest(runSubmissionSchema), asy
         submission.mistakeTags = mistakeTags
         await submission.save()
     }
+
+    if (approachSnapshot && Object.values(approachSnapshot).some(Boolean)) {
+        await recordLearningEvent({
+            userId: req.user._id,
+            type: 'approach_written',
+            questionId: question._id,
+            metadata: { fields: Object.keys(approachSnapshot).filter((key) => approachSnapshot[key]) },
+        })
+    }
+
+    if (submission.patternGuess) {
+        await recordLearningEvent({
+            userId: req.user._id,
+            type: 'pattern_guess_submitted',
+            questionId: question._id,
+            metadata: { guess: submission.patternGuess, correct: submission.patternGuessCorrect },
+        })
+    }
+
+    await recordLearningEvent({
+        userId: req.user._id,
+        type: 'submission_analyzed',
+        questionId: question._id,
+        metadata: { status: result.status, mistakeTags, mode },
+    })
 
     await Progress.findOneAndUpdate(
         { userId: req.user._id, questionId: question._id },
