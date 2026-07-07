@@ -49,7 +49,20 @@ export default function Interview() {
                         <p className="text-gray-300 whitespace-pre-line mb-4">{question.description}</p>
                         <textarea className="glass-input w-full min-h-[120px]" value={explanation} onChange={(e) => setExplanation(e.target.value)} placeholder="Explain your approach like an interview." />
                         {result && <p className="mt-4 text-sm text-gray-300">Latest run: {result.status} ({result.passedCount}/{result.totalCount})</p>}
-                        {session.status === 'finished' && <div className="mt-4 p-4 rounded-lg bg-white/5"><p className="font-semibold">Score: {session.finalScore}%</p><p className="text-sm text-gray-400">{session.feedback}</p></div>}
+                        {session.status === 'finished' && (
+                            <div className="mt-4 p-4 rounded-lg bg-white/5">
+                                <p className="font-semibold">Score: {session.finalScore}%</p>
+                                <p className="text-sm text-gray-400 mb-3">{session.feedback}</p>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {Object.entries(session.scoreBreakdown || {}).map(([key, value]) => (
+                                        <div key={key} className="p-2 rounded bg-black/20">
+                                            <p className="text-xs text-gray-500 capitalize">{key.replace(/([A-Z])/g, ' $1')}</p>
+                                            <p className="font-semibold">{value}%</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </GlassPanel>
                     <GlassPanel>
                         <select value={language} onChange={(e) => setLanguage(e.target.value)} className="glass-input mb-4"><option value="javascript">JavaScript</option><option value="python">Python</option></select>

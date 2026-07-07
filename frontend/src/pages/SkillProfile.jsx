@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Activity, Brain, Loader2, Target } from 'lucide-react'
+import { Activity, Brain, Compass, Loader2, Target } from 'lucide-react'
 import { GlassPanel } from '../components/ui/Glass'
 import { apiFetch } from '../api/client'
 
@@ -27,6 +27,35 @@ export default function SkillProfile() {
                 <div className="glass-card p-4"><p className="text-sm text-gray-400">Consistency</p><p className="text-3xl font-bold text-google-blue">{profile.solveConsistency}%</p></div>
                 <div className="glass-card p-4"><p className="text-sm text-gray-400">Revision Queue</p><p className="text-3xl font-bold text-google-yellow">{profile.revisionHealth?.queued || 0}</p></div>
             </div>
+            <div className="grid lg:grid-cols-2 gap-6">
+                <GlassPanel>
+                    <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Compass size={20} />Recommended Path</h2>
+                    <div className="space-y-3">
+                        {profile.recommendedPlan?.map((item, index) => (
+                            <Link key={`${item.type}-${index}`} to={item.link} className="block p-3 rounded-lg bg-white/5 hover:bg-white/10">
+                                <p className="font-semibold">{item.title}</p>
+                                <p className="text-sm text-gray-400">{item.reason}</p>
+                            </Link>
+                        ))}
+                    </div>
+                </GlassPanel>
+                <GlassPanel>
+                    <h2 className="text-xl font-bold mb-4">Readiness Blockers</h2>
+                    <div className="space-y-3">
+                        {profile.blockers?.length ? profile.blockers.map((blocker) => (
+                            <div key={blocker} className="p-3 rounded-lg bg-google-yellow/10 border border-google-yellow/20 text-sm text-gray-300">{blocker}</div>
+                        )) : <p className="text-gray-400">No major blockers yet. Keep building signal through practice.</p>}
+                    </div>
+                </GlassPanel>
+            </div>
+            <GlassPanel>
+                <h2 className="text-xl font-bold mb-4">Pattern Recognition</h2>
+                <div className="grid md:grid-cols-3 gap-4">
+                    <div className="p-4 rounded-lg bg-white/5"><p className="text-sm text-gray-400">Mixed Attempts</p><p className="text-2xl font-bold">{profile.mixedPractice?.attempted || 0}</p></div>
+                    <div className="p-4 rounded-lg bg-white/5"><p className="text-sm text-gray-400">Pattern Guesses</p><p className="text-2xl font-bold">{profile.mixedPractice?.guesses || 0}</p></div>
+                    <div className="p-4 rounded-lg bg-white/5"><p className="text-sm text-gray-400">Recognition Accuracy</p><p className="text-2xl font-bold text-google-blue">{profile.mixedPractice?.recognitionAccuracy || 0}%</p></div>
+                </div>
+            </GlassPanel>
             <div className="grid lg:grid-cols-3 gap-6">
                 <GlassPanel className="lg:col-span-2">
                     <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Target size={20} />Pattern Mastery</h2>
@@ -44,7 +73,10 @@ export default function SkillProfile() {
                     <div className="space-y-3">
                         {profile.mistakeDistribution?.length ? profile.mistakeDistribution.map((item) => (
                             <div key={item.tag} className="flex items-center justify-between p-3 rounded-lg bg-white/5">
-                                <span className="capitalize">{item.tag.replaceAll('_', ' ')}</span>
+                                <div>
+                                    <p className="capitalize">{item.title || item.tag.replaceAll('_', ' ')}</p>
+                                    <p className="text-xs text-gray-400">{item.advice}</p>
+                                </div>
                                 <span className="font-semibold text-google-yellow">{item.count}</span>
                             </div>
                         )) : <p className="text-gray-400">No mistake data yet. Run a few submissions.</p>}

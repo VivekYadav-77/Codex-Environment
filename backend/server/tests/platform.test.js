@@ -195,6 +195,7 @@ describe('coach and revision flow', () => {
 
         expect(mistakes.status).toBe(200)
         expect(mistakes.body.byTag.some((item) => item.tag === 'wrong_answer')).toBe(true)
+        expect(mistakes.body.byTag[0]).toHaveProperty('advice')
     })
 
     it('updates mastery after accepted submissions', async () => {
@@ -244,6 +245,8 @@ describe('coach and revision flow', () => {
         expect(profile.status).toBe(200)
         expect(profile.body).toHaveProperty('readinessScore')
         expect(profile.body).toHaveProperty('mistakeDistribution')
+        expect(profile.body).toHaveProperty('recommendedPlan')
+        expect(profile.body).toHaveProperty('blockers')
     })
 
     it('serves mixed practice with hidden pattern metadata', async () => {
@@ -257,6 +260,20 @@ describe('coach and revision flow', () => {
         expect(mixed.status).toBe(200)
         expect(mixed.body[0].primaryPattern).toBeUndefined()
         expect(mixed.body[0].patterns).toEqual([])
+
+        const run = await request(app)
+            .post('/api/submissions/run')
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                questionId: 'two-sum',
+                language: 'javascript',
+                code: 'function twoSum(){ return [0, 2] }',
+                mode: 'mixed',
+                patternGuess: 'hash-map-lookup',
+            })
+
+        expect(run.status).toBe(200)
+        expect(run.body.revealedPattern.correctGuess).toBe(true)
     })
 })
 
@@ -292,6 +309,7 @@ describe('interview and admin flows', () => {
         expect(finished.status).toBe(200)
         expect(finished.body.status).toBe('finished')
         expect(finished.body.finalScore).toBeGreaterThan(0)
+        expect(finished.body.scoreBreakdown).toHaveProperty('communication')
     })
 
     it('rejects admin content routes for non-admin users', async () => {

@@ -25,6 +25,50 @@ const scoreStatus = (score, attemptedCount, dueReview) => {
     return 'learning'
 }
 
+const mistakeAdvice = {
+    wrong_answer: {
+        title: 'Correctness gap',
+        advice: 'Slow down before coding and write the expected output for at least one custom case.',
+    },
+    runtime_error: {
+        title: 'Runtime stability',
+        advice: 'Check variable initialization, bounds, null values, and language-specific edge behavior.',
+    },
+    time_limit_exceeded: {
+        title: 'Complexity pressure',
+        advice: 'Compare brute force and optimized complexity before running the solution.',
+    },
+    edge_case_failure: {
+        title: 'Edge-case coverage',
+        advice: 'List empty, duplicate, single-item, negative, and large-input cases before implementation.',
+    },
+    complexity_issue: {
+        title: 'Complexity reasoning',
+        advice: 'Name the bottleneck loop or data structure before choosing the final approach.',
+    },
+    syntax_or_compile_issue: {
+        title: 'Implementation hygiene',
+        advice: 'Run through function signature, return type, and variable names before submitting.',
+    },
+    pattern_misunderstanding: {
+        title: 'Pattern recognition',
+        advice: 'Write the reason this pattern applies before opening the editor.',
+    },
+    brute_force_only: {
+        title: 'Optimization habit',
+        advice: 'Start with brute force, then explicitly identify repeated work to remove.',
+    },
+}
+
+const formatTask = ({ type, title, reason, impact = 'medium', minutes = 20, ...rest }) => ({
+    type,
+    title,
+    reason,
+    impact,
+    estimatedMinutes: minutes,
+    ...rest,
+})
+
 export async function recalculatePatternProgress(userId, patternSlug) {
     if (!patternSlug) return null
 
@@ -194,53 +238,63 @@ export async function getTodayPlan(userId) {
     const tasks = []
 
     if (dueRevisions[0]) {
-        tasks.push({
+        tasks.push(formatTask({
             type: 'revision',
             title: `Revise ${dueRevisions[0].questionId.title}`,
             questionId: dueRevisions[0].questionId.slug,
             topic: dueRevisions[0].questionId.topic,
             patternSlug: dueRevisions[0].patternSlug,
             reason: dueRevisions[0].reason,
-        })
+            impact: 'high',
+            minutes: 15,
+        }))
     }
 
     const weakPattern = mastery.find((row) => row.status !== 'locked' && row.masteryScore > 0 && row.masteryScore < 60)
     if (weakPattern) {
-        tasks.push({
+        tasks.push(formatTask({
             type: 'practice',
             title: `Strengthen ${weakPattern.pattern.name}`,
             topic: weakPattern.pattern.topic || 'hashing',
             patternSlug: weakPattern.pattern.slug,
             reason: 'Your recent attempts show this pattern needs practice',
-        })
+            impact: 'high',
+            minutes: 25,
+        }))
     }
 
     if (firstLearning) {
-        tasks.push({
+        tasks.push(formatTask({
             type: 'learn',
             title: `Learn ${firstLearning.pattern.name}`,
             patternSlug: firstLearning.pattern.slug,
             reason: 'Next pattern in your roadmap',
-        })
+            impact: 'medium',
+            minutes: 20,
+        }))
     }
 
     if (practiceQuestion) {
-        tasks.push({
+        tasks.push(formatTask({
             type: 'practice',
             title: `Solve ${practiceQuestion.title}`,
             questionId: practiceQuestion.slug,
             topic: practiceQuestion.topic,
             patternSlug: practiceQuestion.primaryPattern,
             reason: `Build ${firstLearning.pattern.name} skill`,
-        })
+            impact: 'medium',
+            minutes: 30,
+        }))
     }
 
     if (strongPatterns.length >= 2) {
-        tasks.push({
+        tasks.push(formatTask({
             type: 'mixed',
             title: 'Mixed pattern practice',
             reason: 'Train pattern recognition without labels',
-        })
+            impact: 'high',
+            minutes: 25,
+        }))
     }
 
     return {
@@ -250,7 +304,7 @@ export async function getTodayPlan(userId) {
             strongPatterns,
             weakPatterns,
         },
-        tasks,
+        tasks: tasks.slice(0, 5),
         dueRevisions,
     }
 }
@@ -286,7 +340,9 @@ export async function getMistakes(userId) {
 
     return {
         recent: rows,
-        byTag: Object.entries(byTag).map(([tag, count]) => ({ tag, count })).sort((a, b) => b.count - a.count),
+        byTag: Object.entries(byTag)
+            .map(([tag, count]) => ({ tag, count, ...(mistakeAdvice[tag] || { title: tag.replaceAll('_', ' '), advice: 'Review the failed submission and retry a smaller case.' }) }))
+            .sort((a, b) => b.count - a.count),
         byPattern: Object.entries(byPattern).map(([patternSlug, count]) => ({ patternSlug, count })).sort((a, b) => b.count - a.count),
     }
 }
@@ -301,7 +357,7 @@ export async function getSkillProfile(userId) {
         getMastery(userId),
         getMistakes(userId),
         Progress.find({ userId }),
-        Submission.find({ userId }).sort({ createdAt: 1 }),
+        Submission.find({ userId }).sort({ createdAt: 1 }).populate('questionId', 'slug title topic difficulty primaryPattern'),
         RevisionItem.find({ userId }),
     ])
 
@@ -311,6 +367,8 @@ export async function getSkillProfile(userId) {
     const accepted = submissions.filter((row) => row.status === 'accepted')
     const mixed = submissions.filter((row) => row.mode === 'mixed')
     const mixedAccepted = mixed.filter((row) => row.status === 'accepted')
+    const mixedGuesses = mixed.filter((row) => row.patternGuess)
+    const mixedCorrectGuesses = mixedGuesses.filter((row) => row.patternGuessCorrect)
     const hintTotal = submissions.reduce((sum, row) => sum + (row.hintCountAtSubmit || 0), 0)
     const mastered = mastery.filter((row) => row.masteryScore >= 75).length
     const revisionCompleted = revisions.filter((row) => row.status === 'completed').length
@@ -322,6 +380,19 @@ export async function getSkillProfile(userId) {
     const hintScore = submissions.length ? Math.max(0, 15 - Math.round(hintTotal / submissions.length) * 3) : 5
     const revisionScore = revisions.length ? Math.round((revisionCompleted / revisions.length) * 10) : 3
     const readinessScore = Math.max(0, Math.min(100, breadthScore + successScore + mixedScore + hintScore + revisionScore))
+    const blockers = []
+    if (mastered < 3) blockers.push('Build mastery in at least 3 core patterns.')
+    if (mistakes.byTag[0]) blockers.push(`${mistakes.byTag[0].title}: ${mistakes.byTag[0].advice}`)
+    if (revisionQueued > 3) blockers.push('Clear queued revisions before adding many new topics.')
+    if (mixed.length < 3) blockers.push('Do more mixed practice to improve pattern recognition.')
+    if (submissions.length && hintTotal / submissions.length > 1) blockers.push('Reduce hint dependency by writing the next invariant before asking the mentor.')
+
+    const recommendedPlan = [
+        revisionQueued > 0 && { type: 'revision', title: 'Clear due revision', reason: 'Retention improves when weak items are reviewed on schedule.', link: '/revision' },
+        mistakes.byTag[0] && { type: 'habit', title: `Fix ${mistakes.byTag[0].title}`, reason: mistakes.byTag[0].advice, link: '/profile/skills' },
+        { type: 'mixed', title: 'Run mixed pattern practice', reason: 'Practice identifying the pattern without labels.', link: '/practice/mixed?mode=mixed' },
+        { type: 'interview', title: 'Take one mock interview', reason: 'Measure communication, correctness, edge cases, and timing together.', link: '/interview' },
+    ].filter(Boolean).slice(0, 4)
 
     const trendMap = {}
     for (const submission of submissions) {
@@ -338,7 +409,15 @@ export async function getSkillProfile(userId) {
         solveConsistency: submissions.length ? Math.round((accepted.length / submissions.length) * 100) : 0,
         revisionHealth: { completed: revisionCompleted, queued: revisionQueued },
         mistakeDistribution: mistakes.byTag,
-        mixedPractice: { attempted: mixed.length, accepted: mixedAccepted.length },
+        blockers,
+        recommendedPlan,
+        mixedPractice: {
+            attempted: mixed.length,
+            accepted: mixedAccepted.length,
+            guesses: mixedGuesses.length,
+            correctGuesses: mixedCorrectGuesses.length,
+            recognitionAccuracy: mixedGuesses.length ? Math.round((mixedCorrectGuesses.length / mixedGuesses.length) * 100) : 0,
+        },
         mediumHardAttempts: mediumHard.length,
         strengths: mastery.filter((row) => row.masteryScore >= 75).slice(0, 5),
         weakSpots: mastery.filter((row) => row.masteryScore < 60).slice(0, 5),

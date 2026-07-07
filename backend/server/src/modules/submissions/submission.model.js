@@ -33,9 +33,13 @@ const submissionSchema = new mongoose.Schema(
         approachSnapshot: {
             bruteForce: String,
             optimized: String,
+            patternGuess: String,
+            edgeCases: String,
             timeComplexity: String,
             spaceComplexity: String,
         },
+        patternGuess: String,
+        patternGuessCorrect: Boolean,
         mistakeTags: [{ type: String }],
         mode: { type: String, enum: ['practice', 'mixed', 'interview', 'revision'], default: 'practice' },
     },

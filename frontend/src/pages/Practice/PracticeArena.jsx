@@ -34,6 +34,8 @@ const tabs = [
 const emptyApproach = {
     bruteForce: '',
     optimized: '',
+    patternGuess: '',
+    edgeCases: '',
     timeComplexity: '',
     spaceComplexity: '',
 }
@@ -239,6 +241,7 @@ export default function PracticeArena() {
                     code,
                     hintCountAtSubmit: hints.length,
                     approachSnapshot: approach,
+                    patternGuess: approach.patternGuess,
                     mode: practiceMode,
                 },
             })
@@ -475,6 +478,8 @@ export default function PracticeArena() {
                             </div>
                             <ApproachField label="Brute force idea" value={approach.bruteForce} onChange={(value) => updateApproach('bruteForce', value)} placeholder="What is the simplest correct approach?" />
                             <ApproachField label="Optimized idea" value={approach.optimized} onChange={(value) => updateApproach('optimized', value)} placeholder="Which pattern or data structure improves it?" />
+                            <ApproachField label="Pattern guess" value={approach.patternGuess} onChange={(value) => updateApproach('patternGuess', value)} placeholder="Example: hash-map-lookup" />
+                            <ApproachField label="Edge cases to test" value={approach.edgeCases} onChange={(value) => updateApproach('edgeCases', value)} placeholder="Empty input, duplicates, single item, no answer..." />
                             <div className="grid md:grid-cols-2 gap-4">
                                 <ApproachField label="Expected time complexity" value={approach.timeComplexity} onChange={(value) => updateApproach('timeComplexity', value)} placeholder="Example: O(n)" />
                                 <ApproachField label="Expected space complexity" value={approach.spaceComplexity} onChange={(value) => updateApproach('spaceComplexity', value)} placeholder="Example: O(n)" />
@@ -511,6 +516,11 @@ export default function PracticeArena() {
                                     {submissionResult.revealedPattern && (
                                         <div className="mb-3 p-3 rounded-lg bg-google-yellow/10 border border-google-yellow/20">
                                             <p className="text-sm font-semibold text-google-yellow">Revealed pattern: {submissionResult.revealedPattern.slug}</p>
+                                            {submissionResult.revealedPattern.guess && (
+                                                <p className={`text-xs mt-1 ${submissionResult.revealedPattern.correctGuess ? 'text-google-green' : 'text-google-yellow'}`}>
+                                                    Your guess: {submissionResult.revealedPattern.guess} - {submissionResult.revealedPattern.correctGuess ? 'matched' : 'different'}
+                                                </p>
+                                            )}
                                             <p className="text-xs text-gray-400 mt-1">{submissionResult.revealedPattern.reason}</p>
                                         </div>
                                     )}

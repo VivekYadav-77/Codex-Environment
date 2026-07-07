@@ -30,9 +30,12 @@ const runSubmissionSchema = z.object({
         approachSnapshot: z.object({
             bruteForce: z.string().optional(),
             optimized: z.string().optional(),
+            patternGuess: z.string().optional(),
+            edgeCases: z.string().optional(),
             timeComplexity: z.string().optional(),
             spaceComplexity: z.string().optional(),
         }).optional(),
+        patternGuess: z.string().optional(),
         mode: z.enum(['practice', 'mixed', 'interview', 'revision']).optional(),
     }),
     params: z.object({}),
@@ -40,7 +43,7 @@ const runSubmissionSchema = z.object({
 })
 
 router.post('/run', submissionLimiter, validateRequest(runSubmissionSchema), asyncHandler(async (req, res) => {
-    const { questionId, language, code, hintCountAtSubmit = 0, approachSnapshot, mode = 'practice' } = req.body
+    const { questionId, language, code, hintCountAtSubmit = 0, approachSnapshot, patternGuess, mode = 'practice' } = req.body
 
     const question = await Question.findOne(questionLookup(questionId))
 
@@ -62,6 +65,8 @@ router.post('/run', submissionLimiter, validateRequest(runSubmissionSchema), asy
         runtimeMs: result.runtimeMs,
         hintCountAtSubmit,
         approachSnapshot,
+        patternGuess: patternGuess || approachSnapshot?.patternGuess,
+        patternGuessCorrect: Boolean((patternGuess || approachSnapshot?.patternGuess) && question.primaryPattern && (patternGuess || approachSnapshot?.patternGuess)?.toLowerCase().trim() === question.primaryPattern.toLowerCase()),
         mode,
     })
 
@@ -113,6 +118,8 @@ router.post('/run', submissionLimiter, validateRequest(runSubmissionSchema), asy
         mistakeTags,
         revealedPattern: mode === 'mixed' ? {
             slug: question.primaryPattern,
+            guess: submission.patternGuess || null,
+            correctGuess: submission.patternGuessCorrect || false,
             reason: question.coachTags?.length
                 ? `Look for ${question.coachTags.join(', ')} signals.`
                 : 'The required data-access pattern matches this problem structure.',

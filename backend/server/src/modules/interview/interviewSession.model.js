@@ -12,6 +12,7 @@ const interviewSessionSchema = new mongoose.Schema(
         submissions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Submission' }],
         explanation: String,
         finalScore: { type: Number, default: 0 },
+        scoreBreakdown: mongoose.Schema.Types.Mixed,
         feedback: String,
     },
     { timestamps: true }

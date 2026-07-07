@@ -12,11 +12,17 @@ const router = Router()
 router.use(requireAuth)
 
 const scoreInterview = ({ result, attempts, elapsedMinutes, explanation }) => {
-    const correctness = result?.status === 'accepted' ? 55 : Math.round(((result?.passedCount || 0) / Math.max(result?.totalCount || 1, 1)) * 35)
-    const attemptScore = Math.max(0, 20 - Math.max(0, attempts - 1) * 5)
-    const timeScore = Math.max(0, 15 - Math.floor(elapsedMinutes / 10))
-    const explanationScore = explanation?.trim().length > 80 ? 10 : explanation?.trim().length > 20 ? 5 : 0
-    return Math.max(0, Math.min(100, correctness + attemptScore + timeScore + explanationScore))
+    const correctness = result?.status === 'accepted' ? 80 : Math.round(((result?.passedCount || 0) / Math.max(result?.totalCount || 1, 1)) * 55)
+    const debugging = Math.max(0, 100 - Math.max(0, attempts - 1) * 20)
+    const timeManagement = Math.max(0, 100 - Math.floor(elapsedMinutes / 3) * 8)
+    const communication = explanation?.trim().length > 120 ? 85 : explanation?.trim().length > 50 ? 60 : explanation?.trim().length > 20 ? 35 : 10
+    const edgeCases = /edge|empty|duplicate|negative|large|case/i.test(explanation || '') ? 80 : 45
+    const complexity = /O\(|time|space|complex/i.test(explanation || '') ? 80 : 45
+    const finalScore = Math.round((correctness * 0.35) + (complexity * 0.15) + (communication * 0.2) + (edgeCases * 0.1) + (debugging * 0.1) + (timeManagement * 0.1))
+    return {
+        finalScore: Math.max(0, Math.min(100, finalScore)),
+        breakdown: { correctness, complexity, communication, edgeCases, debugging, timeManagement },
+    }
 }
 
 router.post('/start', asyncHandler(async (req, res) => {
@@ -85,7 +91,7 @@ router.post('/:id/finish', asyncHandler(async (req, res) => {
 
     const latest = session.submissions.at(-1)
     const elapsedMinutes = Math.max(1, Math.round((Date.now() - session.startedAt.getTime()) / 60000))
-    const finalScore = scoreInterview({
+    const score = scoreInterview({
         result: latest,
         attempts: session.submissions.length,
         elapsedMinutes,
@@ -95,8 +101,9 @@ router.post('/:id/finish', asyncHandler(async (req, res) => {
     session.status = 'finished'
     session.endedAt = new Date()
     session.explanation = req.body?.explanation || ''
-    session.finalScore = finalScore
-    session.feedback = finalScore >= 75
+    session.finalScore = score.finalScore
+    session.scoreBreakdown = score.breakdown
+    session.feedback = score.finalScore >= 75
         ? 'Strong interview attempt. Keep practicing concise explanation and edge-case coverage.'
         : 'Good practice signal. Review the pattern, explain the invariant, then retry a similar problem.'
     await session.save()
