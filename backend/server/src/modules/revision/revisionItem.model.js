@@ -12,6 +12,8 @@ const revisionItemSchema = new mongoose.Schema(
         },
         dueAt: { type: Date, required: true, index: true },
         priority: { type: Number, default: 2 },
+        intervalDays: { type: Number, default: 1 },
+        lastResult: String,
         status: { type: String, enum: ['queued', 'completed', 'skipped'], default: 'queued' },
     },
     { timestamps: true }

@@ -64,8 +64,10 @@ export default function Dashboard() {
     }
 
     const today = dashboard?.today
+    const skillProfile = dashboard?.skillProfile
     const mastery = dashboard?.mastery || []
     const topWeak = mastery.filter((item) => item.masteryScore < 60).slice(0, 4)
+    const topMistake = skillProfile?.mistakeDistribution?.[0]
 
     return (
         <div className="max-w-7xl mx-auto space-y-6">
@@ -80,8 +82,8 @@ export default function Dashboard() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="glass-card p-4"><p className="text-sm text-gray-400">Solved</p><p className="text-3xl font-bold text-google-green">{today?.summary?.solved || 0}</p></div>
                 <div className="glass-card p-4"><p className="text-sm text-gray-400">Attempted</p><p className="text-3xl font-bold text-google-yellow">{today?.summary?.attempted || 0}</p></div>
-                <div className="glass-card p-4"><p className="text-sm text-gray-400">Strong</p><p className="text-lg font-semibold">{today?.summary?.strongPatterns?.[0] || 'Building'}</p></div>
-                <div className="glass-card p-4"><p className="text-sm text-gray-400">Focus</p><p className="text-lg font-semibold text-google-blue">{today?.summary?.weakPatterns?.[0] || 'Start roadmap'}</p></div>
+                <div className="glass-card p-4"><p className="text-sm text-gray-400">Readiness</p><p className="text-3xl font-bold text-google-blue">{skillProfile?.readinessScore || 0}%</p></div>
+                <div className="glass-card p-4"><p className="text-sm text-gray-400">Top Mistake</p><p className="text-sm font-semibold text-google-yellow capitalize">{topMistake?.tag?.replaceAll('_', ' ') || 'No data yet'}</p></div>
             </div>
 
             <div className="grid lg:grid-cols-3 gap-6">
@@ -91,7 +93,7 @@ export default function Dashboard() {
                         {today?.tasks?.length ? today.tasks.map((task, index) => {
                             const Icon = taskIcon[task.type] || CheckCircle
                             return (
-                                <Link key={`${task.type}-${index}`} to={taskLink(task)} className="block">
+                                <Link key={`${task.type}-${index}`} to={task.type === 'mixed' ? '/practice/mixed?mode=mixed' : taskLink(task)} className="block">
                                     <div className="p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
                                         <div className="flex items-center gap-3">
                                             <Icon className="text-google-blue" />

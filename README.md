@@ -12,7 +12,30 @@ Codex Environment is a comprehensive Data Structures and Algorithms (DSA) learni
   - **Code Review**: Instant AI code reviews analyzing correctness, complexity (Time/Space), and style.
 - **Code Execution Engine**: Run code securely in JavaScript, Python, Java, and C++.
 - **Interactive Tutorials**: Learn concepts like Big O notation and Recursion through interactive modules.
+- **Adaptive Learning Coach**: Personalized next actions, skill profile, mistake intelligence, revision calendar, mixed practice, and interview mode.
+- **Learner Intelligence**: Tracks mistake tags, hint usage, approach snapshots, pattern mastery, readiness score, and learning timeline events.
+- **Content Studio Foundation**: Admin-protected APIs and UI shell for managing questions, patterns, concept checks, and learning tracks.
 - **Modern UI**: Polished Glassmorphism design system using Tailwind CSS and Framer Motion.
+
+## Learning Coach Architecture
+
+The platform now centers on a learner-first coaching loop:
+
+1. **Practice**: Learners solve normal, revision, mixed-pattern, or interview-mode problems.
+2. **Detect**: Submissions create deterministic mistake insights such as edge-case failure, complexity issue, pattern misunderstanding, and syntax/runtime issues.
+3. **Adapt**: Coach APIs calculate mastery, skill profile, readiness score, weak patterns, and ranked next actions.
+4. **Revise**: Revision items use spaced intervals based on wrong answers, hint-supported solves, and clean solves.
+5. **Reflect**: Practice Arena includes AI mentor chat and a timeline of submissions, hints, mentor messages, and accepted solutions.
+
+Important API areas:
+
+- `/api/coach/me/dashboard`, `/api/coach/me/skill-profile`, `/api/coach/me/mistakes`, `/api/coach/me/next-actions`
+- `/api/revision/me`, `/api/revision/me/:id/complete`, `/api/revision/me/:id/skip`, `/api/revision/me/:id/reschedule`
+- `/api/questions/mixed`, `/api/questions/:questionId/timeline/me`
+- `/api/patterns/:slug/concept-checks`, `/api/coach/me/concept-checks/attempt`
+- `/api/ai/mentor/message`, `/api/ai/mentor/session/:questionId`
+- `/api/interview/start`, `/api/interview/:id/run`, `/api/interview/:id/finish`, `/api/interview/me`
+- `/api/admin/questions`, `/api/admin/patterns`, `/api/admin/concept-checks`, `/api/admin/tracks`
 
 ## 🛠️ Tech Stack
 

@@ -17,6 +17,7 @@ const { User } = await import('../src/modules/users/user.model.js')
 const { Question } = await import('../src/modules/questions/question.model.js')
 const { Pattern } = await import('../src/modules/patterns/pattern.model.js')
 const { LearningTrack } = await import('../src/modules/tracks/learningTrack.model.js')
+const { RevisionItem } = await import('../src/modules/revision/revisionItem.model.js')
 const { corePatterns, enrichQuestion, hashingJudge, trackSeed } = await import('../src/scripts/seedDatabase.js')
 
 const app = createApp()
@@ -187,6 +188,13 @@ describe('coach and revision flow', () => {
         expect(revisions.status).toBe(200)
         expect(revisions.body).toHaveLength(1)
         expect(revisions.body[0].reason).toBe('wrong_answer')
+
+        const mistakes = await request(app)
+            .get('/api/coach/me/mistakes')
+            .set('Authorization', `Bearer ${token}`)
+
+        expect(mistakes.status).toBe(200)
+        expect(mistakes.body.byTag.some((item) => item.tag === 'wrong_answer')).toBe(true)
     })
 
     it('updates mastery after accepted submissions', async () => {
@@ -205,5 +213,95 @@ describe('coach and revision flow', () => {
         expect(accepted.status).toBe(200)
         expect(accepted.body.status).toBe('accepted')
         expect(accepted.body.patternProgress.masteryScore).toBeGreaterThan(0)
+    })
+
+    it('prioritizes due revision in next actions and returns a skill profile', async () => {
+        await seedMinimalCoachData()
+        const token = await register()
+        const question = await Question.findOne({ slug: 'two-sum' })
+        const userResponse = await request(app).get('/api/auth/me').set('Authorization', `Bearer ${token}`)
+
+        await RevisionItem.create({
+            userId: userResponse.body.user.id,
+            questionId: question._id,
+            patternSlug: 'hash-map-lookup',
+            reason: 'manual',
+            dueAt: new Date(Date.now() - 1000),
+            priority: 1,
+        })
+
+        const actions = await request(app)
+            .get('/api/coach/me/next-actions')
+            .set('Authorization', `Bearer ${token}`)
+
+        expect(actions.status).toBe(200)
+        expect(actions.body[0].type).toBe('revision')
+
+        const profile = await request(app)
+            .get('/api/coach/me/skill-profile')
+            .set('Authorization', `Bearer ${token}`)
+
+        expect(profile.status).toBe(200)
+        expect(profile.body).toHaveProperty('readinessScore')
+        expect(profile.body).toHaveProperty('mistakeDistribution')
+    })
+
+    it('serves mixed practice with hidden pattern metadata', async () => {
+        await seedMinimalCoachData()
+        const token = await register()
+
+        const mixed = await request(app)
+            .get('/api/questions/mixed')
+            .set('Authorization', `Bearer ${token}`)
+
+        expect(mixed.status).toBe(200)
+        expect(mixed.body[0].primaryPattern).toBeUndefined()
+        expect(mixed.body[0].patterns).toEqual([])
+    })
+})
+
+describe('interview and admin flows', () => {
+    it('starts, runs, and finishes an interview session', async () => {
+        await seedMinimalCoachData()
+        const token = await register()
+
+        const started = await request(app)
+            .post('/api/interview/start')
+            .set('Authorization', `Bearer ${token}`)
+            .send({ language: 'javascript' })
+
+        expect(started.status).toBe(201)
+        expect(started.body.session._id).toBeTruthy()
+
+        const run = await request(app)
+            .post(`/api/interview/${started.body.session._id}/run`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                language: 'javascript',
+                code: 'function twoSum(nums,target){const seen=new Map(); for(let i=0;i<nums.length;i++){const need=target-nums[i]; if(seen.has(need)) return [seen.get(need), i]; seen.set(nums[i], i);}}',
+            })
+
+        expect(run.status).toBe(200)
+        expect(run.body.status).toBe('accepted')
+
+        const finished = await request(app)
+            .post(`/api/interview/${started.body.session._id}/finish`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({ explanation: 'I track previously seen numbers in a map and return once the complement appears.' })
+
+        expect(finished.status).toBe(200)
+        expect(finished.body.status).toBe('finished')
+        expect(finished.body.finalScore).toBeGreaterThan(0)
+    })
+
+    it('rejects admin content routes for non-admin users', async () => {
+        await seedMinimalCoachData()
+        const token = await register()
+
+        const response = await request(app)
+            .get('/api/admin/questions')
+            .set('Authorization', `Bearer ${token}`)
+
+        expect(response.status).toBe(403)
     })
 })

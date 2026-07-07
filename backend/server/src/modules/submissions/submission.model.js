@@ -29,6 +29,15 @@ const submissionSchema = new mongoose.Schema(
         passedCount: { type: Number, default: 0 },
         totalCount: { type: Number, default: 0 },
         runtimeMs: { type: Number, default: 0 },
+        hintCountAtSubmit: { type: Number, default: 0 },
+        approachSnapshot: {
+            bruteForce: String,
+            optimized: String,
+            timeComplexity: String,
+            spaceComplexity: String,
+        },
+        mistakeTags: [{ type: String }],
+        mode: { type: String, enum: ['practice', 'mixed', 'interview', 'revision'], default: 'practice' },
     },
     { timestamps: true }
 )

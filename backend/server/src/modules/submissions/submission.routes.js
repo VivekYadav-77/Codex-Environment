@@ -7,6 +7,7 @@ import { Progress } from '../progress/progress.model.js'
 import { runJudgedSubmission } from '../execution/execution.service.js'
 import { Submission } from './submission.model.js'
 import { updateCoachAfterSubmission } from '../coach/coach.service.js'
+import { recordLearningOutcome } from '../insights/insight.service.js'
 import { validateRequest } from '../../middleware/validateRequest.js'
 import { z } from 'zod'
 
@@ -25,13 +26,21 @@ const runSubmissionSchema = z.object({
         questionId: z.string().min(1),
         language: z.enum(['javascript', 'python']),
         code: z.string().min(1).max(50000),
+        hintCountAtSubmit: z.number().int().min(0).max(100).optional(),
+        approachSnapshot: z.object({
+            bruteForce: z.string().optional(),
+            optimized: z.string().optional(),
+            timeComplexity: z.string().optional(),
+            spaceComplexity: z.string().optional(),
+        }).optional(),
+        mode: z.enum(['practice', 'mixed', 'interview', 'revision']).optional(),
     }),
     params: z.object({}),
     query: z.object({}),
 })
 
 router.post('/run', submissionLimiter, validateRequest(runSubmissionSchema), asyncHandler(async (req, res) => {
-    const { questionId, language, code } = req.body
+    const { questionId, language, code, hintCountAtSubmit = 0, approachSnapshot, mode = 'practice' } = req.body
 
     const question = await Question.findOne(questionLookup(questionId))
 
@@ -51,7 +60,24 @@ router.post('/run', submissionLimiter, validateRequest(runSubmissionSchema), asy
         passedCount: result.passedCount,
         totalCount: result.totalCount,
         runtimeMs: result.runtimeMs,
+        hintCountAtSubmit,
+        approachSnapshot,
+        mode,
     })
+
+    const mistakeTags = await recordLearningOutcome({
+        userId: req.user._id,
+        question,
+        submission,
+        result,
+        mode,
+        hintCountAtSubmit,
+    })
+
+    if (mistakeTags.length) {
+        submission.mistakeTags = mistakeTags
+        await submission.save()
+    }
 
     await Progress.findOneAndUpdate(
         { userId: req.user._id, questionId: question._id },
@@ -73,6 +99,7 @@ router.post('/run', submissionLimiter, validateRequest(runSubmissionSchema), asy
         userId: req.user._id,
         question,
         result,
+        submission,
     })
 
     res.json({
@@ -83,6 +110,13 @@ router.post('/run', submissionLimiter, validateRequest(runSubmissionSchema), asy
         runtimeMs: result.runtimeMs,
         testResults: result.testResults,
         error: result.error,
+        mistakeTags,
+        revealedPattern: mode === 'mixed' ? {
+            slug: question.primaryPattern,
+            reason: question.coachTags?.length
+                ? `Look for ${question.coachTags.join(', ')} signals.`
+                : 'The required data-access pattern matches this problem structure.',
+        } : undefined,
         patternProgress,
     })
 }))

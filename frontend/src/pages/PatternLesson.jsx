@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { BookOpen, Loader2, Target } from 'lucide-react'
+import { BookOpen, CheckCircle, Loader2, Target } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { GlassPanel } from '../components/ui/Glass'
 import { apiFetch } from '../api/client'
@@ -8,13 +8,33 @@ import { apiFetch } from '../api/client'
 export default function PatternLesson() {
     const { patternSlug } = useParams()
     const [data, setData] = useState(null)
+    const [checks, setChecks] = useState([])
+    const [answers, setAnswers] = useState({})
+    const [checkResults, setCheckResults] = useState({})
     const [error, setError] = useState('')
 
     useEffect(() => {
         apiFetch(`/api/patterns/${patternSlug}`)
             .then(setData)
             .catch((err) => setError(err.message))
+        apiFetch(`/api/patterns/${patternSlug}/concept-checks`)
+            .then(setChecks)
+            .catch(() => setChecks([]))
     }, [patternSlug])
+
+    const submitCheck = async (check) => {
+        const selectedIndex = answers[check._id]
+        if (selectedIndex === undefined) return
+        if (check.generated) {
+            setCheckResults((current) => ({ ...current, [check._id]: { correct: selectedIndex === check.correctIndex, explanation: check.explanation } }))
+            return
+        }
+        const result = await apiFetch('/api/coach/me/concept-checks/attempt', {
+            method: 'POST',
+            body: { conceptCheckId: check._id, selectedIndex },
+        })
+        setCheckResults((current) => ({ ...current, [check._id]: result }))
+    }
 
     if (error) {
         return (
@@ -49,6 +69,31 @@ export default function PatternLesson() {
 
             <div className="grid lg:grid-cols-3 gap-6">
                 <GlassPanel className="lg:col-span-2 space-y-6">
+                    <section>
+                        <h2 className="text-xl font-bold mb-3 flex items-center gap-2"><CheckCircle size={20} />Concept Diagnosis</h2>
+                        <div className="space-y-4">
+                            {checks.map((check) => (
+                                <div key={check._id} className="p-4 rounded-lg bg-white/5 border border-white/10">
+                                    <p className="font-semibold mb-3">{check.question}</p>
+                                    <div className="space-y-2">
+                                        {check.options.map((option, index) => (
+                                            <label key={option} className="flex items-center gap-2 text-sm text-gray-300">
+                                                <input type="radio" name={check._id} checked={answers[check._id] === index} onChange={() => setAnswers((current) => ({ ...current, [check._id]: index }))} />
+                                                {option}
+                                            </label>
+                                        ))}
+                                    </div>
+                                    <Button size="sm" className="mt-3" onClick={() => submitCheck(check)}>Check Readiness</Button>
+                                    {checkResults[check._id] && (
+                                        <p className={`text-sm mt-3 ${checkResults[check._id].correct ? 'text-google-green' : 'text-google-yellow'}`}>
+                                            {checkResults[check._id].correct ? 'Ready signal: ' : 'Review signal: '}
+                                            {checkResults[check._id].explanation}
+                                        </p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </section>
                     <div className="grid md:grid-cols-3 gap-3">
                         <div className="p-3 rounded-lg bg-white/5">
                             <p className="text-xs text-gray-400">Category</p>

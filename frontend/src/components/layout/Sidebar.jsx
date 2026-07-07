@@ -20,6 +20,10 @@ import {
     Type,
     Lightbulb,
     Target,
+    CalendarClock,
+    Brain,
+    Briefcase,
+    Shield,
     RotateCcw,
     Cpu,
     Zap,
@@ -48,6 +52,21 @@ const menuSections = [
         title: 'Roadmap',
         icon: Map,
         path: '/roadmap',
+    },
+    {
+        title: 'Revision',
+        icon: CalendarClock,
+        path: '/revision',
+    },
+    {
+        title: 'Skill Profile',
+        icon: Brain,
+        path: '/profile/skills',
+    },
+    {
+        title: 'Interview',
+        icon: Briefcase,
+        path: '/interview',
     },
     {
         title: 'Tutorial',
@@ -85,6 +104,7 @@ const menuSections = [
         icon: PenTool,
         path: '/practice',
         items: [
+            { label: 'Mixed Practice', path: '/practice/mixed', icon: Target },
             { label: 'Sorting', path: '/practice/sorting', icon: Layers },
             { label: 'Searching', path: '/practice/searching', icon: Search },
             { label: 'Stacks', path: '/practice/stacks', icon: LayoutList },
@@ -94,6 +114,11 @@ const menuSections = [
             { label: 'Graphs', path: '/practice/graphs', icon: Network },
             { label: 'Hashing', path: '/practice/hashing', icon: Hash },
         ]
+    },
+    {
+        title: 'Admin',
+        icon: Shield,
+        path: '/admin/content',
     },
 ]
 

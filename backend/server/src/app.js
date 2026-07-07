@@ -13,6 +13,8 @@ import patternRoutes from './modules/patterns/pattern.routes.js'
 import trackRoutes from './modules/tracks/track.routes.js'
 import coachRoutes from './modules/coach/coach.routes.js'
 import revisionRoutes from './modules/revision/revision.routes.js'
+import interviewRoutes from './modules/interview/interview.routes.js'
+import adminRoutes from './modules/admin/admin.routes.js'
 
 export function createApp() {
     const app = express()
@@ -42,6 +44,8 @@ export function createApp() {
     app.use('/api/tracks', trackRoutes)
     app.use('/api/coach', coachRoutes)
     app.use('/api/revision', revisionRoutes)
+    app.use('/api/interview', interviewRoutes)
+    app.use('/api/admin', adminRoutes)
 
     app.use(notFound)
     app.use(errorMiddleware)

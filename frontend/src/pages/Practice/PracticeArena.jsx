@@ -5,7 +5,9 @@ import { useSelector } from 'react-redux'
 import Editor from '@monaco-editor/react'
 import {
     AlertCircle,
+    Brain,
     CheckCircle,
+    Clock,
     FileText,
     Lightbulb,
     Loader2,
@@ -25,6 +27,8 @@ const tabs = [
     { id: 'approach', label: 'Approach', icon: PenTool },
     { id: 'tests', label: 'Tests', icon: Terminal },
     { id: 'review', label: 'Review', icon: CheckCircle },
+    { id: 'mentor', label: 'Mentor', icon: Brain },
+    { id: 'timeline', label: 'Timeline', icon: Clock },
 ]
 
 const emptyApproach = {
@@ -120,6 +124,11 @@ export default function PracticeArena() {
     const [currentPattern, setCurrentPattern] = useState(null)
     const [activeTab, setActiveTab] = useState('problem')
     const [approach, setApproach] = useState(emptyApproach)
+    const [practiceMode, setPracticeMode] = useState(searchParams.get('mode') || (topic === 'mixed' ? 'mixed' : 'practice'))
+    const [mentorMessage, setMentorMessage] = useState('')
+    const [mentorSession, setMentorSession] = useState(null)
+    const [mentorLoading, setMentorLoading] = useState(false)
+    const [timeline, setTimeline] = useState([])
 
     const currentQuestion = questions[selectedIdx]
     const approachKey = useMemo(() => {
@@ -132,7 +141,8 @@ export default function PracticeArena() {
             setLoading(true)
             setError('')
             try {
-                const data = await apiFetch(`/api/questions?topic=${encodeURIComponent(topic)}`)
+                const isMixed = practiceMode === 'mixed' || topic === 'mixed'
+                const data = await apiFetch(isMixed ? '/api/questions/mixed' : `/api/questions?topic=${encodeURIComponent(topic)}`)
                 setQuestions(data)
                 const requestedQuestion = searchParams.get('question')
                 const requestedIdx = requestedQuestion ? data.findIndex((q) => q.slug === requestedQuestion || q.id === requestedQuestion) : -1
@@ -145,7 +155,7 @@ export default function PracticeArena() {
         }
 
         loadQuestions()
-    }, [topic, searchParams])
+    }, [topic, searchParams, practiceMode])
 
     useEffect(() => {
         if (!currentQuestion) return
@@ -155,14 +165,22 @@ export default function PracticeArena() {
         setReview(null)
         setActiveTab('problem')
 
-        if (currentQuestion.primaryPattern) {
+        if (currentQuestion.primaryPattern && practiceMode !== 'mixed') {
             apiFetch(`/api/patterns/${currentQuestion.primaryPattern}`)
                 .then((data) => setCurrentPattern(data.pattern))
                 .catch(() => setCurrentPattern(null))
         } else {
             setCurrentPattern(null)
         }
+        setTimeline([])
+        setMentorSession(null)
     }, [currentQuestion, language])
+
+    useEffect(() => {
+        if (!currentQuestion?.slug || !user) return
+        apiFetch(`/api/questions/${currentQuestion.slug}/timeline/me`).then(setTimeline).catch(() => setTimeline([]))
+        apiFetch(`/api/ai/mentor/session/${currentQuestion.slug}`).then(setMentorSession).catch(() => setMentorSession(null))
+    }, [currentQuestion, user, submissionResult, hints.length])
 
     useEffect(() => {
         if (!approachKey) return
@@ -215,9 +233,21 @@ export default function PracticeArena() {
         try {
             const result = await apiFetch('/api/submissions/run', {
                 method: 'POST',
-                body: { questionId: currentQuestion.slug || currentQuestion.id, language, code },
+                body: {
+                    questionId: currentQuestion.slug || currentQuestion.id,
+                    language,
+                    code,
+                    hintCountAtSubmit: hints.length,
+                    approachSnapshot: approach,
+                    mode: practiceMode,
+                },
             })
             setSubmissionResult(result)
+            if (result.revealedPattern?.slug) {
+                apiFetch(`/api/patterns/${result.revealedPattern.slug}`)
+                    .then((data) => setCurrentPattern(data.pattern))
+                    .catch(() => setCurrentPattern(null))
+            }
             setActiveTab('tests')
         } catch (err) {
             setSubmissionResult({
@@ -247,6 +277,32 @@ export default function PracticeArena() {
             setHints((items) => [...items, { id: Date.now(), content: `Hint unavailable: ${err.message}` }])
         } finally {
             setHintLoading(false)
+        }
+    }
+
+    const handleMentor = async () => {
+        if (!currentQuestion || !mentorMessage.trim()) return
+        setMentorLoading(true)
+        try {
+            const result = await apiFetch('/api/ai/mentor/message', {
+                method: 'POST',
+                body: {
+                    questionId: currentQuestion.slug || currentQuestion.id,
+                    message: mentorMessage,
+                    code,
+                    approach,
+                    mode: practiceMode,
+                },
+            })
+            setMentorSession(result.session)
+            setMentorMessage('')
+        } catch (err) {
+            setMentorSession((current) => ({
+                ...(current || {}),
+                messages: [...(current?.messages || []), { role: 'mentor', content: `Mentor unavailable: ${err.message}` }],
+            }))
+        } finally {
+            setMentorLoading(false)
         }
     }
 
@@ -307,6 +363,20 @@ export default function PracticeArena() {
                 </h1>
                 <p className="text-gray-400">Reason through the approach, code, test, then review your DSA solution.</p>
             </motion.div>
+
+            <GlassPanel className="mb-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    <div>
+                        <p className="font-semibold">Practice mode</p>
+                        <p className="text-sm text-gray-400">Mixed mode hides the pattern until after submission.</p>
+                    </div>
+                    <select value={practiceMode} onChange={(e) => setPracticeMode(e.target.value)} className="glass-input px-3 py-2 text-sm">
+                        <option value="practice">Normal Practice</option>
+                        <option value="revision">Revision</option>
+                        <option value="mixed">Mixed Pattern</option>
+                    </select>
+                </div>
+            </GlassPanel>
 
             {!user && (
                 <GlassPanel className="mb-6 border border-google-yellow/30">
@@ -379,6 +449,12 @@ export default function PracticeArena() {
                                     </div>
                                 </Link>
                             )}
+                            {practiceMode === 'mixed' && !currentPattern && (
+                                <div className="p-3 rounded-lg bg-google-yellow/10 border border-google-yellow/20 mb-4">
+                                    <p className="text-sm text-google-yellow font-semibold">Pattern hidden</p>
+                                    <p className="text-xs text-gray-400 mt-1">Solve first, then the platform will reveal the pattern signal.</p>
+                                </div>
+                            )}
                             <p className="text-gray-300 whitespace-pre-line mb-4">{currentQuestion.description}</p>
                             {currentQuestion.examples?.map((example, index) => (
                                 <div key={index} className="bg-white/5 rounded-lg p-4 mb-3">
@@ -432,6 +508,12 @@ export default function PracticeArena() {
                                             <p className="text-xs text-gray-400 mt-2">Status: {submissionResult.patternProgress.status}</p>
                                         </div>
                                     )}
+                                    {submissionResult.revealedPattern && (
+                                        <div className="mb-3 p-3 rounded-lg bg-google-yellow/10 border border-google-yellow/20">
+                                            <p className="text-sm font-semibold text-google-yellow">Revealed pattern: {submissionResult.revealedPattern.slug}</p>
+                                            <p className="text-xs text-gray-400 mt-1">{submissionResult.revealedPattern.reason}</p>
+                                        </div>
+                                    )}
                                     {submissionResult.error && <p className="text-sm text-gray-300 mb-3">{submissionResult.error}</p>}
                                     <div className="space-y-3">
                                         {submissionResult.testResults?.map((result, index) => <TestResult key={`${result.name}-${index}`} result={result} />)}
@@ -462,6 +544,43 @@ export default function PracticeArena() {
                                         {hints.map((hint) => <div key={hint.id} className="p-3 rounded-lg bg-google-yellow/10 border border-google-yellow/20 text-sm text-gray-300">{hint.content}</div>)}
                                     </div>
                                 )}
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'mentor' && (
+                        <div className="space-y-4">
+                            <div>
+                                <h2 className="text-xl font-bold">AI Mentor</h2>
+                                <p className="text-sm text-gray-400">Strict Socratic guidance based on your code, attempts, approach notes, and mistakes.</p>
+                            </div>
+                            <div className="space-y-3 max-h-[420px] overflow-y-auto">
+                                {mentorSession?.messages?.length ? mentorSession.messages.map((message, index) => (
+                                    <div key={index} className={`p-3 rounded-lg ${message.role === 'learner' ? 'bg-google-blue/10 border border-google-blue/20' : 'bg-white/5 border border-white/10'}`}>
+                                        <p className="text-xs text-gray-500 mb-1 capitalize">{message.role}</p>
+                                        <p className="text-sm text-gray-300">{message.content}</p>
+                                    </div>
+                                )) : <p className="text-gray-400">Ask what to think about next. The mentor will nudge, not solve.</p>}
+                            </div>
+                            <textarea className="glass-input w-full min-h-[90px]" value={mentorMessage} onChange={(event) => setMentorMessage(event.target.value)} placeholder="Describe where you are stuck." />
+                            <Button variant="blue" icon={Brain} onClick={handleMentor} loading={mentorLoading}>Ask Mentor</Button>
+                        </div>
+                    )}
+
+                    {activeTab === 'timeline' && (
+                        <div>
+                            <h2 className="text-xl font-bold mb-4">Thinking Timeline</h2>
+                            <div className="space-y-3">
+                                {timeline.length ? timeline.map((event) => (
+                                    <div key={event._id} className="p-3 rounded-lg bg-white/5 border border-white/10">
+                                        <div className="flex justify-between gap-3">
+                                            <p className="font-semibold capitalize">{event.title || event.type.replaceAll('_', ' ')}</p>
+                                            <p className="text-xs text-gray-500">{new Date(event.createdAt).toLocaleString()}</p>
+                                        </div>
+                                        {event.details?.status && <p className="text-sm text-gray-400 mt-1">{event.details.status} - {event.details.passedCount}/{event.details.totalCount} tests</p>}
+                                        {event.details?.tags?.length ? <p className="text-xs text-google-yellow mt-1">{event.details.tags.join(', ')}</p> : null}
+                                    </div>
+                                )) : <p className="text-gray-400">Run tests, request hints, or talk to the mentor to build a replay.</p>}
                             </div>
                         </div>
                     )}
