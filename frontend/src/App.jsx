@@ -19,6 +19,9 @@ const Interview = lazy(() => import('./pages/Interview'))
 const AdminContent = lazy(() => import('./pages/AdminContent'))
 const DailySession = lazy(() => import('./pages/DailySession'))
 const Misconceptions = lazy(() => import('./pages/Misconceptions'))
+const Onboarding = lazy(() => import('./pages/Onboarding'))
+const Learn = lazy(() => import('./pages/Learn'))
+const SystemDesign = lazy(() => import('./pages/SystemDesign'))
 
 const PageLoader = () => (
     <div className="min-h-[50vh] flex items-center justify-center">
@@ -40,7 +43,11 @@ export default function App() {
                             {/* Home */}
                             <Route path="/" element={<Home />} />
                             <Route path="/dashboard" element={<Dashboard />} />
+                            <Route path="/onboarding" element={<Onboarding />} />
                             <Route path="/session/today" element={<DailySession />} />
+                            <Route path="/learn" element={<Learn />} />
+                            <Route path="/system-design" element={<SystemDesign />} />
+                            <Route path="/system-design/:slug" element={<SystemDesign />} />
                             <Route path="/roadmap" element={<Roadmap />} />
                             <Route path="/roadmap/:patternSlug" element={<PatternLesson />} />
                             <Route path="/revision" element={<Revision />} />
@@ -49,6 +56,7 @@ export default function App() {
                             <Route path="/admin/content" element={<AdminContent />} />
                             <Route path="/misconceptions" element={<Misconceptions />} />
                             <Route path="/misconceptions/:slug" element={<Misconceptions />} />
+                            <Route path="/mistake-doctor" element={<Misconceptions />} />
                             <Route path="/login" element={<Login />} />
                             <Route path="/register" element={<Register />} />
 

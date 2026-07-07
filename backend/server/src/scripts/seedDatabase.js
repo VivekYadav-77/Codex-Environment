@@ -8,6 +8,9 @@ import { Question } from '../modules/questions/question.model.js'
 import { Algorithm } from '../modules/algorithms/algorithm.model.js'
 import { Pattern } from '../modules/patterns/pattern.model.js'
 import { LearningTrack } from '../modules/tracks/learningTrack.model.js'
+import { SystemDesignConcept } from '../modules/systemDesign/systemDesignConcept.model.js'
+import { SystemDesignPrompt } from '../modules/systemDesign/systemDesignPrompt.model.js'
+import { systemDesignConceptSeeds, systemDesignPromptSeeds } from '../modules/systemDesign/systemDesign.content.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const dataDir = join(__dirname, '..', '..', 'data')
@@ -207,6 +210,66 @@ export const trackSeed = {
     estimatedProblemCount: 80,
     patterns: corePatterns.map((pattern) => ({ patternSlug: pattern.slug, order: pattern.order })),
 }
+
+const patternLabExtras = {
+    'hash-map-lookup': {
+        analogy: 'Imagine checking a guest list while people enter. Instead of asking everyone again, you keep a notebook of who already arrived.',
+        signalRules: ['Need to find a complement or previous value', 'Need O(1) lookup while scanning', 'Problem mentions pairs, indexes, or seen-before values'],
+        antiSignals: ['Input must remain sorted and order alone solves it', 'The problem needs all combinations, not one lookup decision'],
+        visualSteps: ['Start with an empty map', 'For each value, compute the needed complement', 'Check the map before inserting current value', 'Return once the complement is found'],
+        trapExamples: ['Inserting before checking can reuse the same element', 'Returning values instead of indexes in Two Sum'],
+        bruteForceToOptimized: 'The brute force checks every pair in O(n^2). The optimized version remembers previous values in a map so each complement check becomes O(1).',
+        guidedProblemSlugs: ['two-sum', 'contains-duplicate', 'isomorphic-strings'],
+        mixedProblemSlugs: ['longest-consecutive', 'subarray-sum-k', 'valid-anagram'],
+        interviewProblemSlugs: ['two-sum'],
+    },
+    'frequency-map': {
+        analogy: 'Like sorting votes into buckets before deciding who won.',
+        signalRules: ['Duplicates or counts matter', 'Need compare two collections', 'Words like frequency, anagram, unique, majority, top-k appear'],
+        antiSignals: ['Only relative position matters', 'Need contiguous window without global counts'],
+        visualSteps: ['Create a count table', 'Increment count for each value', 'Use counts to compare, group, or rank', 'Handle missing keys explicitly'],
+        trapExamples: ['Forgetting different lengths in anagram checks', 'Comparing grouped arrays without unordered comparison'],
+        bruteForceToOptimized: 'Repeated counting scans the same data many times. A frequency map counts once and answers many questions from the table.',
+        guidedProblemSlugs: ['contains-duplicate', 'first-unique-char', 'valid-anagram'],
+        mixedProblemSlugs: ['group-anagrams', 'top-k-frequent'],
+        interviewProblemSlugs: ['group-anagrams'],
+    },
+    'two-pointers': {
+        analogy: 'Two people walk from opposite ends of a street and eliminate impossible shops as they move.',
+        signalRules: ['Sorted array or string symmetry', 'Need pair search, palindrome check, partition, or in-place movement', 'Can discard one side after each comparison'],
+        antiSignals: ['Unsorted data with no monotonic rule', 'Need random membership lookup instead of directional movement'],
+        visualSteps: ['Place left and right pointers', 'Compare current values', 'Move the pointer that cannot be part of the answer', 'Stop when pointers meet or cross'],
+        trapExamples: ['Moving both pointers after one comparison', 'Forgetting to sort only when index preservation is not required'],
+        bruteForceToOptimized: 'The brute force tries many pairs. Two pointers use sorted structure or symmetry to discard impossible pairs in linear time.',
+        guidedProblemSlugs: ['sort-colors'],
+        mixedProblemSlugs: ['merge-intervals'],
+        interviewProblemSlugs: ['sort-colors'],
+    },
+    'binary-search': {
+        analogy: 'Like guessing a number by always asking whether the answer is higher or lower.',
+        signalRules: ['Sorted input', 'Monotonic yes/no condition', 'Need minimum feasible answer or exact target'],
+        antiSignals: ['No sorted order or monotonic predicate', 'Every item must be inspected independently'],
+        visualSteps: ['Define search boundaries', 'Pick middle', 'Ask the monotonic question', 'Discard half safely'],
+        trapExamples: ['Boundary update causes infinite loop', 'Using binary search when predicate is not monotonic'],
+        bruteForceToOptimized: 'Linear scan checks each candidate. Binary search asks a stronger question and removes half the space each step.',
+        guidedProblemSlugs: ['binary-search-target', 'search-insert'],
+        mixedProblemSlugs: ['search-rotated', 'find-minimum-rotated'],
+        interviewProblemSlugs: ['search-2d-matrix'],
+    },
+}
+
+const enrichPattern = (pattern) => ({
+    ...pattern,
+    analogy: patternLabExtras[pattern.slug]?.analogy || pattern.mentalModel,
+    signalRules: patternLabExtras[pattern.slug]?.signalRules || [pattern.whenToUse],
+    antiSignals: patternLabExtras[pattern.slug]?.antiSignals || ['When the input lacks the structure this pattern depends on.'],
+    visualSteps: patternLabExtras[pattern.slug]?.visualSteps || ['Identify the signal', 'Write the invariant', 'Apply the template', 'Test edge cases'],
+    trapExamples: patternLabExtras[pattern.slug]?.trapExamples || pattern.commonMistakes,
+    bruteForceToOptimized: patternLabExtras[pattern.slug]?.bruteForceToOptimized || 'Start from the obvious correct solution, then remove repeated work by using the pattern invariant.',
+    guidedProblemSlugs: patternLabExtras[pattern.slug]?.guidedProblemSlugs || [],
+    mixedProblemSlugs: patternLabExtras[pattern.slug]?.mixedProblemSlugs || [],
+    interviewProblemSlugs: patternLabExtras[pattern.slug]?.interviewProblemSlugs || [],
+})
 
 export const topicDefaults = {
     hashing: 'hash-map-lookup',
@@ -414,12 +477,16 @@ export async function seed() {
     await Algorithm.deleteMany({})
     await Pattern.deleteMany({})
     await LearningTrack.deleteMany({})
+    await SystemDesignConcept.deleteMany({})
+    await SystemDesignPrompt.deleteMany({})
     await Question.insertMany(questions)
     await Algorithm.insertMany(algorithms)
-    await Pattern.insertMany(corePatterns)
+    await Pattern.insertMany(corePatterns.map(enrichPattern))
     await LearningTrack.create(trackSeed)
+    await SystemDesignConcept.insertMany(systemDesignConceptSeeds)
+    await SystemDesignPrompt.insertMany(systemDesignPromptSeeds)
 
-    console.log(`Seeded ${questions.length} questions, ${algorithms.length} algorithms, ${corePatterns.length} patterns, and 1 learning track.`)
+    console.log(`Seeded ${questions.length} questions, ${algorithms.length} algorithms, ${corePatterns.length} patterns, ${systemDesignConceptSeeds.length} system design concepts, ${systemDesignPromptSeeds.length} prompts, and 1 learning track.`)
     await mongoose.disconnect()
 }
 

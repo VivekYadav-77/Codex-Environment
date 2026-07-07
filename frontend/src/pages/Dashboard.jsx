@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import { BookOpen, CheckCircle, Compass, Loader2, RotateCcw, Target } from 'lucide-react'
+import { BookOpen, CheckCircle, Compass, Loader2, Network, RotateCcw, Sparkles, Target } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { GlassPanel } from '../components/ui/Glass'
 import { apiFetch } from '../api/client'
@@ -10,10 +10,15 @@ const taskIcon = {
     learn: BookOpen,
     practice: Target,
     revision: RotateCcw,
+    system_design: Network,
+    mixed: Target,
+    'mixed-warmup': Target,
 }
 
 const taskLink = (task) => {
     if (task.type === 'learn') return `/roadmap/${task.patternSlug}`
+    if (task.type === 'system_design') return task.link || '/system-design'
+    if (task.type === 'mixed' || task.type === 'mixed-warmup') return '/practice/mixed?mode=mixed'
     if (task.type === 'practice' || task.type === 'revision') return `/practice/${task.topic || 'hashing'}${task.questionId ? `?question=${task.questionId}` : ''}`
     return '/roadmap'
 }
@@ -78,7 +83,28 @@ export default function Dashboard() {
                     <Compass className="text-google-blue" />
                     Adaptive Coach
                 </h1>
-                <p className="text-gray-400">Today’s plan is generated from your submissions, mastery, and revision needs.</p>
+                <p className="text-gray-400">Today's plan is generated from your submissions, mastery, revision needs, and System Design readiness.</p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+                <Link to="/onboarding" className="block">
+                    <div className="glass-card p-4 flex items-center gap-3">
+                        <Sparkles className="text-google-yellow" />
+                        <div>
+                            <p className="font-semibold">Coach setup</p>
+                            <p className="text-sm text-gray-400">{dashboard?.onboarding?.completed ? 'Tune your goal, level, time, and tracks.' : 'Complete onboarding so Today can personalize your learning loop.'}</p>
+                        </div>
+                    </div>
+                </Link>
+                <Link to="/system-design" className="block">
+                    <div className="glass-card p-4 flex items-center gap-3">
+                        <Network className="text-google-green" />
+                        <div>
+                            <p className="font-semibold">System Design Studio</p>
+                            <p className="text-sm text-gray-400">Practice components, architecture canvas, tradeoffs, and design interview drills.</p>
+                        </div>
+                    </div>
+                </Link>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

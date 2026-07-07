@@ -9,7 +9,6 @@ import {
     CheckCircle,
     Clock,
     FileText,
-    Lightbulb,
     Loader2,
     Lock,
     PenTool,
@@ -21,6 +20,11 @@ import {
 import { Button } from '../../components/ui/Button'
 import { GlassPanel } from '../../components/ui/Glass'
 import { apiFetch } from '../../api/client'
+import { HintLadder } from './components/HintLadder'
+import { OfficialSolutionPanel } from './components/OfficialSolutionPanel'
+import { PracticeModeSelector } from './components/PracticeModeSelector'
+import { ReflectionPanel } from './components/ReflectionPanel'
+import { WorkflowStepper } from './components/WorkflowStepper'
 
 const tabs = [
     { id: 'problem', label: 'Problem', icon: FileText },
@@ -42,8 +46,6 @@ const emptyApproach = {
     timeComplexity: '',
     spaceComplexity: '',
 }
-
-const workflowSteps = ['Understand', 'Plan', 'Code', 'Test', 'Reflect']
 
 const statusConfig = {
     accepted: { label: 'Accepted', color: 'text-google-green', border: 'border-google-green/30 bg-google-green/5' },
@@ -250,7 +252,7 @@ export default function PracticeArena() {
         }
 
         const missingMixed = []
-        if (practiceMode === 'mixed') {
+        if (practiceMode === 'mixed' || practiceMode === 'interview') {
             if (!approach.patternGuess.trim()) missingMixed.push('pattern guess')
             if (!approach.bruteForce.trim()) missingMixed.push('brute force idea')
             if (!approach.optimized.trim()) missingMixed.push('optimized idea')
@@ -263,7 +265,7 @@ export default function PracticeArena() {
                 totalCount: 0,
                 runtimeMs: 0,
                 testResults: [],
-                error: `Mixed practice requires: ${missingMixed.join(', ')}.`,
+                error: `${practiceMode === 'interview' ? 'Interview mode' : 'Mixed practice'} requires: ${missingMixed.join(', ')}.`,
             })
             setActiveTab('approach')
             return
@@ -425,33 +427,30 @@ export default function PracticeArena() {
                 <p className="text-gray-400">Reason through the approach, code, test, then review your DSA solution.</p>
             </motion.div>
 
-            <GlassPanel className="mb-6">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                    <div>
-                        <p className="font-semibold">Practice mode</p>
-                        <p className="text-sm text-gray-400">Mixed mode hides the pattern until after submission.</p>
-                    </div>
-                    <select value={practiceMode} onChange={(e) => setPracticeMode(e.target.value)} className="glass-input px-3 py-2 text-sm">
-                        <option value="practice">Normal Practice</option>
-                        <option value="revision">Revision</option>
-                        <option value="mixed">Mixed Pattern</option>
-                    </select>
-                </div>
-            </GlassPanel>
+            <PracticeModeSelector practiceMode={practiceMode} onChange={setPracticeMode} />
+            <WorkflowStepper activeTab={activeTab} approach={approach} submissionResult={submissionResult} />
 
-            <GlassPanel className="mb-6">
-                <div className="grid grid-cols-5 gap-2">
-                    {workflowSteps.map((step, index) => {
-                        const active = (activeTab === 'problem' && index === 0) || (activeTab === 'approach' && index === 1) || (index === 2 && activeTab === 'problem') || (activeTab === 'tests' && index === 3) || (activeTab === 'review' && index === 4)
-                        const complete = index === 0 || (index === 1 && Object.values(approach).some(Boolean)) || (index === 3 && submissionResult)
-                        return (
-                            <div key={step} className={`rounded-lg p-2 text-center text-xs border ${active ? 'border-google-blue bg-google-blue/10 text-white' : complete ? 'border-google-green/30 bg-google-green/5 text-google-green' : 'border-white/10 bg-white/5 text-gray-400'}`}>
-                                {step}
-                            </div>
-                        )
-                    })}
-                </div>
-            </GlassPanel>
+            {practiceMode === 'guided' && (
+                <GlassPanel className="mb-6 border border-google-green/20">
+                    <h2 className="font-semibold text-google-green mb-2">Guided coach step</h2>
+                    <p className="text-sm text-gray-300">Read the problem, write the brute force idea, name the pattern signal, then code. The goal is learning the thinking loop, not racing.</p>
+                </GlassPanel>
+            )}
+
+            {practiceMode === 'mixed' && (
+                <GlassPanel className="mb-6 border border-google-yellow/20">
+                    <h2 className="font-semibold text-google-yellow mb-2">Pattern Recognition Game</h2>
+                    <p className="text-sm text-gray-300 mb-3">Before coding, guess the pattern from the statement. The platform reveals the actual pattern after submission.</p>
+                    <input className="glass-input w-full" value={approach.patternGuess} onChange={(event) => updateApproach('patternGuess', event.target.value)} placeholder="Example: hash-map-lookup, two-pointers, binary-search" />
+                </GlassPanel>
+            )}
+
+            {practiceMode === 'interview' && (
+                <GlassPanel className="mb-6 border border-google-blue/20">
+                    <h2 className="font-semibold text-google-blue mb-2">Interview pressure mode</h2>
+                    <p className="text-sm text-gray-300">Explain constraints, edge cases, complexity, and tradeoffs before relying on the judge. Use final review as interviewer feedback.</p>
+                </GlassPanel>
+            )}
 
             {!user && (
                 <GlassPanel className="mb-6 border border-google-yellow/30">
@@ -622,50 +621,9 @@ export default function PracticeArena() {
                             </div>
                             {review ? <SimpleMarkdown content={review} /> : <p className="text-gray-400">Submit for review after drafting your approach or running tests.</p>}
 
-                            <div className="pt-5 border-t border-white/10">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-lg font-semibold flex items-center gap-2"><Lightbulb size={20} className="text-google-yellow" />AI Hints</h3>
-                                    <Button variant="glass" size="sm" onClick={handleHint} loading={hintLoading} icon={Lightbulb}>Hint Level {hintLevel}</Button>
-                                </div>
-                                {hints.length === 0 ? <p className="text-gray-400 text-sm">Ask for a nudge when you are stuck.</p> : (
-                                    <div className="space-y-3">
-                                        {hints.map((hint) => <div key={hint.id} className="p-3 rounded-lg bg-google-yellow/10 border border-google-yellow/20 text-sm text-gray-300"><p className="text-xs text-google-yellow mb-1">Level {hint.hintLevel || 1}</p>{hint.content}</div>)}
-                                    </div>
-                                )}
-                            </div>
-                            {submissionResult?.status === 'accepted' && (
-                                <div className="pt-5 border-t border-white/10 space-y-3">
-                                    <h3 className="text-lg font-semibold">Post-Solve Reflection</h3>
-                                    {[
-                                        ['patternUsed', 'Pattern used'],
-                                        ['whyItWorked', 'Why it worked'],
-                                        ['keyInvariant', 'Key invariant'],
-                                        ['dangerousEdgeCase', 'Dangerous edge case'],
-                                        ['interviewExplanation', 'Interview explanation'],
-                                    ].map(([field, label]) => (
-                                        <textarea key={field} className="glass-input w-full min-h-[72px]" value={reflection[field]} onChange={(event) => setReflection((current) => ({ ...current, [field]: event.target.value }))} placeholder={label} />
-                                    ))}
-                                    <label className="block">
-                                        <span className="block text-sm text-gray-400 mb-1">Confidence after solve: {reflection.confidenceAfterSolve}/5</span>
-                                        <input className="w-full" type="range" min="1" max="5" value={reflection.confidenceAfterSolve} onChange={(event) => setReflection((current) => ({ ...current, confidenceAfterSolve: Number(event.target.value) }))} />
-                                    </label>
-                                    <Button variant="green" size="sm" onClick={saveReflection} disabled={reflectionSaved}>{reflectionSaved ? 'Reflection Saved' : 'Save Reflection'}</Button>
-                                </div>
-                            )}
-                            {officialSolution && (
-                                <div className="pt-5 border-t border-white/10 space-y-3">
-                                    <h3 className="text-lg font-semibold">Official Explanation</h3>
-                                    {officialSolution.empty ? (
-                                        <p className="text-sm text-gray-400">Official solution content has not been added yet.</p>
-                                    ) : (
-                                        <div className="space-y-3 text-sm text-gray-300">
-                                            {officialSolution.officialSolution?.optimizedApproach && <p>{officialSolution.officialSolution.optimizedApproach}</p>}
-                                            {officialSolution.officialSolution?.complexityExplanation && <p className="text-gray-400">{officialSolution.officialSolution.complexityExplanation}</p>}
-                                            {officialSolution.officialSolution?.interviewExplanation && <p className="text-google-blue">{officialSolution.officialSolution.interviewExplanation}</p>}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                            <HintLadder hints={hints} hintLevel={hintLevel} hintLoading={hintLoading} onHint={handleHint} />
+                            <ReflectionPanel submissionResult={submissionResult} reflection={reflection} setReflection={setReflection} reflectionSaved={reflectionSaved} onSave={saveReflection} />
+                            <OfficialSolutionPanel officialSolution={officialSolution} />
                         </div>
                     )}
 

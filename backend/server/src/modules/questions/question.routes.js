@@ -27,6 +27,8 @@ const toQuestionResponse = (question, options = {}) => ({
     functionName: question.functionName,
     hasJudge: Boolean(question.functionName && question.testCases?.length),
     hints: question.hints || [],
+    mixedWarmup: Boolean(options.mixedWarmup),
+    recommendationReason: options.recommendationReason,
 })
 
 router.get('/', asyncHandler(async (req, res) => {
@@ -49,7 +51,13 @@ router.get('/mixed', requireAuth, asyncHandler(async (req, res) => {
     if (['Easy', 'Medium', 'Hard'].includes(level)) filter.difficulty = level
 
     const questions = await Question.find(filter).sort({ learningOrder: 1, difficulty: 1 }).limit(12)
-    res.json(questions.map((question) => toQuestionResponse(question, { hidePattern: true })))
+    res.json(questions.map((question) => toQuestionResponse(question, {
+        hidePattern: true,
+        mixedWarmup: introducedPatterns.length === 0,
+        recommendationReason: introducedPatterns.length === 0
+            ? 'Warm-up mixed practice uses early active questions until you solve enough patterns.'
+            : 'Selected from patterns you have already introduced.',
+    })))
 }))
 
 router.get('/:slug/timeline/me', requireAuth, asyncHandler(async (req, res) => {

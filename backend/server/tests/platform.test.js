@@ -19,6 +19,9 @@ const { Pattern } = await import('../src/modules/patterns/pattern.model.js')
 const { LearningTrack } = await import('../src/modules/tracks/learningTrack.model.js')
 const { RevisionItem } = await import('../src/modules/revision/revisionItem.model.js')
 const { ConceptCheck } = await import('../src/modules/conceptChecks/conceptCheck.model.js')
+const { SystemDesignConcept } = await import('../src/modules/systemDesign/systemDesignConcept.model.js')
+const { SystemDesignPrompt } = await import('../src/modules/systemDesign/systemDesignPrompt.model.js')
+const { systemDesignConceptSeeds, systemDesignPromptSeeds } = await import('../src/modules/systemDesign/systemDesign.content.js')
 const { corePatterns, enrichQuestion, hashingJudge, trackSeed } = await import('../src/scripts/seedDatabase.js')
 
 const app = createApp()
@@ -71,6 +74,14 @@ afterAll(async () => {
 describe('environment validation', () => {
     it('rejects invalid URLs', () => {
         expect(() => parseEnv({ FRONTEND_URL: 'not-a-url' })).toThrow(/Invalid environment configuration/)
+    })
+
+    it('returns deep health details', async () => {
+        const response = await request(app).get('/health/deep')
+        expect(response.status).toBe(200)
+        expect(response.body.database.connected).toBe(true)
+        expect(response.body).toHaveProperty('judge')
+        expect(response.body).toHaveProperty('requestId')
     })
 })
 
@@ -283,10 +294,87 @@ describe('coach and revision flow', () => {
         expect(run.status).toBe(200)
         expect(run.body.revealedPattern.correctGuess).toBe(true)
         expect(run.body.executionJobId).toBeTruthy()
+
+        const job = await request(app)
+            .get(`/api/execution/jobs/${run.body.executionJobId}`)
+            .set('Authorization', `Bearer ${token}`)
+
+        expect(job.status).toBe(200)
+        expect(['completed', 'timed_out']).toContain(job.body.status)
+        expect(job.body.logs).toBeTruthy()
     })
 })
 
 describe('learning operating system flow', () => {
+    it('stores onboarding preferences and injects system design into daily planning', async () => {
+        await seedMinimalCoachData()
+        await SystemDesignConcept.create(systemDesignConceptSeeds[0])
+        const token = await register()
+
+        const saved = await request(app)
+            .put('/api/onboarding/me')
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                goal: 'interview_prep',
+                level: 'beginner',
+                dailyTimeMinutes: 45,
+                selectedTracks: ['dsa', 'system_design'],
+            })
+
+        expect(saved.status).toBe(200)
+        expect(saved.body.completed).toBe(true)
+        expect(saved.body.selectedTracks).toContain('system_design')
+
+        const today = await request(app)
+            .get('/api/coach/me/today')
+            .set('Authorization', `Bearer ${token}`)
+
+        expect(today.status).toBe(200)
+        expect(today.body.tasks.some((task) => task.type === 'system_design')).toBe(true)
+    })
+
+    it('serves system design concepts, saves drafts, and scores attempts', async () => {
+        await seedMinimalCoachData()
+        await SystemDesignConcept.insertMany(systemDesignConceptSeeds.slice(0, 2))
+        await SystemDesignPrompt.create(systemDesignPromptSeeds[0])
+        const token = await register()
+
+        const concepts = await request(app).get('/api/system-design/concepts')
+        expect(concepts.status).toBe(200)
+        expect(concepts.body.length).toBe(2)
+
+        const concept = await request(app).get(`/api/system-design/concepts/${systemDesignConceptSeeds[0].slug}`)
+        expect(concept.status).toBe(200)
+        expect(concept.body).toHaveProperty('tradeoffs')
+
+        const draft = await request(app)
+            .post('/api/system-design/drafts')
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                title: 'URL shortener draft',
+                promptSlug: 'url-shortener',
+                components: [{ name: 'API Service' }],
+                connections: ['Client -> API Service'],
+                notes: 'Cache hot redirects and store durable mappings.',
+            })
+        expect(draft.status).toBe(201)
+
+        const attempt = await request(app)
+            .post('/api/system-design/attempts')
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                promptSlug: 'url-shortener',
+                requirements: 'Create short URLs, redirect users, and collect basic analytics.',
+                estimates: 'Assume read-heavy traffic with many redirects per created link.',
+                highLevelDesign: 'Use API servers behind a load balancer with database and cache.',
+                bottlenecks: 'Hot links can overload the database if redirects are not cached.',
+                tradeoffs: 'Random codes simplify distributed generation but need collision checks.',
+                finalRecommendation: 'Start with cached redirects, durable storage, and async analytics.',
+            })
+        expect(attempt.status).toBe(201)
+        expect(attempt.body.score).toBe(100)
+    })
+
     it('records learning events and returns event summaries', async () => {
         await seedMinimalCoachData()
         const token = await register()
@@ -405,6 +493,19 @@ describe('learning operating system flow', () => {
         expect(quality.status).toBe(200)
         expect(quality.body).toHaveProperty('score')
         expect(quality.body).toHaveProperty('missing')
+
+        const publishCheck = await request(app)
+            .post(`/api/admin/questions/${question._id}/publish-check`)
+            .set('Authorization', `Bearer ${token}`)
+
+        expect(publishCheck.status).toBe(200)
+
+        const audit = await request(app)
+            .get('/api/admin/audit')
+            .set('Authorization', `Bearer ${token}`)
+
+        expect(audit.status).toBe(200)
+        expect(audit.body.some((row) => row.action === 'question.publish_check')).toBe(true)
     })
 
     it('hides official solutions until accepted and exposes learner memory and analytics', async () => {
@@ -457,6 +558,25 @@ describe('learning operating system flow', () => {
         expect(analytics.status).toBe(200)
         expect(analytics.body).toHaveProperty('streaks')
         expect(analytics.body).toHaveProperty('submissionTrend')
+    })
+
+    it('returns deterministic hint fallback without an AI key', async () => {
+        await seedMinimalCoachData()
+        const token = await register()
+        const response = await request(app)
+            .post('/api/ai/hint')
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                code: 'function twoSum(){}',
+                question: { _id: '507f1f77bcf86cd799439011', title: 'Two Sum', description: 'Find two values.' },
+                hintLevel: 2,
+                forceFallback: true,
+            })
+
+        expect(response.status).toBe(200)
+        expect(response.body.aiFallback).toBe(true)
+        expect(response.body.hintLevel).toBe(2)
+        expect(response.body.hint).toMatch(/pattern|signal/i)
     })
 })
 

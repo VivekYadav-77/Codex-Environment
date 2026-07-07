@@ -7,9 +7,14 @@ import { Pattern } from '../patterns/pattern.model.js'
 import { ConceptCheck } from '../conceptChecks/conceptCheck.model.js'
 import { LearningTrack } from '../tracks/learningTrack.model.js'
 import { scoreQuestionQuality } from './contentQuality.service.js'
+import { AdminAudit } from './adminAudit.model.js'
 
 const router = Router()
 router.use(requireAuth, requireAdmin)
+
+const audit = (req, action, targetType, targetId, metadata = {}) => (
+    AdminAudit.create({ userId: req.user._id, action, targetType, targetId: String(targetId || ''), metadata, requestId: req.requestId })
+)
 
 const crud = (Model) => {
     const child = Router()
@@ -58,6 +63,7 @@ router.patch('/questions/:id/solution', asyncHandler(async (req, res) => {
         { new: true, runValidators: true }
     )
     if (!question) return res.status(404).json({ error: 'Question not found' })
+    await audit(req, 'question.solution.updated', 'question', question._id)
     res.json({ officialSolution: question.officialSolution, quality: await scoreQuestionQuality(question) })
 }))
 
@@ -90,7 +96,21 @@ router.patch('/questions/:id/content', asyncHandler(async (req, res) => {
     const update = Object.fromEntries(Object.entries(req.body).filter(([key]) => allowed.includes(key)))
     const question = await Question.findByIdAndUpdate(req.params.id, { $set: update }, { new: true, runValidators: true })
     if (!question) return res.status(404).json({ error: 'Question not found' })
+    await audit(req, 'question.content.updated', 'question', question._id, { fields: Object.keys(update) })
     res.json({ question, quality: await scoreQuestionQuality(question) })
+}))
+
+router.get('/audit', asyncHandler(async (req, res) => {
+    const rows = await AdminAudit.find({}).sort({ createdAt: -1 }).limit(100).populate('userId', 'name email role')
+    res.json(rows)
+}))
+
+router.post('/questions/:id/publish-check', asyncHandler(async (req, res) => {
+    const question = await Question.findById(req.params.id)
+    if (!question) return res.status(404).json({ error: 'Question not found' })
+    const quality = await scoreQuestionQuality(question)
+    await audit(req, 'question.publish_check', 'question', question._id, { score: quality.score, publishReady: quality.publishReady })
+    res.json(quality)
 }))
 
 export default router

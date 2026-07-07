@@ -1,10 +1,10 @@
 export function notFound(req, res) {
-    res.status(404).json({ error: 'Not found' })
+    res.status(404).json({ error: 'Not found', requestId: req.requestId })
 }
 
 export function errorMiddleware(err, req, res, next) {
     const statusCode = err.statusCode || err.status || 500
-    const payload = { error: err.message || 'Something went wrong' }
+    const payload = { error: err.message || 'Something went wrong', requestId: req.requestId }
 
     if (process.env.NODE_ENV !== 'production' && err.details) {
         payload.details = err.details

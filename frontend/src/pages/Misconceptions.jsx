@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import { AlertTriangle, Loader2 } from 'lucide-react'
 import { GlassPanel } from '../components/ui/Glass'
 import { apiFetch } from '../api/client'
 
 export default function Misconceptions() {
     const { slug } = useParams()
+    const location = useLocation()
+    const isDoctor = location.pathname.startsWith('/mistake-doctor')
     const [items, setItems] = useState(null)
     const [error, setError] = useState('')
 
@@ -21,8 +23,8 @@ export default function Misconceptions() {
     return (
         <div className="max-w-5xl mx-auto space-y-6">
             <div>
-                <h1 className="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-3"><AlertTriangle className="text-google-yellow" />Misconceptions</h1>
-                <p className="text-gray-400">Common mental-model gaps detected from your attempts and practice behavior.</p>
+                <h1 className="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-3"><AlertTriangle className="text-google-yellow" />{isDoctor ? 'Mistake Doctor' : 'Misconceptions'}</h1>
+                <p className="text-gray-400">{isDoctor ? 'Plain-language diagnosis, correction, and recovery actions from your recent mistakes.' : 'Common mental-model gaps detected from your attempts and practice behavior.'}</p>
             </div>
             <div className="space-y-4">
                 {items.map((item) => (
@@ -31,8 +33,8 @@ export default function Misconceptions() {
                             <div>
                                 <h2 className="text-xl font-bold">{item.title}</h2>
                                 <p className="text-gray-400 mt-1">{item.description}</p>
-                                <p className="text-sm text-google-green mt-3">{item.correction}</p>
-                                <p className="text-sm text-gray-300 mt-2">{item.recommendedAction}</p>
+                                <p className="text-sm text-google-green mt-3">Correction: {item.correction}</p>
+                                <p className="text-sm text-gray-300 mt-2">Recovery: {item.recommendedAction}</p>
                                 <p className="text-xs text-google-yellow mt-2">Confidence: {item.confidence || 'low'} - Evidence: {item.evidenceCount || 0}</p>
                             </div>
                             {!slug && <Link className="text-google-blue text-sm" to={`/misconceptions/${item.slug}`}>Details</Link>}

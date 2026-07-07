@@ -1,183 +1,89 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import {
-    BookOpen,
-    Play,
-    PenTool,
-    ChevronDown,
+    AlertTriangle,
     BarChart3,
-    GitBranch,
-    ListTree,
-    Network,
-    Binary,
-    Search,
-    Layers,
-    Hash,
-    LayoutList,
-    ArrowLeftRight,
-    Table2,
-    Type,
-    Lightbulb,
-    Target,
-    CalendarClock,
+    BookOpen,
     Brain,
     Briefcase,
-    Shield,
-    AlertTriangle,
-    RotateCcw,
-    Cpu,
-    Zap,
-    Sparkles // Imported Sparkles
-    ,
+    ChevronDown,
     Compass,
-    Map
+    Home,
+    Map,
+    Network,
+    PenTool,
+    Play,
+    RotateCcw,
+    Sparkles,
+    Target,
 } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 import { setSidebarOpen } from '../../store/slices/uiSlice'
 
 const menuSections = [
-    // 1. Added Home Route here
+    { title: 'Home', icon: Home, path: '/' },
+    { title: 'Today', icon: Compass, path: '/session/today' },
     {
-        title: 'Home', // Matched 'label' to 'title' for consistency
-        icon: Sparkles,
-        path: '/',
-        // No 'items' array implies this is a direct link
-    },
-    {
-        title: 'Dashboard',
-        icon: Compass,
-        path: '/dashboard',
-    },
-    {
-        title: 'Today',
-        icon: Play,
-        path: '/session/today',
-    },
-    {
-        title: 'Roadmap',
-        icon: Map,
-        path: '/roadmap',
-    },
-    {
-        title: 'Revision',
-        icon: CalendarClock,
-        path: '/revision',
-    },
-    {
-        title: 'Skill Profile',
-        icon: Brain,
-        path: '/profile/skills',
-    },
-    {
-        title: 'Misconceptions',
-        icon: AlertTriangle,
-        path: '/misconceptions',
-    },
-    {
-        title: 'Interview',
-        icon: Briefcase,
-        path: '/interview',
-    },
-    {
-        title: 'Tutorial',
+        title: 'Learn',
         icon: BookOpen,
-        path: '/tutorial',
+        path: '/learn',
         items: [
-            { label: 'Big O Complexity', path: '/tutorial/complexity', icon: BarChart3 },
-            { label: 'Recursion Flow', path: '/tutorial/flow', icon: GitBranch },
-        ]
-    },
-    {
-        title: 'Visualizer',
-        icon: Play,
-        path: '/algorithms',
-        items: [
-            { label: 'Arrays', path: '/algorithms/arrays', icon: Table2 },
-            { label: 'Strings', path: '/algorithms/strings', icon: Type },
-            { label: 'Sorting', path: '/algorithms/sorting', icon: Layers },
-            { label: 'Searching', path: '/algorithms/searching', icon: Search },
-            { label: 'Stacks', path: '/algorithms/stacks', icon: LayoutList },
-            { label: 'Queues', path: '/algorithms/queues', icon: ArrowLeftRight },
-            { label: 'Linked Lists', path: '/algorithms/linked-lists', icon: Binary },
-            { label: 'Trees', path: '/algorithms/trees', icon: ListTree },
-            { label: 'Graphs', path: '/algorithms/graphs', icon: Network },
-            { label: 'Hashing', path: '/algorithms/hashing', icon: Hash },
-            { label: 'Dynamic Programming', path: '/algorithms/dp', icon: Lightbulb },
-            { label: 'Greedy', path: '/algorithms/greedy', icon: Target },
-            { label: 'Backtracking', path: '/algorithms/backtracking', icon: RotateCcw },
-            { label: 'Bit Manipulation', path: '/algorithms/bit-manipulation', icon: Cpu },
-            { label: 'Advanced', path: '/algorithms/advanced', icon: Zap },
-        ]
+            { label: 'Learning Hub', path: '/learn', icon: Sparkles },
+            { label: 'DSA Roadmap', path: '/roadmap', icon: Map },
+            { label: 'System Design', path: '/system-design', icon: Network },
+            { label: 'Visualizer', path: '/algorithms', icon: Play },
+            { label: 'Complexity', path: '/tutorial/complexity', icon: BarChart3 },
+        ],
     },
     {
         title: 'Practice',
         icon: PenTool,
         path: '/practice',
         items: [
-            { label: 'Mixed Practice', path: '/practice/mixed', icon: Target },
-            { label: 'Sorting', path: '/practice/sorting', icon: Layers },
-            { label: 'Searching', path: '/practice/searching', icon: Search },
-            { label: 'Stacks', path: '/practice/stacks', icon: LayoutList },
-            { label: 'Queues', path: '/practice/queues', icon: ArrowLeftRight },
-            { label: 'Linked Lists', path: '/practice/linked-lists', icon: Binary },
-            { label: 'Trees', path: '/practice/trees', icon: ListTree },
-            { label: 'Graphs', path: '/practice/graphs', icon: Network },
-            { label: 'Hashing', path: '/practice/hashing', icon: Hash },
-        ]
+            { label: 'Guided Practice', path: '/practice/hashing?mode=guided', icon: Target },
+            { label: 'Mixed Practice', path: '/practice/mixed?mode=mixed', icon: Brain },
+            { label: 'Revision', path: '/revision', icon: RotateCcw },
+            { label: 'Mistake Doctor', path: '/mistake-doctor', icon: AlertTriangle },
+            { label: 'Skill Profile', path: '/profile/skills', icon: Brain },
+        ],
     },
     {
-        title: 'Admin',
-        icon: Shield,
-        path: '/admin/content',
+        title: 'Interview',
+        icon: Briefcase,
+        path: '/interview',
+        items: [
+            { label: 'Interview Mode', path: '/interview', icon: Briefcase },
+            { label: 'Coding Practice', path: '/practice/mixed?mode=interview', icon: PenTool },
+            { label: 'Design Drill', path: '/system-design', icon: Network },
+        ],
     },
 ]
 
 export default function Sidebar() {
     const location = useLocation()
     const dispatch = useDispatch()
-    const { sidebarOpen } = useSelector(state => state.ui)
+    const { sidebarOpen } = useSelector((state) => state.ui)
     const [openSections, setOpenSections] = useState({})
 
     useEffect(() => {
-        const handleResize = () => {
-            if (window.innerWidth < 768) {
-                dispatch(setSidebarOpen(false));
-            } else {
-                dispatch(setSidebarOpen(true));
-            }
-        };
-
-        handleResize();
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, [dispatch]);
+        const handleResize = () => dispatch(setSidebarOpen(window.innerWidth >= 768))
+        handleResize()
+        window.addEventListener('resize', handleResize)
+        return () => window.removeEventListener('resize', handleResize)
+    }, [dispatch])
 
     useEffect(() => {
-        const activeSection = menuSections.find(section =>
-            // Only auto-expand if the section has items
-            section.items && location.pathname.startsWith(section.path)
-        )
-        if (activeSection) {
-            setOpenSections(prev => ({
-                ...prev,
-                [activeSection.title]: true
-            }))
-        }
+        const activeSection = menuSections.find((section) => section.items && location.pathname.startsWith(section.path))
+        if (activeSection) setOpenSections((current) => ({ ...current, [activeSection.title]: true }))
     }, [location.pathname])
 
-    const closeSidebar = () => dispatch(setSidebarOpen(false))
-
-    const toggleSection = (title) => {
-        setOpenSections(prev => ({
-            ...prev,
-            [title]: !prev[title]
-        }))
+    const closeSidebar = () => {
+        if (window.innerWidth < 768) dispatch(setSidebarOpen(false))
     }
 
     return (
         <>
-            {/* Mobile Overlay */}
             <AnimatePresence>
                 {sidebarOpen && (
                     <motion.div
@@ -190,112 +96,49 @@ export default function Sidebar() {
                 )}
             </AnimatePresence>
 
-            {/* Sidebar */}
-            <motion.aside
-                className={`
-                    fixed left-0 top-16 bottom-0 w-64 z-40
-                    glass border-r border-white/5
-                    transition-transform duration-300 ease-in-out
-                    ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
-                    md:translate-x-0
-                `}
-            >
-                <div className="h-full overflow-y-auto py-6 px-4 ">
-                    <div className="space-y-4">
+            <motion.aside className={`fixed left-0 top-16 bottom-0 w-64 z-40 glass border-r border-white/5 transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
+                <div className="h-full overflow-y-auto py-6 px-4">
+                    <div className="mb-5 p-3 rounded-lg bg-google-blue/10 border border-google-blue/20">
+                        <p className="text-sm font-semibold text-google-blue">Coach Guided</p>
+                        <p className="text-xs text-gray-400 mt-1">Today tells you what to learn, solve, revise, and explain next.</p>
+                    </div>
+                    <div className="space-y-2">
                         {menuSections.map((section) => {
-                            // Check if this is the active route (exact match for Home, startsWith for others)
-                            const isSectionActive = section.path === '/' 
-                                ? location.pathname === '/' 
-                                : location.pathname.startsWith(section.path)
-                            
+                            const isSectionActive = section.path === '/'
+                                ? location.pathname === '/'
+                                : location.pathname.startsWith(section.path) || section.items?.some((item) => location.pathname === item.path.split('?')[0])
                             const isOpen = openSections[section.title]
 
-                            // 2. NEW LOGIC: If no items, render a direct Link (Home)
                             if (!section.items) {
                                 return (
-                                    <Link 
-                                        key={section.title} 
-                                        to={section.path} 
-                                        onClick={closeSidebar}
-                                        className="block rounded-xl overflow-hidden text to-blue-700"
-                                    >
-                                        <div className={`
-                                            w-full flex items-center gap-3 px-3 py-3 text-sm font-semibold 
-                                            transition-all duration-200 uppercase tracking-wider
-                                            ${isSectionActive
-                                                ? 'text-blue-500 bg-white/10'
-                                                : 'text-gray-400 hover:text-white hover:bg-white/5'
-                                            }
-                                        `}>
-                                            <section.icon size={18} className={isSectionActive ? 'text-google-blue' : ''} />
-                                            <span>{section.title}</span>
-                                        </div>
+                                    <Link key={section.title} to={section.path} onClick={closeSidebar} className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-semibold uppercase tracking-wider ${isSectionActive ? 'text-white bg-white/10' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
+                                        <section.icon size={18} className={isSectionActive ? 'text-google-blue' : ''} />
+                                        {section.title}
                                     </Link>
                                 )
                             }
 
-                            // 3. Existing logic for Collapsible Sections
                             return (
-                                <div key={section.title} className="rounded-xl overflow-hidde">
+                                <div key={section.title}>
                                     <button
-                                        onClick={() => toggleSection(section.title)}
-                                        className={`
-                                            w-full flex items-center gap-3 px-3 py-3 text-sm font-semibold 
-                                            transition-all duration-200 uppercase tracking-wider
-                                            ${isSectionActive
-                                                ? 'text-white bg-white/10'
-                                                : 'text-gray-400 hover:text-green-500 hover:bg-white/5'
-                                            }
-                                        `}
+                                        onClick={() => setOpenSections((current) => ({ ...current, [section.title]: !current[section.title] }))}
+                                        className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-semibold uppercase tracking-wider ${isSectionActive ? 'text-white bg-white/10' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
                                     >
                                         <section.icon size={18} className={isSectionActive ? 'text-google-blue' : ''} />
                                         <span>{section.title}</span>
-                                        <ChevronDown
-                                            size={16}
-                                            className={`ml-auto transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-                                        />
+                                        <ChevronDown size={16} className={`ml-auto transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                                     </button>
-
                                     <AnimatePresence initial={false}>
                                         {isOpen && (
-                                            <motion.div
-                                                initial={{ height: 0, opacity: 0 }}
-                                                animate={{ height: 'auto', opacity: 1 }}
-                                                exit={{ height: 0, opacity: 0 }}
-                                                transition={{ duration: 0.2, ease: "easeInOut" }}
-                                            >
-                                                <div className="pt-1 pb-2 space-y-1">
+                                            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
+                                                <div className="py-2 space-y-1">
                                                     {section.items.map((item) => {
-                                                        const isItemActive = location.pathname === item.path
+                                                        const pathOnly = item.path.split('?')[0]
+                                                        const isItemActive = location.pathname === pathOnly
                                                         return (
-                                                            <Link
-                                                                key={item.path}
-                                                                to={item.path}
-                                                                onClick={closeSidebar}
-                                                                className="block"
-                                                            >
-                                                                <motion.div
-                                                                    className={`
-                                                                        flex items-center gap-3 px-3 py-2.5 rounded-lg mx-2
-                                                                        transition-colors relative text-sm
-                                                                        ${isItemActive
-                                                                            ? 'text-white bg-white/10 border border-white/5'
-                                                                            : 'text-gray-400 hover:text-white hover:bg-white/5'
-                                                                        }
-                                                                    `}
-                                                                    whileHover={{ x: 4 }}
-                                                                >
-                                                                    <item.icon size={16} />
-                                                                    <span className="font-medium">{item.label}</span>
-                                                                    {isItemActive && (
-                                                                        <motion.div
-                                                                            layoutId="activeIndicator"
-                                                                            className="absolute left-0 w-1 h-6 bg-google-blue rounded-r-full"
-                                                                            initial={{ opacity: 0 }}
-                                                                            animate={{ opacity: 1 }}
-                                                                        />
-                                                                    )}
-                                                                </motion.div>
+                                                            <Link key={item.path} to={item.path} onClick={closeSidebar} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg mx-2 text-sm ${isItemActive ? 'text-white bg-white/10 border border-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
+                                                                <item.icon size={16} />
+                                                                <span className="font-medium">{item.label}</span>
                                                             </Link>
                                                         )
                                                     })}

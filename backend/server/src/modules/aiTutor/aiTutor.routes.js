@@ -36,22 +36,43 @@ const ensureAiConfigured = (res) => {
     return true
 }
 
-router.post('/hint', requireAuth, aiLimiter, asyncHandler(async (req, res) => {
-    if (!ensureAiConfigured(res)) return
+const fallbackHints = [
+    'Restate the input, output, and constraint that matters most before changing code.',
+    'Look for the signal that points to a pattern: repeated lookup, monotonic condition, window, stack order, or recursion.',
+    'Name the data structure that removes repeated work, then explain what it stores.',
+    'Write the invariant that must remain true after each loop iteration.',
+    'Test the edge case most likely to break your logic: empty, duplicate, single item, negative, or large input.',
+    'Sketch pseudocode in three steps without language syntax, then map each step to code.',
+]
 
-    const { code, question, previousHints = [], hintLevel = 1, mode = 'practice', approach = {}, submissionResult = null } = req.body
+const fallbackReview = ({ submissionResult }) => {
+    const status = submissionResult?.status || 'not_run'
+    return [
+        `AI review is unavailable, so here is a deterministic review checklist for status: ${status}.`,
+        '- Correctness: compare your output against visible examples and one custom edge case.',
+        '- Complexity: identify the largest loop or recursive branch and state time/space.',
+        '- Edge cases: check empty input, duplicates, single item, and no-answer cases.',
+        '- Next fix: isolate the first failed test and explain why expected and actual differ.',
+    ].join('\n')
+}
+
+router.post('/hint', requireAuth, aiLimiter, asyncHandler(async (req, res) => {
+    const { code, question, previousHints = [], hintLevel = 1, mode = 'practice', approach = {}, submissionResult = null, forceFallback = false } = req.body
     if (!code || !question) {
         return res.status(400).json({ error: 'Code and question are required' })
     }
     const safeHintLevel = Math.max(1, Math.min(6, Number(hintLevel) || 1))
 
     const memory = await getLearnerMemory(req.user._id)
-    const model = genAI.getGenerativeModel({
-        model: 'gemini-2.5-flash',
-        systemInstruction: HINT_SYSTEM_PROMPT,
-    })
+    let hintText = fallbackHints[safeHintLevel - 1]
+    const aiConfigured = !forceFallback && env.geminiApiKey && env.geminiApiKey !== 'your_gemini_api_key_here'
+    if (aiConfigured) {
+        const model = genAI.getGenerativeModel({
+            model: 'gemini-2.5-flash',
+            systemInstruction: HINT_SYSTEM_PROMPT,
+        })
 
-    const prompt = `Problem: ${question.title}\n${question.description}
+        const prompt = `Problem: ${question.title}\n${question.description}
 
 Mode: ${mode}
 Hint level ${safeHintLevel}: ${hintLadder[safeHintLevel - 1]}
@@ -66,8 +87,10 @@ Previous hints:
 ${previousHints.map((h) => h.content || h).join('\n')}
 
 Give one concise Socratic hint for this level. Do not provide full solution code.`
-    const result = await model.generateContent(prompt)
-    const response = await result.response
+        const result = await model.generateContent(prompt)
+        const response = await result.response
+        hintText = response.text()
+    }
     const event = await recordLearningEvent({
         userId: req.user._id,
         type: 'hint_requested',
@@ -76,19 +99,22 @@ Give one concise Socratic hint for this level. Do not provide full solution code
     })
 
     res.json({
-        hint: response.text(),
+        hint: hintText,
         hintLevel: safeHintLevel,
         nextHintAvailable: safeHintLevel < hintLadder.length,
         learningEventId: event?._id,
+        aiFallback: !aiConfigured,
     })
 }))
 
 router.post('/review', aiLimiter, asyncHandler(async (req, res) => {
-    if (!ensureAiConfigured(res)) return
-
     const { code, question, language, submissionResult } = req.body
     if (!code || !question) {
         return res.status(400).json({ error: 'Code and question are required' })
+    }
+
+    if (!env.geminiApiKey || env.geminiApiKey === 'your_gemini_api_key_here') {
+        return res.json({ reviewText: fallbackReview({ submissionResult }), aiFallback: true })
     }
 
     const model = genAI.getGenerativeModel({

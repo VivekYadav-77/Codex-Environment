@@ -1,6 +1,7 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import Editor from '@monaco-editor/react'
-import { Briefcase, Loader2, Play, Send } from 'lucide-react'
+import { Briefcase, Loader2, Network, Play, Send } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { GlassPanel } from '../components/ui/Glass'
 import { apiFetch } from '../api/client'
@@ -40,7 +41,22 @@ export default function Interview() {
                 <h1 className="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-3"><Briefcase className="text-google-green" />Interview Mode</h1>
                 <p className="text-gray-400">Timed practice with hidden pattern labels and final interviewer feedback.</p>
             </div>
-            {!session && <GlassPanel><Button icon={loading ? Loader2 : Play} loading={loading} onClick={start}>Start Interview</Button></GlassPanel>}
+            {!session && (
+                <div className="grid md:grid-cols-2 gap-6">
+                    <GlassPanel>
+                        <Briefcase className="text-google-blue mb-3" />
+                        <h2 className="text-xl font-bold mb-2">Coding Interview</h2>
+                        <p className="text-sm text-gray-400 mb-4">Timed coding practice with hidden pattern labels, hidden tests, and final interviewer-style feedback.</p>
+                        <Button icon={loading ? Loader2 : Play} loading={loading} onClick={start}>Start Coding Interview</Button>
+                    </GlassPanel>
+                    <GlassPanel>
+                        <Network className="text-google-green mb-3" />
+                        <h2 className="text-xl font-bold mb-2">System Design Interview</h2>
+                        <p className="text-sm text-gray-400 mb-4">Practice requirements, estimates, architecture, bottlenecks, tradeoffs, and final recommendation.</p>
+                        <Link to="/system-design"><Button variant="green" icon={Network}>Start Design Drill</Button></Link>
+                    </GlassPanel>
+                </div>
+            )}
             {session && question && (
                 <div className="grid lg:grid-cols-2 gap-6">
                     <GlassPanel>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CheckCircle, Clock, Loader2, PlayCircle } from 'lucide-react'
+import { AlertTriangle, BookOpen, CheckCircle, Clock, Loader2, Network, PlayCircle, Target } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { GlassPanel } from '../components/ui/Glass'
 import { apiFetch } from '../api/client'
@@ -32,12 +32,23 @@ export default function DailySession() {
     if (error) return <div className="text-google-red">{error}</div>
 
     const completed = session?.tasks?.filter((task) => task.status === 'completed').length || 0
+    const icons = {
+        revision: Clock,
+        learn: BookOpen,
+        concept_check: CheckCircle,
+        practice: Target,
+        mixed: Target,
+        'mixed-warmup': Target,
+        system_design: Network,
+        reflection: CheckCircle,
+        mistake_correction: AlertTriangle,
+    }
 
     return (
         <div className="max-w-5xl mx-auto space-y-6">
             <div>
-                <h1 className="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-3"><PlayCircle className="text-google-green" />Today&apos;s Session</h1>
-                <p className="text-gray-400">A focused loop: revision, concept check, guided practice, reflection.</p>
+                <h1 className="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-3"><PlayCircle className="text-google-green" />Today&apos;s Coach Mission</h1>
+                <p className="text-gray-400">A focused loop: revise, learn, practice, diagnose, reflect, and build System Design readiness when enabled.</p>
             </div>
 
             <GlassPanel>
@@ -45,6 +56,7 @@ export default function DailySession() {
                     <div>
                         <p className="text-sm text-gray-400">Progress</p>
                         <p className="text-2xl font-bold">{completed}/{session?.tasks?.length || 0} tasks</p>
+                        <p className="text-xs text-google-blue mt-1">{session?.summary?.mission || 'Coach-guided learning loop'} - {session?.summary?.plannedMinutes || 0} min</p>
                     </div>
                     <div className="flex gap-2">
                         {session?.status === 'planned' && <Button icon={PlayCircle} onClick={start}>Start Session</Button>}
@@ -60,7 +72,10 @@ export default function DailySession() {
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div>
                                 <div className="flex items-center gap-2">
-                                    {task.status === 'completed' ? <CheckCircle className="text-google-green" /> : <Clock className="text-google-yellow" />}
+                                    {task.status === 'completed' ? <CheckCircle className="text-google-green" /> : (() => {
+                                        const Icon = icons[task.type] || Clock
+                                        return <Icon className="text-google-yellow" />
+                                    })()}
                                     <p className="font-semibold">{task.title}</p>
                                 </div>
                                 <p className="text-sm text-gray-400 mt-1">{task.reason}</p>
