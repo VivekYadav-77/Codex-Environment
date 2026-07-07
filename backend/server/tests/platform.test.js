@@ -160,6 +160,9 @@ describe('seed integrity', () => {
         for (const question of questions.map(enrichQuestion)) {
             expect(question.primaryPattern).toBeTruthy()
             expect(patternSlugs.has(question.primaryPattern)).toBe(true)
+            expect(question.learningObjectives.length).toBeGreaterThanOrEqual(2)
+            expect(question.officialSolution.optimizedApproach).toMatch(/Use/i)
+            expect(question.edgeCases.length).toBeGreaterThanOrEqual(2)
 
             if (question.testCases.length > 0) {
                 expect(question.functionName).toBeTruthy()
@@ -260,6 +263,11 @@ describe('coach and revision flow', () => {
         expect(profile.body).toHaveProperty('recommendedPlan')
         expect(profile.body).toHaveProperty('blockers')
         expect(profile.body).toHaveProperty('readinessLevel')
+        expect(profile.body).toHaveProperty('profileSummary')
+        expect(profile.body).toHaveProperty('badges')
+        expect(profile.body).toHaveProperty('proofPortfolio')
+        expect(profile.body).toHaveProperty('nextUpgrade')
+        expect(profile.body).toHaveProperty('profileCompleteness')
     })
 
     it('serves mixed practice with hidden pattern metadata', async () => {
@@ -506,6 +514,14 @@ describe('learning operating system flow', () => {
 
         expect(audit.status).toBe(200)
         expect(audit.body.some((row) => row.action === 'question.publish_check')).toBe(true)
+
+        const courseDepth = await request(app)
+            .get('/api/admin/course-depth')
+            .set('Authorization', `Bearer ${token}`)
+
+        expect(courseDepth.status).toBe(200)
+        expect(courseDepth.body).toHaveProperty('averageScore')
+        expect(courseDepth.body).toHaveProperty('weakestPatterns')
     })
 
     it('hides official solutions until accepted and exposes learner memory and analytics', async () => {

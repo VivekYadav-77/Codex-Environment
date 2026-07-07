@@ -14,6 +14,17 @@ const toAlgorithmResponse = (algorithm) => ({
     operations: algorithm.operations || [],
     code: algorithm.code,
     practice: algorithm.practice,
+    prerequisites: algorithm.prerequisites || [],
+    learningObjectives: algorithm.learningObjectives || [],
+    beginnerExplanation: algorithm.beginnerExplanation,
+    mentalModel: algorithm.mentalModel,
+    workedExample: algorithm.workedExample,
+    visualWalkthrough: algorithm.visualWalkthrough || [],
+    complexityReasoning: algorithm.complexityReasoning,
+    commonMisconceptions: algorithm.commonMisconceptions || [],
+    edgeCases: algorithm.edgeCases || [],
+    interviewExplanation: algorithm.interviewExplanation,
+    revisionPrompts: algorithm.revisionPrompts || [],
 })
 
 router.get('/', asyncHandler(async (req, res) => {

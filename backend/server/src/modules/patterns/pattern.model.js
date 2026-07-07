@@ -1,5 +1,15 @@
 import mongoose from 'mongoose'
 
+const depthBlockSchema = new mongoose.Schema(
+    {
+        title: String,
+        body: String,
+        bullets: [String],
+        code: mongoose.Schema.Types.Mixed,
+    },
+    { _id: false }
+)
+
 const patternSchema = new mongoose.Schema(
     {
         slug: { type: String, required: true, unique: true, index: true },
@@ -18,6 +28,16 @@ const patternSchema = new mongoose.Schema(
         prerequisites: [{ type: String }],
         templateNotes: { type: String, default: '' },
         commonMistakes: [{ type: String }],
+        learningObjectives: [String],
+        beginnerExplanation: { type: String, default: '' },
+        workedExample: depthBlockSchema,
+        codeTemplate: { type: mongoose.Schema.Types.Mixed },
+        complexityReasoning: depthBlockSchema,
+        edgeCases: [String],
+        misconceptions: [depthBlockSchema],
+        interviewExplanation: { type: String, default: '' },
+        revisionPrompts: [String],
+        practiceLadder: [depthBlockSchema],
         guidedProblemSlugs: [{ type: String }],
         mixedProblemSlugs: [{ type: String }],
         interviewProblemSlugs: [{ type: String }],

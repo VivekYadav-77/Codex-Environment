@@ -74,7 +74,6 @@ export default function Dashboard() {
     const skillProfile = dashboard?.skillProfile
     const mastery = dashboard?.mastery || []
     const topWeak = mastery.filter((item) => item.masteryScore < 60).slice(0, 4)
-    const topMistake = skillProfile?.mistakeDistribution?.[0]
 
     return (
         <div className="max-w-7xl mx-auto space-y-6">
@@ -111,7 +110,7 @@ export default function Dashboard() {
                 <div className="glass-card p-4"><p className="text-sm text-gray-400">Solved</p><p className="text-3xl font-bold text-google-green">{today?.summary?.solved || 0}</p></div>
                 <div className="glass-card p-4"><p className="text-sm text-gray-400">Attempted</p><p className="text-3xl font-bold text-google-yellow">{today?.summary?.attempted || 0}</p></div>
                 <div className="glass-card p-4"><p className="text-sm text-gray-400">Readiness</p><p className="text-3xl font-bold text-google-blue">{skillProfile?.readinessScore || 0}%</p><p className="text-xs text-gray-400">{skillProfile?.readinessLevel?.label || 'Foundation Ready'}</p></div>
-                <div className="glass-card p-4"><p className="text-sm text-gray-400">Top Mistake</p><p className="text-sm font-semibold text-google-yellow capitalize">{topMistake?.tag?.replaceAll('_', ' ') || 'No data yet'}</p></div>
+                <Link to="/profile/skills" className="glass-card p-4 block hover:bg-white/10"><p className="text-sm text-gray-400">Profile Value</p><p className="text-3xl font-bold text-google-green">{skillProfile?.profileCompleteness?.score || 0}%</p><p className="text-xs text-gray-400">{skillProfile?.nextUpgrade?.label || 'Build learning proof'}</p></Link>
             </div>
             <div className="grid md:grid-cols-4 gap-4">
                 <div className="glass-card p-4"><p className="text-sm text-gray-400">Session Streak</p><p className="text-2xl font-bold">{analytics?.streaks?.dailySession || 0}</p></div>

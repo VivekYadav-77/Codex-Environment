@@ -6,7 +6,7 @@ import { Question } from '../questions/question.model.js'
 import { Pattern } from '../patterns/pattern.model.js'
 import { ConceptCheck } from '../conceptChecks/conceptCheck.model.js'
 import { LearningTrack } from '../tracks/learningTrack.model.js'
-import { scoreQuestionQuality } from './contentQuality.service.js'
+import { auditCourseDepth, scorePatternQuality, scoreQuestionQuality } from './contentQuality.service.js'
 import { AdminAudit } from './adminAudit.model.js'
 
 const router = Router()
@@ -42,6 +42,16 @@ router.get('/questions/:id/quality', asyncHandler(async (req, res) => {
     const question = await Question.findById(req.params.id)
     if (!question) return res.status(404).json({ error: 'Question not found' })
     res.json(await scoreQuestionQuality(question))
+}))
+
+router.get('/patterns/:id/quality', asyncHandler(async (req, res) => {
+    const pattern = await Pattern.findById(req.params.id)
+    if (!pattern) return res.status(404).json({ error: 'Pattern not found' })
+    res.json(await scorePatternQuality(pattern))
+}))
+
+router.get('/course-depth', asyncHandler(async (req, res) => {
+    res.json(await auditCourseDepth())
 }))
 
 router.post('/questions/:id/validate', asyncHandler(async (req, res) => {
@@ -90,6 +100,13 @@ router.patch('/questions/:id/content', asyncHandler(async (req, res) => {
         'functionName',
         'testCases',
         'hints',
+        'learningObjectives',
+        'beginnerExplanation',
+        'workedExample',
+        'visualWalkthrough',
+        'edgeCases',
+        'revisionPrompts',
+        'profileSignals',
         'isActive',
         'officialSolution',
     ]

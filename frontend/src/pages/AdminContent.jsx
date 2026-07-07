@@ -7,10 +7,12 @@ export default function AdminContent() {
     const [questions, setQuestions] = useState(null)
     const [quality, setQuality] = useState({})
     const [solutions, setSolutions] = useState({})
+    const [courseDepth, setCourseDepth] = useState(null)
     const [error, setError] = useState('')
 
     useEffect(() => {
         apiFetch('/api/admin/questions').then(setQuestions).catch((err) => setError(err.message))
+        apiFetch('/api/admin/course-depth').then(setCourseDepth).catch(() => setCourseDepth(null))
     }, [])
 
     const loadQuality = async (id) => {
@@ -34,6 +36,30 @@ export default function AdminContent() {
                 <h1 className="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-3"><Shield className="text-google-red" />Content Studio</h1>
                 <p className="text-gray-400">Admin-only question, pattern, concept check, and track management.</p>
             </div>
+            {courseDepth && (
+                <GlassPanel>
+                    <div className="grid md:grid-cols-4 gap-4 mb-5">
+                        <div className="p-4 rounded-lg bg-white/5"><p className="text-sm text-gray-400">Course Depth</p><p className="text-3xl font-bold text-google-blue">{courseDepth.averageScore}%</p></div>
+                        <div className="p-4 rounded-lg bg-white/5"><p className="text-sm text-gray-400">Patterns</p><p className="text-3xl font-bold">{courseDepth.patternCount}</p></div>
+                        <div className="p-4 rounded-lg bg-white/5"><p className="text-sm text-gray-400">Questions</p><p className="text-3xl font-bold">{courseDepth.questionCount}</p></div>
+                        <div className="p-4 rounded-lg bg-white/5"><p className="text-sm text-gray-400">Ready</p><p className={`text-3xl font-bold ${courseDepth.publishReady ? 'text-google-green' : 'text-google-yellow'}`}>{courseDepth.publishReady ? 'Yes' : 'No'}</p></div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <p className="font-semibold mb-2">Weakest Patterns</p>
+                            <div className="space-y-2">
+                                {courseDepth.weakestPatterns?.map((item) => <div key={item.slug} className="p-3 rounded-lg bg-white/5"><p className="text-sm">{item.title} - {item.score}%</p><p className="text-xs text-gray-400">{item.missing?.slice(0, 3).join(', ')}</p></div>)}
+                            </div>
+                        </div>
+                        <div>
+                            <p className="font-semibold mb-2">Weakest Questions</p>
+                            <div className="space-y-2">
+                                {courseDepth.weakestQuestions?.map((item) => <div key={item.slug || item.title} className="p-3 rounded-lg bg-white/5"><p className="text-sm">{item.title || 'Question'} - {item.score}%</p><p className="text-xs text-gray-400">{item.missing?.slice(0, 3).join(', ')}</p></div>)}
+                            </div>
+                        </div>
+                    </div>
+                </GlassPanel>
+            )}
             <GlassPanel>
                 {error && <p className="text-google-red">{error}</p>}
                 {!error && !questions && <Loader2 className="animate-spin text-google-blue" />}

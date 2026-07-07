@@ -1,9 +1,33 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { BookOpen, CheckCircle, Loader2, Target } from 'lucide-react'
+import { AlertTriangle, BookOpen, CheckCircle, Code2, Eye, Loader2, Target } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { GlassPanel } from '../components/ui/Glass'
 import { apiFetch } from '../api/client'
+
+const tabs = [
+    { id: 'learn', label: 'Learn', icon: BookOpen },
+    { id: 'visualize', label: 'Visualize', icon: Eye },
+    { id: 'template', label: 'Template', icon: Code2 },
+    { id: 'mistakes', label: 'Mistakes', icon: AlertTriangle },
+    { id: 'practice', label: 'Practice', icon: Target },
+    { id: 'checkpoint', label: 'Checkpoint', icon: CheckCircle },
+]
+
+const List = ({ items = [], tone = 'text-gray-300' }) => (
+    <ul className="space-y-2">
+        {items.map((item) => <li key={item} className={`text-sm ${tone}`}>- {item}</li>)}
+    </ul>
+)
+
+const CodeBlock = ({ code }) => {
+    if (!code) return null
+    return (
+        <pre className="overflow-x-auto rounded-lg bg-black/40 border border-white/10 p-4 text-sm text-gray-200">
+            <code>{code}</code>
+        </pre>
+    )
+}
 
 export default function PatternLesson() {
     const { patternSlug } = useParams()
@@ -11,6 +35,7 @@ export default function PatternLesson() {
     const [checks, setChecks] = useState([])
     const [answers, setAnswers] = useState({})
     const [checkResults, setCheckResults] = useState({})
+    const [activeTab, setActiveTab] = useState('learn')
     const [error, setError] = useState('')
 
     useEffect(() => {
@@ -61,87 +86,148 @@ export default function PatternLesson() {
                 <p className="text-gray-400">{pattern.description}</p>
             </div>
 
+            <div className="flex flex-wrap gap-2">
+                {tabs.map((tab) => {
+                    const Icon = tab.icon
+                    return (
+                        <button
+                            key={tab.id}
+                            type="button"
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`px-3 py-2 rounded-lg border text-sm flex items-center gap-2 ${activeTab === tab.id ? 'bg-google-blue/20 border-google-blue/40 text-white' : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'}`}
+                        >
+                            <Icon size={16} />
+                            {tab.label}
+                        </button>
+                    )
+                })}
+            </div>
+
             <div className="grid lg:grid-cols-3 gap-6">
                 <GlassPanel className="lg:col-span-2 space-y-6">
-                    <section>
-                        <h2 className="text-xl font-bold mb-3 flex items-center gap-2"><CheckCircle size={20} />Concept Diagnosis</h2>
-                        <div className="space-y-4">
-                            {checks.map((check) => (
-                                <div key={check._id} className="p-4 rounded-lg bg-white/5 border border-white/10">
-                                    <p className="font-semibold mb-3">{check.question}</p>
-                                    <div className="space-y-2">
-                                        {check.options.map((option, index) => (
-                                            <label key={option} className="flex items-center gap-2 text-sm text-gray-300">
-                                                <input type="radio" name={check._id} checked={answers[check._id] === index} onChange={() => setAnswers((current) => ({ ...current, [check._id]: index }))} />
-                                                {option}
-                                            </label>
-                                        ))}
+                    {activeTab === 'learn' && (
+                        <>
+                            <div className="grid md:grid-cols-3 gap-3">
+                                <div className="p-3 rounded-lg bg-white/5"><p className="text-xs text-gray-400">Category</p><p className="font-semibold">{pattern.category}</p></div>
+                                <div className="p-3 rounded-lg bg-white/5"><p className="text-xs text-gray-400">Level</p><p className="font-semibold capitalize">{pattern.difficultyBand}</p></div>
+                                <div className="p-3 rounded-lg bg-white/5"><p className="text-xs text-gray-400">Practice Set</p><p className="font-semibold">{questions.length} problems</p></div>
+                            </div>
+                            <section>
+                                <h2 className="text-xl font-bold mb-2">Learning Objectives</h2>
+                                <List items={pattern.learningObjectives || []} />
+                            </section>
+                            <section><h2 className="text-xl font-bold mb-2">Beginner Explanation</h2><p className="text-gray-300">{pattern.beginnerExplanation || pattern.description}</p></section>
+                            <section><h2 className="text-xl font-bold mb-2">Mental Model</h2><p className="text-gray-300">{pattern.mentalModel}</p></section>
+                            <section><h2 className="text-xl font-bold mb-2">Real-World Analogy</h2><p className="text-gray-300">{pattern.analogy || pattern.mentalModel}</p></section>
+                            <section>
+                                <h2 className="text-xl font-bold mb-2">Pattern Signal Detector</h2>
+                                <div className="grid md:grid-cols-2 gap-3">
+                                    <div className="p-4 rounded-lg bg-google-green/10 border border-google-green/20">
+                                        <p className="font-semibold text-google-green mb-2">Use this when</p>
+                                        <List items={pattern.signalRules || []} />
                                     </div>
-                                    <Button size="sm" className="mt-3" onClick={() => submitCheck(check)}>Check Readiness</Button>
-                                    {checkResults[check._id] && (
-                                        <p className={`text-sm mt-3 ${checkResults[check._id].correct ? 'text-google-green' : 'text-google-yellow'}`}>
-                                            {checkResults[check._id].correct ? 'Ready signal: ' : 'Review signal: '}
-                                            {checkResults[check._id].explanation}
-                                        </p>
-                                    )}
+                                    <div className="p-4 rounded-lg bg-google-yellow/10 border border-google-yellow/20">
+                                        <p className="font-semibold text-google-yellow mb-2">Do not force it when</p>
+                                        <List items={pattern.antiSignals || []} />
+                                    </div>
                                 </div>
-                            ))}
-                            {!checks.length && <p className="text-sm text-gray-400">Concept checks will appear here as content is added.</p>}
-                        </div>
-                    </section>
+                            </section>
+                        </>
+                    )}
 
-                    <div className="grid md:grid-cols-3 gap-3">
-                        <div className="p-3 rounded-lg bg-white/5"><p className="text-xs text-gray-400">Category</p><p className="font-semibold">{pattern.category}</p></div>
-                        <div className="p-3 rounded-lg bg-white/5"><p className="text-xs text-gray-400">Level</p><p className="font-semibold capitalize">{pattern.difficultyBand}</p></div>
-                        <div className="p-3 rounded-lg bg-white/5"><p className="text-xs text-gray-400">Practice Set</p><p className="font-semibold">{questions.length} problems</p></div>
-                    </div>
-
-                    <section><h2 className="text-xl font-bold mb-2">Real-World Analogy</h2><p className="text-gray-300">{pattern.analogy || pattern.mentalModel}</p></section>
-                    <section><h2 className="text-xl font-bold mb-2">Mental Model</h2><p className="text-gray-300">{pattern.mentalModel}</p></section>
-                    <section><h2 className="text-xl font-bold mb-2">When To Use</h2><p className="text-gray-300">{pattern.whenToUse}</p></section>
-
-                    <section>
-                        <h2 className="text-xl font-bold mb-2">Pattern Signal Detector</h2>
-                        <div className="grid md:grid-cols-2 gap-3">
-                            <div className="p-4 rounded-lg bg-google-green/10 border border-google-green/20">
-                                <p className="font-semibold text-google-green mb-2">Use this when</p>
-                                <ul className="space-y-2">{pattern.signalRules?.map((item) => <li key={item} className="text-sm text-gray-300">- {item}</li>)}</ul>
-                            </div>
-                            <div className="p-4 rounded-lg bg-google-yellow/10 border border-google-yellow/20">
-                                <p className="font-semibold text-google-yellow mb-2">Do not force it when</p>
-                                <ul className="space-y-2">{pattern.antiSignals?.map((item) => <li key={item} className="text-sm text-gray-300">- {item}</li>)}</ul>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section><h2 className="text-xl font-bold mb-2">Brute Force To Optimized</h2><p className="text-gray-300">{pattern.bruteForceToOptimized}</p></section>
-
-                    <section>
-                        <h2 className="text-xl font-bold mb-2">Visual Walkthrough</h2>
-                        <div className="grid md:grid-cols-4 gap-3">
-                            {pattern.visualSteps?.map((step, index) => (
-                                <div key={step} className="p-3 rounded-lg bg-white/5 border border-white/10">
-                                    <p className="text-xs text-google-blue mb-1">Step {index + 1}</p>
-                                    <p className="text-sm text-gray-300">{step}</p>
+                    {activeTab === 'visualize' && (
+                        <>
+                            <section><h2 className="text-xl font-bold mb-2">Worked Example</h2><p className="text-gray-300 mb-3">{pattern.workedExample?.body || pattern.bruteForceToOptimized}</p><List items={pattern.workedExample?.bullets || []} /></section>
+                            <section>
+                                <h2 className="text-xl font-bold mb-2">Visual Walkthrough</h2>
+                                <div className="grid md:grid-cols-4 gap-3">
+                                    {pattern.visualSteps?.map((step, index) => (
+                                        <div key={step} className="p-3 rounded-lg bg-white/5 border border-white/10">
+                                            <p className="text-xs text-google-blue mb-1">Step {index + 1}</p>
+                                            <p className="text-sm text-gray-300">{step}</p>
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
-                    </section>
+                            </section>
+                            <section><h2 className="text-xl font-bold mb-2">Brute Force To Optimized</h2><p className="text-gray-300">{pattern.bruteForceToOptimized}</p></section>
+                            <section><h2 className="text-xl font-bold mb-2">Complexity Reasoning</h2><p className="text-gray-300">{pattern.complexityReasoning?.body}</p><List items={pattern.complexityReasoning?.bullets || []} /></section>
+                        </>
+                    )}
 
-                    <section><h2 className="text-xl font-bold mb-2">Template Notes</h2><p className="text-gray-300">{pattern.templateNotes}</p></section>
+                    {activeTab === 'template' && (
+                        <>
+                            <section><h2 className="text-xl font-bold mb-2">Template Notes</h2><p className="text-gray-300">{pattern.templateNotes}</p></section>
+                            <CodeBlock code={pattern.codeTemplate?.javascript} />
+                            <section><h2 className="text-xl font-bold mb-2">Interview Explanation</h2><p className="text-gray-300">{pattern.interviewExplanation}</p></section>
+                            <section><h2 className="text-xl font-bold mb-2">Revision Prompts</h2><List items={pattern.revisionPrompts || []} /></section>
+                        </>
+                    )}
 
-                    <section>
-                        <h2 className="text-xl font-bold mb-2">Common Mistakes And Traps</h2>
-                        <ul className="space-y-2">
-                            {[...(pattern.commonMistakes || []), ...(pattern.trapExamples || [])].map((mistake) => (
-                                <li key={mistake} className="text-gray-300 flex gap-2"><span className="text-google-red">!</span>{mistake}</li>
-                            ))}
-                        </ul>
-                    </section>
+                    {activeTab === 'mistakes' && (
+                        <>
+                            <section>
+                                <h2 className="text-xl font-bold mb-2">Common Mistakes And Traps</h2>
+                                <ul className="space-y-2">
+                                    {[...(pattern.commonMistakes || []), ...(pattern.trapExamples || [])].map((mistake) => (
+                                        <li key={mistake} className="text-gray-300 flex gap-2"><span className="text-google-red">!</span>{mistake}</li>
+                                    ))}
+                                </ul>
+                            </section>
+                            <section><h2 className="text-xl font-bold mb-2">Misconceptions</h2>{pattern.misconceptions?.map((item) => <div key={item.title} className="p-4 rounded-lg bg-white/5 border border-white/10 mb-3"><p className="font-semibold">{item.title}</p><p className="text-sm text-gray-300 mt-1">{item.body}</p><List items={item.bullets || []} /></div>)}</section>
+                            <section><h2 className="text-xl font-bold mb-2">Edge Cases</h2><List items={pattern.edgeCases || []} /></section>
+                        </>
+                    )}
+
+                    {activeTab === 'practice' && (
+                        <section>
+                            <h2 className="text-xl font-bold mb-4">Practice Ladder</h2>
+                            <div className="grid md:grid-cols-3 gap-3">
+                                {pattern.practiceLadder?.map((step) => (
+                                    <div key={step.title} className="p-4 rounded-lg bg-white/5 border border-white/10">
+                                        <p className="font-semibold text-google-blue">{step.title}</p>
+                                        <p className="text-sm text-gray-300 mt-2">{step.body}</p>
+                                        <div className="mt-3"><List items={step.bullets || []} /></div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    )}
+
+                    {activeTab === 'checkpoint' && (
+                        <section>
+                            <h2 className="text-xl font-bold mb-3 flex items-center gap-2"><CheckCircle size={20} />Concept Checkpoint</h2>
+                            <div className="space-y-4">
+                                {checks.map((check) => (
+                                    <div key={check._id} className="p-4 rounded-lg bg-white/5 border border-white/10">
+                                        <div className="flex flex-wrap items-center gap-2 mb-3">
+                                            <p className="font-semibold">{check.question}</p>
+                                            {check.skill && <span className="text-xs px-2 py-0.5 rounded-full bg-google-blue/10 text-google-blue">{check.skill.replaceAll('_', ' ')}</span>}
+                                        </div>
+                                        <div className="space-y-2">
+                                            {check.options.map((option, index) => (
+                                                <label key={option} className="flex items-center gap-2 text-sm text-gray-300">
+                                                    <input type="radio" name={check._id} checked={answers[check._id] === index} onChange={() => setAnswers((current) => ({ ...current, [check._id]: index }))} />
+                                                    {option}
+                                                </label>
+                                            ))}
+                                        </div>
+                                        <Button size="sm" className="mt-3" onClick={() => submitCheck(check)}>Check Readiness</Button>
+                                        {checkResults[check._id] && (
+                                            <p className={`text-sm mt-3 ${checkResults[check._id].correct ? 'text-google-green' : 'text-google-yellow'}`}>
+                                                {checkResults[check._id].correct ? 'Ready signal: ' : 'Review signal: '}
+                                                {checkResults[check._id].explanation}
+                                            </p>
+                                        )}
+                                    </div>
+                                ))}
+                                {!checks.length && <p className="text-sm text-gray-400">Concept checks will appear here as content is added.</p>}
+                            </div>
+                        </section>
+                    )}
                 </GlassPanel>
 
                 <GlassPanel>
-                    <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Target size={20} />Practice Ladder</h2>
+                    <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Target size={20} />Practice Sets</h2>
                     <div className="space-y-5">
                         {problemGroups.map((group) => {
                             const selected = group.slugs.map((slug) => questionMap.get(slug)).filter(Boolean)

@@ -5,6 +5,7 @@ import { MistakeInsight } from '../insights/mistakeInsight.model.js'
 import { Reflection } from '../reflections/reflection.model.js'
 import { User } from '../users/user.model.js'
 import { SystemDesignAttempt } from '../systemDesign/systemDesignAttempt.model.js'
+import { ConceptCheckAttempt } from '../conceptChecks/conceptCheckAttempt.model.js'
 import { getLearnerMisconceptions } from '../misconceptions/misconception.service.js'
 import { getMastery } from './mastery.service.js'
 import { mistakeAdvice, readinessThresholds, startOfWeek } from './coach.config.js'
@@ -95,7 +96,7 @@ export function buildReadinessLevel({ readinessScore, mastered, mixed, mixedGues
 }
 
 export async function getSkillProfile(userId) {
-    const [mastery, mistakes, progressRows, submissions, revisions, reflections, misconceptions, user, systemDesignAttempts] = await Promise.all([
+    const [mastery, mistakes, progressRows, submissions, revisions, reflections, misconceptions, user, systemDesignAttempts, conceptAttempts] = await Promise.all([
         getMastery(userId),
         getMistakes(userId),
         Progress.find({ userId }),
@@ -105,6 +106,7 @@ export async function getSkillProfile(userId) {
         getLearnerMisconceptions(userId),
         User.findById(userId).select('onboarding'),
         SystemDesignAttempt.find({ userId }).sort({ createdAt: -1 }),
+        ConceptCheckAttempt.find({ userId }).sort({ createdAt: -1 }).limit(100),
     ])
 
     const solved = progressRows.filter((row) => row.status === 'solved').length
@@ -119,6 +121,12 @@ export async function getSkillProfile(userId) {
     const mastered = mastery.filter((row) => row.masteryScore >= 75).length
     const revisionCompleted = revisions.filter((row) => row.status === 'completed').length
     const revisionQueued = revisions.filter((row) => row.status === 'queued').length
+    const mediumHardAccepted = accepted.filter((row) => ['Medium', 'Hard'].includes(row.questionId?.difficulty))
+    const hintDependency = submissions.length
+        ? Math.round((hintTotal / submissions.length) * 100) / 100
+        : 0
+    const qualityReflections = reflections.filter((item) => (item.interviewExplanation || '').length > 40 && (item.keyInvariant || '').length > 15)
+    const conceptCorrect = conceptAttempts.filter((item) => item.correct).length
 
     const breadthScore = Math.min(35, mastered * 7)
     const successScore = submissions.length ? Math.round((accepted.length / submissions.length) * 25) : 0
@@ -154,11 +162,103 @@ export async function getSkillProfile(userId) {
         if (submission.status === 'accepted') trendMap[key].accepted += 1
     }
     const readinessLevel = buildReadinessLevel({ readinessScore, mastered, mixed, mixedGuesses, mixedCorrectGuesses, submissions, reflections, revisionQueued, systemDesignAttempts })
+    const recognitionAccuracy = mixedGuesses.length ? Math.round((mixedCorrectGuesses.length / mixedGuesses.length) * 100) : 0
+    const communicationScore = reflections.length ? Math.round((qualityReflections.length / reflections.length) * 100) : 0
+    const revisionHealthScore = revisions.length ? Math.round((revisionCompleted / revisions.length) * 100) : revisionQueued ? 0 : 50
+    const strongestPatterns = mastery.filter((row) => row.masteryScore >= 70).slice(0, 5)
+    const weakSpots = mastery.filter((row) => row.masteryScore < 60).slice(0, 5)
+    const completenessItems = [
+        { key: 'onboarding', label: 'Complete onboarding', met: Boolean(user?.onboarding?.completed), action: '/onboarding' },
+        { key: 'solves', label: 'Solve at least 5 problems', met: solved >= 5, action: '/practice' },
+        { key: 'medium_hard', label: 'Accept 2 medium or hard problems', met: mediumHardAccepted.length >= 2, action: '/practice/mixed?mode=mixed' },
+        { key: 'reflections', label: 'Write 3 strong reflections', met: qualityReflections.length >= 3, action: '/revision' },
+        { key: 'concept_checks', label: 'Pass 5 concept checks', met: conceptCorrect >= 5, action: '/learn' },
+        { key: 'mixed', label: 'Attempt 3 mixed problems', met: mixed.length >= 3, action: '/practice/mixed?mode=mixed' },
+        { key: 'revision', label: 'Clear urgent revision backlog', met: revisionQueued <= 1, action: '/revision' },
+    ]
+    const profileCompleteness = {
+        score: Math.round((completenessItems.filter((item) => item.met).length / completenessItems.length) * 100),
+        items: completenessItems,
+        missing: completenessItems.filter((item) => !item.met),
+    }
+    const badges = [
+        { id: 'pattern_ready', label: 'Pattern Ready', earned: mastered >= 3, reason: 'Master at least 3 DSA patterns.' },
+        { id: 'mixed_practice_ready', label: 'Mixed Practice Ready', earned: mixed.length >= 3 && recognitionAccuracy >= 60, reason: 'Attempt mixed practice and identify patterns accurately.' },
+        { id: 'interview_ready', label: 'Interview Ready', earned: readinessScore >= 70 && qualityReflections.length >= 3, reason: 'Combine readiness score with clear interview explanations.' },
+        { id: 'low_hint_solver', label: 'Low Hint Solver', earned: submissions.length >= 3 && hintDependency <= 1, reason: 'Keep average hint use at or below one per submission.' },
+        { id: 'strong_reflector', label: 'Strong Reflector', earned: qualityReflections.length >= 3, reason: 'Write reflections with invariants and explanations.' },
+        { id: 'system_design_starter', label: 'System Design Starter', earned: systemDesignAttempts.length >= 1, reason: 'Complete one system design attempt.' },
+        { id: 'revision_consistent', label: 'Revision Consistent', earned: revisionCompleted >= 3 && revisionQueued <= 1, reason: 'Complete revisions and keep backlog low.' },
+    ]
+    const milestones = badges.map((badge) => ({
+        ...badge,
+        status: badge.earned ? 'earned' : 'locked',
+    }))
+    const nextUpgrade = completenessItems.find((item) => !item.met) || {
+        key: 'maintain',
+        label: 'Maintain consistency with mixed practice and interviews',
+        action: '/session/today',
+        met: false,
+    }
+    const proofPortfolio = {
+        acceptedProblems: accepted.slice(-8).reverse().map((row) => ({
+            title: row.questionId?.title || 'Accepted problem',
+            slug: row.questionId?.slug,
+            difficulty: row.questionId?.difficulty,
+            patternSlug: row.questionId?.primaryPattern,
+            solvedAt: row.createdAt,
+        })),
+        masteredPatterns: strongestPatterns.map((row) => ({
+            slug: row.pattern.slug,
+            name: row.pattern.name,
+            score: row.masteryScore,
+            status: row.status,
+        })),
+        reflections: qualityReflections.slice(0, 5).map((row) => ({
+            patternUsed: row.patternUsed,
+            keyInvariant: row.keyInvariant,
+            confidenceAfterSolve: row.confidenceAfterSolve,
+            createdAt: row.createdAt,
+        })),
+        conceptChecks: {
+            attempted: conceptAttempts.length,
+            correct: conceptCorrect,
+            accuracy: conceptAttempts.length ? Math.round((conceptCorrect / conceptAttempts.length) * 100) : 0,
+        },
+        systemDesign: {
+            attempts: systemDesignAttempts.length,
+            bestScore: systemDesignAttempts.reduce((best, item) => Math.max(best, item.score || 0), 0),
+            latest: systemDesignAttempts[0] || null,
+        },
+    }
+    const growthTrend = Object.values(trendMap).map((item) => ({
+        ...item,
+        acceptanceRate: item.submissions ? Math.round((item.accepted / item.submissions) * 100) : 0,
+    }))
+    const profileSummary = {
+        headline: `${readinessLevel.label} - ${readinessScore}% readiness`,
+        learnerLevel: readinessLevel.label,
+        readinessBadge: badges.find((badge) => badge.earned && badge.id.includes('ready'))?.label || readinessLevel.label,
+        strength: strongestPatterns[0]?.pattern?.name || 'Skill signal forming',
+        gap: weakSpots[0]?.pattern?.name || nextUpgrade.label,
+        proof: accepted.length ? `${accepted.length} accepted solves with ${mastered} mastered patterns.` : 'Start solving to build visible proof.',
+        nextAction: nextUpgrade.label,
+    }
 
     return {
         onboarding: user?.onboarding || null,
         readinessScore,
         readinessLevel,
+        profileSummary,
+        badges,
+        milestones,
+        proofPortfolio,
+        growthTrend,
+        nextUpgrade,
+        profileCompleteness,
+        communicationScore,
+        hintDependency,
+        revisionHealthScore,
         solved,
         attempted,
         solveConsistency: submissions.length ? Math.round((accepted.length / submissions.length) * 100) : 0,
@@ -171,11 +271,12 @@ export async function getSkillProfile(userId) {
             accepted: mixedAccepted.length,
             guesses: mixedGuesses.length,
             correctGuesses: mixedCorrectGuesses.length,
-            recognitionAccuracy: mixedGuesses.length ? Math.round((mixedCorrectGuesses.length / mixedGuesses.length) * 100) : 0,
+            recognitionAccuracy,
         },
         mediumHardAttempts: mediumHard.length,
-        strengths: mastery.filter((row) => row.masteryScore >= 75).slice(0, 5),
-        weakSpots: mastery.filter((row) => row.masteryScore < 60).slice(0, 5),
+        mediumHardAccepted: mediumHardAccepted.length,
+        strengths: strongestPatterns,
+        weakSpots,
         mastery,
         progressTrend: Object.values(trendMap),
         misconceptions,

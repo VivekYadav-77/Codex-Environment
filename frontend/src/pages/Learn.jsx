@@ -5,6 +5,12 @@ import { Button } from '../components/ui/Button'
 import { GlassPanel } from '../components/ui/Glass'
 import { apiFetch } from '../api/client'
 
+const bands = [
+    { id: 'beginner', label: 'Foundation', description: 'Core signals, invariants, and basic implementation habits.' },
+    { id: 'intermediate', label: 'Pattern Fluency', description: 'Transfer patterns across problem statements and edge cases.' },
+    { id: 'advanced', label: 'Interview Depth', description: 'Explain tradeoffs, optimize confidently, and handle hard variants.' },
+]
+
 export default function Learn() {
     const [patterns, setPatterns] = useState([])
     const [concepts, setConcepts] = useState([])
@@ -22,6 +28,12 @@ export default function Learn() {
 
     if (loading) return <div className="h-64 flex items-center justify-center"><Loader2 className="animate-spin text-google-blue" /></div>
 
+    const patternStats = {
+        objectives: patterns.reduce((sum, pattern) => sum + (pattern.learningObjectives?.length || 0), 0),
+        checks: patterns.length * 3,
+        practiceSets: patterns.reduce((sum, pattern) => sum + (pattern.guidedProblemSlugs?.length || 0) + (pattern.mixedProblemSlugs?.length || 0) + (pattern.interviewProblemSlugs?.length || 0), 0),
+    }
+
     return (
         <div className="max-w-7xl mx-auto space-y-6">
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
@@ -31,6 +43,43 @@ export default function Learn() {
                 </div>
                 <Link to="/onboarding"><Button variant="glass" icon={Sparkles}>Tune Coach</Button></Link>
             </div>
+            <div className="grid md:grid-cols-4 gap-4">
+                <div className="glass-card p-4"><p className="text-sm text-gray-400">DSA Patterns</p><p className="text-3xl font-bold text-google-blue">{patterns.length}</p></div>
+                <div className="glass-card p-4"><p className="text-sm text-gray-400">Learning Objectives</p><p className="text-3xl font-bold text-google-green">{patternStats.objectives}</p></div>
+                <div className="glass-card p-4"><p className="text-sm text-gray-400">Concept Checks</p><p className="text-3xl font-bold text-google-yellow">{patternStats.checks}</p></div>
+                <div className="glass-card p-4"><p className="text-sm text-gray-400">Practice Links</p><p className="text-3xl font-bold">{patternStats.practiceSets}</p></div>
+            </div>
+            <GlassPanel>
+                <div className="flex items-center justify-between gap-3 mb-4">
+                    <div>
+                        <h2 className="text-xl font-bold flex items-center gap-2"><Route size={20} />Structured DSA Curriculum</h2>
+                        <p className="text-sm text-gray-400">Every concept follows the same path: objectives, mental model, worked example, template, mistakes, practice, and checkpoint.</p>
+                    </div>
+                    <Link to="/roadmap"><Button size="sm">Open Roadmap</Button></Link>
+                </div>
+                <div className="grid lg:grid-cols-3 gap-4">
+                    {bands.map((band) => {
+                        const items = patterns.filter((pattern) => pattern.difficultyBand === band.id)
+                        return (
+                            <div key={band.id} className="p-4 rounded-lg bg-white/5 border border-white/10">
+                                <p className="font-semibold text-google-blue">{band.label}</p>
+                                <p className="text-sm text-gray-400 mt-1">{band.description}</p>
+                                <div className="mt-4 space-y-2">
+                                    {items.map((pattern) => (
+                                        <Link key={pattern.slug} to={`/roadmap/${pattern.slug}`} className="block p-3 rounded-lg bg-black/20 hover:bg-white/10">
+                                            <div className="flex justify-between gap-3">
+                                                <p className="font-semibold">{pattern.name}</p>
+                                                <span className="text-xs text-google-green">{pattern.learningObjectives?.length || 0} goals</span>
+                                            </div>
+                                            <p className="text-xs text-gray-400 mt-1">{pattern.signalRules?.[0] || pattern.whenToUse}</p>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
+            </GlassPanel>
             <div className="grid lg:grid-cols-2 gap-6">
                 <GlassPanel>
                     <div className="flex items-center justify-between gap-3 mb-4">

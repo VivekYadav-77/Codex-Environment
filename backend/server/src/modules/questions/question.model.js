@@ -12,6 +12,16 @@ const testCaseSchema = new mongoose.Schema(
     { _id: false }
 )
 
+const depthBlockSchema = new mongoose.Schema(
+    {
+        title: String,
+        body: String,
+        bullets: [String],
+        code: mongoose.Schema.Types.Mixed,
+    },
+    { _id: false }
+)
+
 const questionSchema = new mongoose.Schema(
     {
         slug: { type: String, required: true, unique: true, index: true },
@@ -48,6 +58,13 @@ const questionSchema = new mongoose.Schema(
             relatedProblems: [String],
             misconceptionSlugs: [String],
         },
+        learningObjectives: [String],
+        beginnerExplanation: String,
+        workedExample: depthBlockSchema,
+        visualWalkthrough: [String],
+        edgeCases: [String],
+        revisionPrompts: [String],
+        profileSignals: [String],
         isActive: { type: Boolean, default: true },
     },
     { timestamps: true }

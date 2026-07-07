@@ -4085,6 +4085,76 @@ const ColorLegend = () => (
     </div>
 )
 
+const AlgorithmDepthPanel = ({ algorithm }) => {
+    if (!algorithm) return null
+    const objectives = algorithm.learningObjectives || []
+    const visualWalkthrough = algorithm.visualWalkthrough || []
+    const edgeCases = algorithm.edgeCases || []
+    const revisionPrompts = algorithm.revisionPrompts || []
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mt-8"
+        >
+            <GlassPanel>
+                <div className="grid lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2 space-y-5">
+                        <div>
+                            <h2 className="text-2xl font-bold text-white mb-2">Concept Depth</h2>
+                            <p className="text-gray-300">{algorithm.beginnerExplanation || algorithm.description}</p>
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-4">
+                            <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                                <h3 className="font-semibold text-google-blue mb-2">Learning Objectives</h3>
+                                <ul className="space-y-2 text-sm text-gray-300">
+                                    {objectives.map((item) => <li key={item}>- {item}</li>)}
+                                </ul>
+                            </div>
+                            <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                                <h3 className="font-semibold text-google-green mb-2">Mental Model</h3>
+                                <p className="text-sm text-gray-300">{algorithm.mentalModel}</p>
+                            </div>
+                        </div>
+                        <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                            <h3 className="font-semibold text-google-yellow mb-2">{algorithm.workedExample?.title || 'Worked Example'}</h3>
+                            <p className="text-sm text-gray-300 mb-3">{algorithm.workedExample?.body}</p>
+                            <div className="grid md:grid-cols-4 gap-2">
+                                {visualWalkthrough.map((step, index) => (
+                                    <div key={step} className="p-3 rounded-lg bg-black/20">
+                                        <p className="text-xs text-google-blue">Step {index + 1}</p>
+                                        <p className="text-sm text-gray-300">{step}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="space-y-4">
+                        <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                            <h3 className="font-semibold mb-2">Complexity Reasoning</h3>
+                            <p className="text-sm text-gray-300">{algorithm.complexityReasoning?.body}</p>
+                        </div>
+                        <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                            <h3 className="font-semibold mb-2">Edge Cases</h3>
+                            <ul className="space-y-2 text-sm text-gray-300">
+                                {edgeCases.map((item) => <li key={item}>- {item}</li>)}
+                            </ul>
+                        </div>
+                        <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                            <h3 className="font-semibold mb-2">Revision Prompts</h3>
+                            <ul className="space-y-2 text-sm text-gray-300">
+                                {revisionPrompts.map((item) => <li key={item}>- {item}</li>)}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </GlassPanel>
+        </motion.div>
+    )
+}
+
 const ExamMode = ({ algorithm }) => {
     const practice = algorithm?.practice || algorithm?.code?.practice;
     if (!practice) return null;
@@ -4501,6 +4571,7 @@ export default function AlgorithmViewer() {
             {/* Legend & Exam Mode */}
             {/* Legend & Exam Mode */}
             {hasVisualization && <ColorLegend />}
+            <AlgorithmDepthPanel algorithm={selectedAlgorithm} />
             <ExamMode algorithm={selectedAlgorithm} />
         </div>
     )

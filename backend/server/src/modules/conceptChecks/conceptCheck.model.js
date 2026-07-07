@@ -7,6 +7,8 @@ const conceptCheckSchema = new mongoose.Schema(
         options: [{ type: String, required: true }],
         correctIndex: { type: Number, required: true },
         explanation: { type: String, required: true },
+        skill: { type: String, enum: ['signal', 'mental_model', 'edge_case', 'complexity', 'misconception'], default: 'signal' },
+        difficulty: { type: String, enum: ['intro', 'practice', 'interview'], default: 'intro' },
         isActive: { type: Boolean, default: true },
     },
     { timestamps: true }
