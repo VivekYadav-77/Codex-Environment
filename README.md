@@ -49,6 +49,18 @@ The latest learning layer adds a complete habit loop around the coach:
 6. **Readiness Levels**: Skill Profile now reports readiness levels, missing requirements, and the next best action.
 7. **Content Quality**: Admin question quality endpoints score publish readiness and missing metadata.
 
+### Production Training System Improvements
+
+The platform now includes deeper production-oriented learning systems:
+
+- **Official Solution Unlocks**: accepted submissions unlock official approaches, complexity notes, and interview explanations.
+- **Stricter Guided Practice**: mixed/interview modes require planning fields before execution.
+- **Learner Memory**: recurring mistakes, weak patterns, hint dependency, reflection quality, and pattern recognition are summarized for coach and AI mentor context.
+- **Evidence-Based Misconceptions**: misconceptions include confidence, evidence counts, related patterns, and related submissions.
+- **Execution Jobs**: judged submissions now run through an `ExecutionJob` abstraction so the execution path is queue-ready.
+- **Learning Analytics**: `/api/analytics/me/learning` powers streaks, event trends, submission trends, and pattern-recognition signals.
+- **Admin Content Editing**: admins can inspect/edit official solution content and see improved quality scoring.
+
 ## 🛠️ Tech Stack
 
 ### Frontend

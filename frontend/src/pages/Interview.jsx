@@ -53,6 +53,13 @@ export default function Interview() {
                             <div className="mt-4 p-4 rounded-lg bg-white/5">
                                 <p className="font-semibold">Score: {session.finalScore}%</p>
                                 <p className="text-sm text-gray-400 mb-3">{session.feedback}</p>
+                                {session.report && (
+                                    <div className="mb-3 p-3 rounded bg-black/20">
+                                        <p className="font-semibold">{session.report.verdict}</p>
+                                        <p className="text-xs text-gray-400 mt-1">Next: {session.report.recommendedNextTask}</p>
+                                        <p className="text-xs text-google-blue mt-2">{session.report.idealExplanation}</p>
+                                    </div>
+                                )}
                                 <div className="grid grid-cols-2 gap-2">
                                     {Object.entries(session.scoreBreakdown || {}).map(([key, value]) => (
                                         <div key={key} className="p-2 rounded bg-black/20">

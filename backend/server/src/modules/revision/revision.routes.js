@@ -5,6 +5,7 @@ import { RevisionItem } from './revisionItem.model.js'
 import { validateRequest } from '../../middleware/validateRequest.js'
 import { z } from 'zod'
 import { recordLearningEvent } from '../events/event.service.js'
+import { rebuildLearnerMemory } from '../learnerMemory/learnerMemory.service.js'
 
 const router = Router()
 
@@ -51,6 +52,7 @@ router.post('/me/:id/complete', asyncHandler(async (req, res) => {
     item.intervalDays = nextInterval
     await item.save()
     await recordLearningEvent({ userId: req.user._id, type: 'revision_completed', questionId: item.questionId, metadata: { patternSlug: item.patternSlug } })
+    await rebuildLearnerMemory(req.user._id)
 
     res.json(item)
 }))

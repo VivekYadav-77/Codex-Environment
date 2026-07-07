@@ -272,10 +272,17 @@ describe('coach and revision flow', () => {
                 code: 'function twoSum(){ return [0, 2] }',
                 mode: 'mixed',
                 patternGuess: 'hash-map-lookup',
+                approachSnapshot: {
+                    bruteForce: 'Try all pairs.',
+                    optimized: 'Use a map for complements.',
+                    patternGuess: 'hash-map-lookup',
+                    edgeCases: 'Duplicate values.',
+                },
             })
 
         expect(run.status).toBe(200)
         expect(run.body.revealedPattern.correctGuess).toBe(true)
+        expect(run.body.executionJobId).toBeTruthy()
     })
 })
 
@@ -398,6 +405,58 @@ describe('learning operating system flow', () => {
         expect(quality.status).toBe(200)
         expect(quality.body).toHaveProperty('score')
         expect(quality.body).toHaveProperty('missing')
+    })
+
+    it('hides official solutions until accepted and exposes learner memory and analytics', async () => {
+        await seedMinimalCoachData()
+        const token = await register()
+        const question = await Question.findOne({ slug: 'two-sum' })
+        await Question.findByIdAndUpdate(question._id, {
+            $set: {
+                officialSolution: {
+                    optimizedApproach: 'Use a hash map to remember complements.',
+                    complexityExplanation: 'O(n) time and O(n) space.',
+                    interviewExplanation: 'Maintain seen values and return once the complement appears.',
+                },
+            },
+        })
+
+        const blocked = await request(app)
+            .get('/api/questions/two-sum/solution')
+            .set('Authorization', `Bearer ${token}`)
+
+        expect(blocked.status).toBe(403)
+
+        await request(app)
+            .post('/api/submissions/run')
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                questionId: 'two-sum',
+                language: 'javascript',
+                code: 'function twoSum(nums,target){const seen=new Map(); for(let i=0;i<nums.length;i++){const need=target-nums[i]; if(seen.has(need)) return [seen.get(need), i]; seen.set(nums[i], i);}}',
+            })
+
+        const solution = await request(app)
+            .get('/api/questions/two-sum/solution')
+            .set('Authorization', `Bearer ${token}`)
+
+        expect(solution.status).toBe(200)
+        expect(solution.body.officialSolution.optimizedApproach).toMatch(/hash map/i)
+
+        const memory = await request(app)
+            .get('/api/coach/me/memory')
+            .set('Authorization', `Bearer ${token}`)
+
+        expect(memory.status).toBe(200)
+        expect(memory.body).toHaveProperty('summary')
+
+        const analytics = await request(app)
+            .get('/api/analytics/me/learning')
+            .set('Authorization', `Bearer ${token}`)
+
+        expect(analytics.status).toBe(200)
+        expect(analytics.body).toHaveProperty('streaks')
+        expect(analytics.body).toHaveProperty('submissionTrend')
     })
 })
 

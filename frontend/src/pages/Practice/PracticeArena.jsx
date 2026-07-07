@@ -137,6 +137,7 @@ export default function PracticeArena() {
     const [mentorSession, setMentorSession] = useState(null)
     const [mentorLoading, setMentorLoading] = useState(false)
     const [timeline, setTimeline] = useState([])
+    const [officialSolution, setOfficialSolution] = useState(null)
     const [reflection, setReflection] = useState({
         patternUsed: '',
         whyItWorked: '',
@@ -182,6 +183,7 @@ export default function PracticeArena() {
         setHintLevel(1)
         setReview(null)
         setReflectionSaved(false)
+        setOfficialSolution(null)
         setActiveTab('problem')
 
         if (currentQuestion.primaryPattern && practiceMode !== 'mixed') {
@@ -247,14 +249,21 @@ export default function PracticeArena() {
             return
         }
 
-        if (practiceMode === 'mixed' && !approach.patternGuess.trim()) {
+        const missingMixed = []
+        if (practiceMode === 'mixed') {
+            if (!approach.patternGuess.trim()) missingMixed.push('pattern guess')
+            if (!approach.bruteForce.trim()) missingMixed.push('brute force idea')
+            if (!approach.optimized.trim()) missingMixed.push('optimized idea')
+            if (!approach.edgeCases.trim()) missingMixed.push('edge cases')
+        }
+        if (missingMixed.length) {
             setSubmissionResult({
                 status: 'compile_error',
                 passedCount: 0,
                 totalCount: 0,
                 runtimeMs: 0,
                 testResults: [],
-                error: 'Mixed practice requires a pattern guess before running tests.',
+                error: `Mixed practice requires: ${missingMixed.join(', ')}.`,
             })
             setActiveTab('approach')
             return
@@ -280,6 +289,11 @@ export default function PracticeArena() {
                 apiFetch(`/api/patterns/${result.revealedPattern.slug}`)
                     .then((data) => setCurrentPattern(data.pattern))
                     .catch(() => setCurrentPattern(null))
+            }
+            if (result.status === 'accepted') {
+                apiFetch(`/api/questions/${currentQuestion.slug || currentQuestion.id}/solution`)
+                    .then(setOfficialSolution)
+                    .catch(() => setOfficialSolution(null))
             }
             setActiveTab('tests')
         } catch (err) {
@@ -636,6 +650,20 @@ export default function PracticeArena() {
                                         <input className="w-full" type="range" min="1" max="5" value={reflection.confidenceAfterSolve} onChange={(event) => setReflection((current) => ({ ...current, confidenceAfterSolve: Number(event.target.value) }))} />
                                     </label>
                                     <Button variant="green" size="sm" onClick={saveReflection} disabled={reflectionSaved}>{reflectionSaved ? 'Reflection Saved' : 'Save Reflection'}</Button>
+                                </div>
+                            )}
+                            {officialSolution && (
+                                <div className="pt-5 border-t border-white/10 space-y-3">
+                                    <h3 className="text-lg font-semibold">Official Explanation</h3>
+                                    {officialSolution.empty ? (
+                                        <p className="text-sm text-gray-400">Official solution content has not been added yet.</p>
+                                    ) : (
+                                        <div className="space-y-3 text-sm text-gray-300">
+                                            {officialSolution.officialSolution?.optimizedApproach && <p>{officialSolution.officialSolution.optimizedApproach}</p>}
+                                            {officialSolution.officialSolution?.complexityExplanation && <p className="text-gray-400">{officialSolution.officialSolution.complexityExplanation}</p>}
+                                            {officialSolution.officialSolution?.interviewExplanation && <p className="text-google-blue">{officialSolution.officialSolution.interviewExplanation}</p>}
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>

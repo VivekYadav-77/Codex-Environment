@@ -6,6 +6,7 @@ import { apiFetch } from '../api/client'
 export default function AdminContent() {
     const [questions, setQuestions] = useState(null)
     const [quality, setQuality] = useState({})
+    const [solutions, setSolutions] = useState({})
     const [error, setError] = useState('')
 
     useEffect(() => {
@@ -15,6 +16,16 @@ export default function AdminContent() {
     const loadQuality = async (id) => {
         const data = await apiFetch(`/api/admin/questions/${id}/quality`)
         setQuality((current) => ({ ...current, [id]: data }))
+    }
+
+    const loadSolution = async (id) => {
+        const data = await apiFetch(`/api/admin/questions/${id}/solution`)
+        setSolutions((current) => ({ ...current, [id]: { ...(data || {}) } }))
+    }
+
+    const saveSolution = async (id) => {
+        const data = await apiFetch(`/api/admin/questions/${id}/solution`, { method: 'PATCH', body: solutions[id] || {} })
+        setQuality((current) => ({ ...current, [id]: data.quality }))
     }
 
     return (
@@ -33,12 +44,23 @@ export default function AdminContent() {
                                 <p className="font-semibold">{question.title}</p>
                                 <p className="text-xs text-gray-400">{question.slug} - {question.isActive ? 'Published' : 'Draft'}</p>
                             </div>
-                            <button className="text-sm text-google-blue" onClick={() => loadQuality(question._id)}>Check Quality</button>
+                            <div className="flex gap-2">
+                                <button className="text-sm text-google-blue" onClick={() => loadQuality(question._id)}>Check Quality</button>
+                                <button className="text-sm text-google-green" onClick={() => loadSolution(question._id)}>Edit Solution</button>
+                            </div>
                         </div>
                         {quality[question._id] && (
                             <div className="mt-3 p-3 rounded-lg bg-black/20">
                                 <p className="font-semibold">Quality: {quality[question._id].score}% {quality[question._id].publishReady ? 'Ready' : 'Needs work'}</p>
                                 {quality[question._id].missing?.length ? <p className="text-xs text-gray-400 mt-1">Missing: {quality[question._id].missing.join(', ')}</p> : null}
+                            </div>
+                        )}
+                        {solutions[question._id] && (
+                            <div className="mt-3 grid gap-2">
+                                <textarea className="glass-input w-full min-h-[70px]" placeholder="Optimized approach" value={solutions[question._id].optimizedApproach || ''} onChange={(event) => setSolutions((current) => ({ ...current, [question._id]: { ...current[question._id], optimizedApproach: event.target.value } }))} />
+                                <textarea className="glass-input w-full min-h-[70px]" placeholder="Complexity explanation" value={solutions[question._id].complexityExplanation || ''} onChange={(event) => setSolutions((current) => ({ ...current, [question._id]: { ...current[question._id], complexityExplanation: event.target.value } }))} />
+                                <textarea className="glass-input w-full min-h-[70px]" placeholder="Interview explanation" value={solutions[question._id].interviewExplanation || ''} onChange={(event) => setSolutions((current) => ({ ...current, [question._id]: { ...current[question._id], interviewExplanation: event.target.value } }))} />
+                                <button className="text-sm text-google-green text-left" onClick={() => saveSolution(question._id)}>Save Solution</button>
                             </div>
                         )}
                     </div>

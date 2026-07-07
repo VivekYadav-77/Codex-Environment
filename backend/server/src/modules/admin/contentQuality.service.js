@@ -12,6 +12,9 @@ export async function scoreQuestionQuality(question) {
     add('edge_tests', question.testCases?.some((test) => /edge|empty|duplicate|single|negative|large/i.test(`${test.category || ''} ${test.name || ''}`)), 'Edge-case tests')
     add('primary_pattern', question.primaryPattern, 'Primary pattern')
     add('hints', question.hints?.length >= 2, 'At least two hints')
+    add('official_solution', question.officialSolution?.optimizedApproach || question.officialSolution?.code?.javascript || question.officialSolution?.code?.python, 'Official solution')
+    add('pattern_signals', question.officialSolution?.patternSignals?.length || question.coachTags?.length, 'Pattern signals')
+    add('misconception_mapping', question.officialSolution?.misconceptionSlugs?.length, 'Misconception mapping')
     const conceptChecks = question.primaryPattern ? await ConceptCheck.countDocuments({ patternSlug: question.primaryPattern, isActive: true }) : 0
     add('concept_checks', conceptChecks > 0, 'Concept checks')
     add('reflection_guidance', question.coachTags?.length || question.lessonRefs?.length, 'Reflection or lesson guidance')
@@ -19,7 +22,7 @@ export async function scoreQuestionQuality(question) {
     const passed = checks.filter((check) => check.passed).length
     return {
         score: Math.round((passed / checks.length) * 100),
-        publishReady: passed >= 8,
+        publishReady: Math.round((passed / checks.length) * 100) >= 80,
         checks,
         missing: checks.filter((check) => !check.passed).map((check) => check.label),
     }

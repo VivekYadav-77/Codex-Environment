@@ -19,6 +19,7 @@ import eventRoutes from './modules/events/event.routes.js'
 import sessionRoutes from './modules/sessions/session.routes.js'
 import reflectionRoutes from './modules/reflections/reflection.routes.js'
 import misconceptionRoutes from './modules/misconceptions/misconception.routes.js'
+import analyticsRoutes from './modules/analytics/analytics.routes.js'
 
 export function createApp() {
     const app = express()
@@ -54,6 +55,7 @@ export function createApp() {
     app.use('/api/session', sessionRoutes)
     app.use('/api/reflections', reflectionRoutes)
     app.use('/api/misconceptions', misconceptionRoutes)
+    app.use('/api/analytics', analyticsRoutes)
 
     app.use(notFound)
     app.use(errorMiddleware)

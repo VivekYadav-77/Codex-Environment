@@ -8,6 +8,7 @@ import { Submission } from '../submissions/submission.model.js'
 import { runJudgedSubmission } from '../execution/execution.service.js'
 import { InterviewSession } from './interviewSession.model.js'
 import { recordLearningEvent } from '../events/event.service.js'
+import { rebuildLearnerMemory } from '../learnerMemory/learnerMemory.service.js'
 
 const router = Router()
 router.use(requireAuth)
@@ -107,6 +108,17 @@ router.post('/:id/finish', asyncHandler(async (req, res) => {
     session.feedback = score.finalScore >= 75
         ? 'Strong interview attempt. Keep practicing concise explanation and edge-case coverage.'
         : 'Good practice signal. Review the pattern, explain the invariant, then retry a similar problem.'
+    session.report = {
+        verdict: score.finalScore >= 80 ? 'Interview ready for this pattern' : score.finalScore >= 60 ? 'Close, but needs refinement' : 'Needs more guided practice',
+        recommendedNextTask: score.finalScore >= 75 ? '/practice/mixed?mode=mixed' : '/session/today',
+        attemptReplay: session.submissions.map((submission) => ({
+            status: submission.status,
+            passedCount: submission.passedCount,
+            totalCount: submission.totalCount,
+            runtimeMs: submission.runtimeMs,
+        })),
+        idealExplanation: 'State the pattern, invariant, complexity, and the edge case that proves your solution is robust.',
+    }
     await session.save()
     await recordLearningEvent({
         userId: req.user._id,
@@ -114,6 +126,7 @@ router.post('/:id/finish', asyncHandler(async (req, res) => {
         questionId: session.questionId,
         metadata: { finalScore: session.finalScore, scoreBreakdown: session.scoreBreakdown },
     })
+    await rebuildLearnerMemory(req.user._id)
 
     res.json(session)
 }))

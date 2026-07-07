@@ -33,6 +33,7 @@ export default function Misconceptions() {
                                 <p className="text-gray-400 mt-1">{item.description}</p>
                                 <p className="text-sm text-google-green mt-3">{item.correction}</p>
                                 <p className="text-sm text-gray-300 mt-2">{item.recommendedAction}</p>
+                                <p className="text-xs text-google-yellow mt-2">Confidence: {item.confidence || 'low'} - Evidence: {item.evidenceCount || 0}</p>
                             </div>
                             {!slug && <Link className="text-google-blue text-sm" to={`/misconceptions/${item.slug}`}>Details</Link>}
                         </div>

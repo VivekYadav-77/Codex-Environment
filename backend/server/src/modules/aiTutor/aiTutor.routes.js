@@ -10,6 +10,7 @@ import { MistakeInsight } from '../insights/mistakeInsight.model.js'
 import { MentorSession } from './mentorSession.model.js'
 import { LearningTimelineEvent } from '../timeline/learningTimelineEvent.model.js'
 import { recordLearningEvent } from '../events/event.service.js'
+import { getLearnerMemory } from '../learnerMemory/learnerMemory.service.js'
 
 const router = Router()
 const genAI = new GoogleGenerativeAI(env.geminiApiKey)
@@ -44,6 +45,7 @@ router.post('/hint', requireAuth, aiLimiter, asyncHandler(async (req, res) => {
     }
     const safeHintLevel = Math.max(1, Math.min(6, Number(hintLevel) || 1))
 
+    const memory = await getLearnerMemory(req.user._id)
     const model = genAI.getGenerativeModel({
         model: 'gemini-2.5-flash',
         systemInstruction: HINT_SYSTEM_PROMPT,
@@ -55,6 +57,7 @@ Mode: ${mode}
 Hint level ${safeHintLevel}: ${hintLadder[safeHintLevel - 1]}
 Approach notes: ${JSON.stringify(approach)}
 Submission result: ${JSON.stringify(submissionResult || {})}
+Learner memory: ${memory?.summary || 'No learner memory yet.'}
 
 Current code:
 ${code}
@@ -121,9 +124,10 @@ router.post('/mentor/message', requireAuth, aiLimiter, asyncHandler(async (req, 
     const question = await Question.findOne(questionLookup(questionId))
     if (!question) return res.status(404).json({ error: 'Question not found' })
 
-    const [submissions, mistakes] = await Promise.all([
+    const [submissions, mistakes, memory] = await Promise.all([
         Submission.find({ userId: req.user._id, questionId: question._id }).sort({ createdAt: -1 }).limit(5),
         MistakeInsight.find({ userId: req.user._id, questionId: question._id }).sort({ createdAt: -1 }).limit(10),
+        getLearnerMemory(req.user._id),
     ])
     const solved = submissions.some((submission) => submission.status === 'accepted')
     const hidePattern = ['mixed', 'interview'].includes(mode) && !solved
@@ -143,6 +147,7 @@ Solved already: ${solved}
 Approach notes: ${JSON.stringify(approach)}
 Recent submissions: ${JSON.stringify(submissions.map((row) => ({ status: row.status, mistakeTags: row.mistakeTags, passedCount: row.passedCount, totalCount: row.totalCount })))}
 Mistakes: ${JSON.stringify(mistakes.map((row) => row.tags))}
+Learner memory: ${memory?.summary || 'No learner memory yet.'}
 Current code:
 ${code}
 

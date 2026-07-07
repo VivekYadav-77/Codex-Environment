@@ -33,6 +33,21 @@ const questionSchema = new mongoose.Schema(
         functionName: String,
         testCases: [testCaseSchema],
         hints: [String],
+        officialSolution: {
+            bruteForceApproach: String,
+            optimizedApproach: String,
+            complexityExplanation: String,
+            code: {
+                javascript: String,
+                python: String,
+            },
+            commonMistakes: [String],
+            patternSignals: [String],
+            interviewExplanation: String,
+            followUpVariants: [String],
+            relatedProblems: [String],
+            misconceptionSlugs: [String],
+        },
         isActive: { type: Boolean, default: true },
     },
     { timestamps: true }

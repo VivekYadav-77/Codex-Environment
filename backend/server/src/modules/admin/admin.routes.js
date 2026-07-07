@@ -45,4 +45,52 @@ router.post('/questions/:id/validate', asyncHandler(async (req, res) => {
     res.json(await scoreQuestionQuality(question))
 }))
 
+router.get('/questions/:id/solution', asyncHandler(async (req, res) => {
+    const question = await Question.findById(req.params.id)
+    if (!question) return res.status(404).json({ error: 'Question not found' })
+    res.json(question.officialSolution || {})
+}))
+
+router.patch('/questions/:id/solution', asyncHandler(async (req, res) => {
+    const question = await Question.findByIdAndUpdate(
+        req.params.id,
+        { $set: { officialSolution: req.body } },
+        { new: true, runValidators: true }
+    )
+    if (!question) return res.status(404).json({ error: 'Question not found' })
+    res.json({ officialSolution: question.officialSolution, quality: await scoreQuestionQuality(question) })
+}))
+
+router.get('/questions/:id/content', asyncHandler(async (req, res) => {
+    const question = await Question.findById(req.params.id)
+    if (!question) return res.status(404).json({ error: 'Question not found' })
+    res.json(question)
+}))
+
+router.patch('/questions/:id/content', asyncHandler(async (req, res) => {
+    const allowed = [
+        'title',
+        'topic',
+        'patterns',
+        'primaryPattern',
+        'prerequisites',
+        'learningOrder',
+        'coachTags',
+        'lessonRefs',
+        'difficulty',
+        'description',
+        'examples',
+        'starterCode',
+        'functionName',
+        'testCases',
+        'hints',
+        'isActive',
+        'officialSolution',
+    ]
+    const update = Object.fromEntries(Object.entries(req.body).filter(([key]) => allowed.includes(key)))
+    const question = await Question.findByIdAndUpdate(req.params.id, { $set: update }, { new: true, runValidators: true })
+    if (!question) return res.status(404).json({ error: 'Question not found' })
+    res.json({ question, quality: await scoreQuestionQuality(question) })
+}))
+
 export default router

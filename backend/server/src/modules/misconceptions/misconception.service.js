@@ -1,4 +1,6 @@
 import { MistakeInsight } from '../insights/mistakeInsight.model.js'
+import { Submission } from '../submissions/submission.model.js'
+import { Reflection } from '../reflections/reflection.model.js'
 import { Misconception } from './misconception.model.js'
 
 export const defaultMisconceptions = [
@@ -75,7 +77,11 @@ export async function ensureDefaultMisconceptions() {
 
 export async function getLearnerMisconceptions(userId) {
     await ensureDefaultMisconceptions()
-    const mistakes = await MistakeInsight.find({ userId }).sort({ createdAt: -1 }).limit(200)
+    const [mistakes, submissions, reflections] = await Promise.all([
+        MistakeInsight.find({ userId }).sort({ createdAt: -1 }).limit(200),
+        Submission.find({ userId }).sort({ createdAt: -1 }).limit(200),
+        Reflection.find({ userId }).sort({ createdAt: -1 }).limit(100),
+    ])
     const tagCounts = mistakes.reduce((acc, mistake) => {
         for (const tag of mistake.tags || []) acc[tag] = (acc[tag] || 0) + 1
         return acc
@@ -90,7 +96,24 @@ export async function getLearnerMisconceptions(userId) {
         .map((item) => {
             const tagScore = item.detectionTags.reduce((sum, tag) => sum + (tagCounts[tag] || 0), 0)
             const patternScore = item.patternSlugs.reduce((sum, slug) => sum + (patternCounts[slug] || 0), 0)
-            return { ...item.toObject(), evidenceCount: tagScore + patternScore }
+            const guessMismatch = item.slug === 'label-driven-pattern-choice'
+                ? submissions.filter((row) => row.patternGuess && row.patternGuessCorrect === false).length
+                : 0
+            const lowConfidence = item.slug === 'weak-interview-explanation'
+                ? reflections.filter((row) => row.confidenceAfterSolve <= 2 || (row.interviewExplanation || '').length < 40).length
+                : 0
+            const hintEvidence = item.slug === 'brute-force-not-optimized'
+                ? submissions.filter((row) => (row.hintCountAtSubmit || 0) >= 2).length
+                : 0
+            const evidenceCount = tagScore + patternScore + guessMismatch + lowConfidence + hintEvidence
+            const confidence = evidenceCount >= 5 ? 'high' : evidenceCount >= 2 ? 'medium' : 'low'
+            const relatedSubmissions = submissions
+                .filter((row) => item.patternSlugs.includes(row.questionId?.primaryPattern) || (row.mistakeTags || []).some((tag) => item.detectionTags.includes(tag)) || (item.slug === 'label-driven-pattern-choice' && row.patternGuessCorrect === false))
+                .slice(0, 5)
+                .map((row) => row._id)
+            const relatedPatterns = [...new Set(mistakes.filter((row) => row.patternSlug && item.detectionTags.some((tag) => row.tags?.includes(tag))).map((row) => row.patternSlug))]
+            const lastSeenAt = mistakes.find((row) => item.detectionTags.some((tag) => row.tags?.includes(tag)))?.createdAt
+            return { ...item.toObject(), evidenceCount, confidence, relatedSubmissions, relatedPatterns, lastSeenAt }
         })
         .filter((item) => item.evidenceCount > 0 || item.slug === 'weak-interview-explanation')
         .sort((a, b) => b.evidenceCount - a.evidenceCount)

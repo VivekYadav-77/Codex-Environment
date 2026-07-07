@@ -6,10 +6,14 @@ import { apiFetch } from '../api/client'
 
 export default function SkillProfile() {
     const [profile, setProfile] = useState(null)
+    const [analytics, setAnalytics] = useState(null)
+    const [memory, setMemory] = useState(null)
     const [error, setError] = useState('')
 
     useEffect(() => {
         apiFetch('/api/coach/me/skill-profile').then(setProfile).catch((err) => setError(err.message))
+        apiFetch('/api/analytics/me/learning').then(setAnalytics).catch(() => setAnalytics(null))
+        apiFetch('/api/coach/me/memory').then(setMemory).catch(() => setMemory(null))
     }, [])
 
     if (error) return <div className="text-google-red">{error}</div>
@@ -26,6 +30,24 @@ export default function SkillProfile() {
                 <div className="glass-card p-4"><p className="text-sm text-gray-400">Level</p><p className="text-lg font-bold text-google-blue">{profile.readinessLevel?.label || 'Foundation Ready'}</p></div>
                 <div className="glass-card p-4"><p className="text-sm text-gray-400">Solved</p><p className="text-3xl font-bold">{profile.solved}</p></div>
                 <div className="glass-card p-4"><p className="text-sm text-gray-400">Consistency</p><p className="text-3xl font-bold text-google-blue">{profile.solveConsistency}%</p></div>
+            </div>
+            <div className="grid lg:grid-cols-2 gap-6">
+                <GlassPanel>
+                    <h2 className="text-xl font-bold mb-3">Learner Memory</h2>
+                    <p className="text-sm text-gray-300">{memory?.summary || 'Memory will form as you practice, reflect, and revise.'}</p>
+                    <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                        {memory?.recentImprovementSignals?.map((signal) => <span key={signal} className="px-2 py-1 rounded bg-google-green/10 text-google-green">{signal}</span>)}
+                    </div>
+                </GlassPanel>
+                <GlassPanel>
+                    <h2 className="text-xl font-bold mb-3">Learning Streaks</h2>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="p-3 rounded-lg bg-white/5"><p className="text-xs text-gray-400">Daily Session</p><p className="text-2xl font-bold">{analytics?.streaks?.dailySession || 0}</p></div>
+                        <div className="p-3 rounded-lg bg-white/5"><p className="text-xs text-gray-400">Revision</p><p className="text-2xl font-bold">{analytics?.streaks?.revision || 0}</p></div>
+                        <div className="p-3 rounded-lg bg-white/5"><p className="text-xs text-gray-400">Reflection</p><p className="text-2xl font-bold">{analytics?.streaks?.reflection || 0}</p></div>
+                        <div className="p-3 rounded-lg bg-white/5"><p className="text-xs text-gray-400">Mixed</p><p className="text-2xl font-bold">{analytics?.streaks?.mixedPractice || 0}</p></div>
+                    </div>
+                </GlassPanel>
             </div>
             <GlassPanel>
                 <h2 className="text-xl font-bold mb-3">Readiness Path</h2>
@@ -73,6 +95,7 @@ export default function SkillProfile() {
                         <Link key={item.slug} to={`/misconceptions/${item.slug}`} className="block p-3 rounded-lg bg-white/5 hover:bg-white/10">
                             <p className="font-semibold">{item.title}</p>
                             <p className="text-sm text-gray-400">{item.correction}</p>
+                            <p className="text-xs text-google-yellow mt-1">Confidence: {item.confidence || 'low'} - Evidence: {item.evidenceCount || 0}</p>
                         </Link>
                     )) : <p className="text-gray-400">No clear misconception pattern yet.</p>}
                 </div>

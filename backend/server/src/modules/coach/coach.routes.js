@@ -4,6 +4,7 @@ import { asyncHandler } from '../../middleware/asyncHandler.js'
 import { validateRequest } from '../../middleware/validateRequest.js'
 import { getDashboard, getMastery, getMistakes, getNextActions, getSkillProfile, getTodayPlan, recalculateAllProgress, recordConceptCheckAttempt } from './coach.service.js'
 import { z } from 'zod'
+import { getLearnerMemory } from '../learnerMemory/learnerMemory.service.js'
 
 const router = Router()
 
@@ -31,6 +32,10 @@ router.get('/me/mistakes', asyncHandler(async (req, res) => {
 
 router.get('/me/next-actions', asyncHandler(async (req, res) => {
     res.json(await getNextActions(req.user._id))
+}))
+
+router.get('/me/memory', asyncHandler(async (req, res) => {
+    res.json(await getLearnerMemory(req.user._id))
 }))
 
 const conceptAttemptSchema = z.object({

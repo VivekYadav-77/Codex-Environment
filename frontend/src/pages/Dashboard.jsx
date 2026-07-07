@@ -21,6 +21,7 @@ const taskLink = (task) => {
 export default function Dashboard() {
     const { user } = useSelector((state) => state.auth)
     const [dashboard, setDashboard] = useState(null)
+    const [analytics, setAnalytics] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
 
@@ -33,6 +34,7 @@ export default function Dashboard() {
 
             try {
                 setDashboard(await apiFetch('/api/coach/me/dashboard'))
+                apiFetch('/api/analytics/me/learning').then(setAnalytics).catch(() => setAnalytics(null))
             } catch (err) {
                 setError(err.message)
             } finally {
@@ -84,6 +86,12 @@ export default function Dashboard() {
                 <div className="glass-card p-4"><p className="text-sm text-gray-400">Attempted</p><p className="text-3xl font-bold text-google-yellow">{today?.summary?.attempted || 0}</p></div>
                 <div className="glass-card p-4"><p className="text-sm text-gray-400">Readiness</p><p className="text-3xl font-bold text-google-blue">{skillProfile?.readinessScore || 0}%</p><p className="text-xs text-gray-400">{skillProfile?.readinessLevel?.label || 'Foundation Ready'}</p></div>
                 <div className="glass-card p-4"><p className="text-sm text-gray-400">Top Mistake</p><p className="text-sm font-semibold text-google-yellow capitalize">{topMistake?.tag?.replaceAll('_', ' ') || 'No data yet'}</p></div>
+            </div>
+            <div className="grid md:grid-cols-4 gap-4">
+                <div className="glass-card p-4"><p className="text-sm text-gray-400">Session Streak</p><p className="text-2xl font-bold">{analytics?.streaks?.dailySession || 0}</p></div>
+                <div className="glass-card p-4"><p className="text-sm text-gray-400">Revision Streak</p><p className="text-2xl font-bold">{analytics?.streaks?.revision || 0}</p></div>
+                <div className="glass-card p-4"><p className="text-sm text-gray-400">Reflection Streak</p><p className="text-2xl font-bold">{analytics?.streaks?.reflection || 0}</p></div>
+                <div className="glass-card p-4"><p className="text-sm text-gray-400">Mixed Signal</p><p className="text-2xl font-bold">{analytics?.streaks?.mixedPractice || 0}</p></div>
             </div>
 
             <div className="grid lg:grid-cols-3 gap-6">

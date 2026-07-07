@@ -4,11 +4,12 @@ import { requireAuth } from '../../middleware/authMiddleware.js'
 import { submissionLimiter } from '../../middleware/rateLimiters.js'
 import { Question } from '../questions/question.model.js'
 import { Progress } from '../progress/progress.model.js'
-import { runJudgedSubmission } from '../execution/execution.service.js'
+import { runExecutionJob } from '../execution/executionQueue.service.js'
 import { Submission } from './submission.model.js'
 import { updateCoachAfterSubmission } from '../coach/coach.service.js'
 import { recordLearningOutcome } from '../insights/insight.service.js'
 import { recordLearningEvent } from '../events/event.service.js'
+import { rebuildLearnerMemory } from '../learnerMemory/learnerMemory.service.js'
 import { validateRequest } from '../../middleware/validateRequest.js'
 import { z } from 'zod'
 
@@ -55,7 +56,26 @@ router.post('/run', submissionLimiter, validateRequest(runSubmissionSchema), asy
         return res.status(404).json({ error: 'Question not found' })
     }
 
-    const result = await runJudgedSubmission({ code, language, question })
+    const planning = approachSnapshot || {}
+    const missing = []
+    if (mode === 'mixed') {
+        if (!planning.patternGuess && !patternGuess) missing.push('pattern guess')
+        if (!planning.bruteForce) missing.push('brute force idea')
+        if (!planning.optimized) missing.push('optimized idea')
+        if (!planning.edgeCases) missing.push('edge cases')
+    }
+    if (mode === 'interview') {
+        if (!planning.restatedProblem) missing.push('restated problem')
+        if (!planning.constraints) missing.push('constraints')
+        if (!planning.patternGuess && !patternGuess) missing.push('pattern guess')
+        if (!planning.timeComplexity) missing.push('time complexity')
+        if (!planning.edgeCases) missing.push('edge cases')
+    }
+    if (missing.length) {
+        return res.status(400).json({ error: `Please complete required planning fields before running: ${missing.join(', ')}.` })
+    }
+
+    const { job, result } = await runExecutionJob({ userId: req.user._id, code, language, question })
 
     await recordLearningEvent({
         userId: req.user._id,
@@ -142,8 +162,10 @@ router.post('/run', submissionLimiter, validateRequest(runSubmissionSchema), asy
         result,
         submission,
     })
+    await rebuildLearnerMemory(req.user._id)
 
     res.json({
+        executionJobId: job._id,
         submissionId: submission._id,
         status: result.status,
         passedCount: result.passedCount,

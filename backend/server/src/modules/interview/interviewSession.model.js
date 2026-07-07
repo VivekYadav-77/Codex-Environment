@@ -13,6 +13,7 @@ const interviewSessionSchema = new mongoose.Schema(
         explanation: String,
         finalScore: { type: Number, default: 0 },
         scoreBreakdown: mongoose.Schema.Types.Mixed,
+        report: mongoose.Schema.Types.Mixed,
         feedback: String,
     },
     { timestamps: true }

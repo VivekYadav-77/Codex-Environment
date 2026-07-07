@@ -4,6 +4,7 @@ import { requireAuth } from '../../middleware/authMiddleware.js'
 import { Question } from './question.model.js'
 import { Progress } from '../progress/progress.model.js'
 import { LearningTimelineEvent } from '../timeline/learningTimelineEvent.model.js'
+import { Submission } from '../submissions/submission.model.js'
 
 const router = Router()
 
@@ -57,6 +58,23 @@ router.get('/:slug/timeline/me', requireAuth, asyncHandler(async (req, res) => {
 
     const events = await LearningTimelineEvent.find({ userId: req.user._id, questionId: question._id }).sort({ createdAt: -1 }).limit(100)
     res.json(events)
+}))
+
+router.get('/:slug/solution', requireAuth, asyncHandler(async (req, res) => {
+    const question = await Question.findOne({ slug: req.params.slug, isActive: true })
+    if (!question) return res.status(404).json({ error: 'Question not found' })
+
+    const accepted = await Submission.exists({ userId: req.user._id, questionId: question._id, status: 'accepted' })
+    const isAdmin = req.user.role === 'admin'
+    if (!accepted && !isAdmin) {
+        return res.status(403).json({ error: 'Official solution unlocks after an accepted submission.' })
+    }
+
+    res.json({
+        questionId: question.slug,
+        officialSolution: question.officialSolution || {},
+        empty: !question.officialSolution?.optimizedApproach && !question.officialSolution?.code?.javascript && !question.officialSolution?.code?.python,
+    })
 }))
 
 router.get('/:slug', asyncHandler(async (req, res) => {

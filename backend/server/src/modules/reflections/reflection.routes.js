@@ -7,6 +7,7 @@ import { Question } from '../questions/question.model.js'
 import { RevisionItem } from '../revision/revisionItem.model.js'
 import { Reflection } from './reflection.model.js'
 import { recordLearningEvent } from '../events/event.service.js'
+import { rebuildLearnerMemory } from '../learnerMemory/learnerMemory.service.js'
 
 const router = Router()
 router.use(requireAuth)
@@ -65,6 +66,7 @@ router.post('/', validateRequest(reflectionSchema), asyncHandler(async (req, res
             { upsert: true, new: true }
         )
     }
+    await rebuildLearnerMemory(req.user._id)
 
     res.status(201).json(reflection)
 }))
