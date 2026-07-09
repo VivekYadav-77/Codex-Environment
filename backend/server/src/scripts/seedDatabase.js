@@ -203,14 +203,58 @@ export const corePatterns = [
     },
 ]
 
-export const trackSeed = {
-    slug: 'dsa-foundations-to-interview-ready',
-    title: 'DSA Foundations to Interview Ready',
-    level: 'beginner',
-    targetOutcome: 'Move from core DSA fundamentals to interview-ready pattern recognition.',
-    estimatedProblemCount: 80,
-    patterns: corePatterns.map((pattern) => ({ patternSlug: pattern.slug, order: pattern.order })),
-}
+export const trackSeeds = [
+    {
+        slug: 'track-1-foundation',
+        title: 'Track 1: The Foundation (Beginner)',
+        level: 'beginner',
+        targetOutcome: 'For a student who has never done DSA. Focuses on mental models and the language of efficiency.',
+        estimatedProblemCount: 20,
+        patterns: [
+            { patternSlug: 'hash-map-lookup', order: 1 },
+            { patternSlug: 'frequency-map', order: 2 },
+            { patternSlug: 'two-pointers', order: 3 }
+        ],
+    },
+    {
+        slug: 'track-2-intermediate',
+        title: 'Track 2: Intermediate Data Structures (Core)',
+        level: 'intermediate',
+        targetOutcome: 'Building the essential toolkit. Learn about Linked Lists, Stacks, Queues, and Trees.',
+        estimatedProblemCount: 40,
+        patterns: [
+            { patternSlug: 'sliding-window', order: 1 },
+            { patternSlug: 'stack-pattern', order: 2 },
+            { patternSlug: 'binary-search', order: 3 },
+            { patternSlug: 'linked-list-pointers', order: 4 },
+            { patternSlug: 'tree-dfs', order: 5 },
+            { patternSlug: 'tree-bfs', order: 6 }
+        ],
+    },
+    {
+        slug: 'track-3-advanced',
+        title: 'Track 3: Advanced Algorithms (Industry Level)',
+        level: 'intermediate',
+        targetOutcome: 'The separator between good and great. Graphs, Dynamic Programming, Heaps, and Tries.',
+        estimatedProblemCount: 30,
+        patterns: [
+            { patternSlug: 'graph-bfs-dfs', order: 1 },
+            { patternSlug: 'heap-priority-queue', order: 2 },
+            { patternSlug: 'dp-foundations', order: 3 }
+        ],
+    },
+    {
+        slug: 'track-4-interview',
+        title: 'Track 4: Interview Masterclass',
+        level: 'interview',
+        targetOutcome: 'Curated patterns to crack top tech companies.',
+        estimatedProblemCount: 50,
+        patterns: [
+            { patternSlug: 'backtracking', order: 1 },
+            { patternSlug: 'dp-foundations', order: 2 }
+        ],
+    }
+]
 
 const patternLabExtras = {
     'hash-map-lookup': {
@@ -367,6 +411,9 @@ export const questionPatternOverrides = {
     'course-schedule': 'graph-bfs-dfs',
     'sort-colors': 'two-pointers',
     'merge-intervals': 'two-pointers',
+    'longest-substring-without-repeating-characters': 'sliding-window',
+    'number-of-islands': 'graph-bfs-dfs',
+    'climbing-stairs': 'dp-foundations',
 }
 
 export const hashingJudge = {
@@ -655,11 +702,11 @@ export async function seed() {
     await Algorithm.insertMany(algorithms)
     await Pattern.insertMany(corePatterns.map(enrichPattern))
     await ConceptCheck.insertMany(corePatterns.flatMap((pattern) => buildConceptChecks(pattern)))
-    await LearningTrack.create(trackSeed)
+    await LearningTrack.insertMany(trackSeeds)
     await SystemDesignConcept.insertMany(systemDesignConceptSeeds)
     await SystemDesignPrompt.insertMany(systemDesignPromptSeeds)
 
-    console.log(`Seeded ${questions.length} questions, ${algorithms.length} algorithms, ${corePatterns.length} patterns, ${corePatterns.length * 3} concept checks, ${systemDesignConceptSeeds.length} system design concepts, ${systemDesignPromptSeeds.length} prompts, and 1 learning track.`)
+    console.log(`Seeded ${questions.length} questions, ${algorithms.length} algorithms, ${corePatterns.length} patterns, ${corePatterns.length * 3} concept checks, ${systemDesignConceptSeeds.length} system design concepts, ${systemDesignPromptSeeds.length} prompts, and ${trackSeeds.length} learning tracks.`)
     await mongoose.disconnect()
 }
 
