@@ -10,6 +10,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import { exec } from 'child_process'
 import os from 'os'
 import verfiyRequest from './middleware/verifyMiddleware.js'
+import learningTracksRouter from './routes/learningTracks.js'
 
 config()
 
@@ -192,6 +193,10 @@ app.get('/api/questions/:topic', (req, res) => {
     const topicQuestions = questions.filter(q => q.topic === topic)
     res.json(topicQuestions)
 })
+
+// ============ LEARNING TRACKS API ============
+
+app.use('/api/learning', learningTracksRouter)
 
 // ============ CODE EXECUTION API ============
 

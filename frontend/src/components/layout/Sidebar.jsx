@@ -30,6 +30,7 @@ const menuSections = [
         path: '/learn',
         items: [
             { label: 'Learning Hub', path: '/learn', icon: Sparkles },
+            { label: 'Structured Tracks', path: '/tracks', icon: BookOpen },
             { label: 'DSA Roadmap', path: '/roadmap', icon: Map },
             { label: 'System Design', path: '/system-design', icon: Network },
             { label: 'Visualizer', path: '/algorithms', icon: Play },

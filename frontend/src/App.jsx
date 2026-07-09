@@ -23,6 +23,10 @@ const Onboarding = lazy(() => import('./pages/Onboarding'))
 const Learn = lazy(() => import('./pages/Learn'))
 const SystemDesign = lazy(() => import('./pages/SystemDesign'))
 
+// Learning Tracks
+const TrackDashboard = lazy(() => import('./pages/LearningTracks/TrackDashboard'))
+const InteractiveLesson = lazy(() => import('./pages/LearningTracks/InteractiveLesson'))
+
 const PageLoader = () => (
     <div className="min-h-[50vh] flex items-center justify-center">
         <div className="glass-card px-5 py-4 text-sm text-gray-300">Loading page...</div>
@@ -59,6 +63,10 @@ export default function App() {
                             <Route path="/mistake-doctor" element={<Misconceptions />} />
                             <Route path="/login" element={<Login />} />
                             <Route path="/register" element={<Register />} />
+
+                            {/* Deep Structured Learning Tracks */}
+                            <Route path="/tracks" element={<TrackDashboard />} />
+                            <Route path="/tracks/:topic/:subtopic/:slug" element={<InteractiveLesson />} />
 
                             {/* Tutorial Routes */}
                             <Route path="/tutorial" element={<ComplexityModule />} />
