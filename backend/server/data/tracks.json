@@ -1,0 +1,49 @@
+[
+  {
+    "trackId": "track-1-foundation",
+    "title": "Track 1: The Foundation (Beginner)",
+    "description": "For a student who has never done DSA. Focuses on mental models and the language of efficiency.",
+    "modules": [
+      { "type": "tutorial", "id": "complexity" },
+      { "type": "tutorial", "id": "flow" },
+      { "type": "question", "id": "two-sum" },
+      { "type": "question", "id": "contains-duplicate" }
+    ]
+  },
+  {
+    "trackId": "track-2-intermediate",
+    "title": "Track 2: Intermediate Data Structures (Core)",
+    "description": "Building the essential toolkit. Learn about Linked Lists, Stacks, Queues, and Trees.",
+    "modules": [
+      { "type": "tutorial", "id": "sliding-window" },
+      { "type": "algorithm", "id": "binary-search" },
+      { "type": "algorithm", "id": "bubble" },
+      { "type": "algorithm", "id": "selection" },
+      { "type": "algorithm", "id": "merge-sort" },
+      { "type": "algorithm", "id": "quick-sort" }
+    ]
+  },
+  {
+    "trackId": "track-3-advanced",
+    "title": "Track 3: Advanced Algorithms (Industry Level)",
+    "description": "The separator between good and great. Graphs, Dynamic Programming, Heaps, and Tries.",
+    "modules": [
+      { "type": "tutorial", "id": "graph-representations" },
+      { "type": "tutorial", "id": "dp-intro" },
+      { "type": "algorithm", "id": "dfs" },
+      { "type": "algorithm", "id": "bfs" },
+      { "type": "algorithm", "id": "dijkstra" }
+    ]
+  },
+  {
+    "trackId": "track-4-interview",
+    "title": "Track 4: Interview Masterclass",
+    "description": "Curated patterns to crack top tech companies.",
+    "modules": [
+      { "type": "algorithm", "id": "lru-cache" },
+      { "type": "question", "id": "longest-substring-without-repeating-characters" },
+      { "type": "question", "id": "number-of-islands" },
+      { "type": "question", "id": "climbing-stairs" }
+    ]
+  }
+]

@@ -1794,5 +1794,86 @@
             "Count occurrences of each element.",
             "Add elements in arr2 order, then remaining sorted."
         ]
+    },
+    {
+        "id": "longest-substring-without-repeating-characters",
+        "title": "Longest Substring Without Repeating Characters",
+        "topic": "sliding-window",
+        "difficulty": "Medium",
+        "description": "Given a string `s`, find the length of the longest substring without repeating characters.",
+        "examples": [
+            {
+                "input": "s = \\\"abcabcbb\\\"",
+                "output": "3",
+                "explanation": "The answer is \\\"abc\\\", with the length of 3."
+            },
+            {
+                "input": "s = \\\"bbbbb\\\"",
+                "output": "1",
+                "explanation": "The answer is \\\"b\\\", with the length of 1."
+            }
+        ],
+        "starterCode": {
+            "javascript": "function lengthOfLongestSubstring(s) {\n  // Your code here\n}",
+            "python": "def length_of_longest_substring(s):\n    pass",
+            "cpp": "int lengthOfLongestSubstring(string s) {\n}"
+        },
+        "hints": [
+            "Think about using a sliding window. What happens when you see a character you've already seen in the current window?",
+            "You can use a set or a hash map to store the characters in the current window.",
+            "If you see a duplicate, shrink the window from the left until the duplicate is removed."
+        ]
+    },
+    {
+        "id": "number-of-islands",
+        "title": "Number of Islands",
+        "topic": "graphs",
+        "difficulty": "Medium",
+        "description": "Given an `m x n` 2D binary grid `grid` which represents a map of '1's (land) and '0's (water), return the number of islands.\\nAn island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically.",
+        "examples": [
+            {
+                "input": "grid = [\\n  [\\\"1\\\",\\\"1\\\",\\\"0\\\",\\\"0\\\",\\\"0\\\"],\\n  [\\\"1\\\",\\\"1\\\",\\\"0\\\",\\\"0\\\",\\\"0\\\"],\\n  [\\\"0\\\",\\\"0\\\",\\\"1\\\",\\\"0\\\",\\\"0\\\"],\\n  [\\\"0\\\",\\\"0\\\",\\\"0\\\",\\\"1\\\",\\\"1\\\"]\\n]",
+                "output": "3"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function numIslands(grid) {\n  // Your code here\n}",
+            "python": "def num_islands(grid):\n    pass",
+            "cpp": "int numIslands(vector<vector<char>>& grid) {\n}"
+        },
+        "hints": [
+            "Think of the grid as a graph where each land cell is a node, and edges connect adjacent land cells.",
+            "You can iterate through the grid. When you find a '1', it's a new island. Then use DFS or BFS to visit all connected '1's and mark them as visited (or turn them to '0').",
+            "Increment your island count each time you start a new search."
+        ]
+    },
+    {
+        "id": "climbing-stairs",
+        "title": "Climbing Stairs",
+        "topic": "dynamic-programming",
+        "difficulty": "Easy",
+        "description": "You are climbing a staircase. It takes `n` steps to reach the top. Each time you can either climb `1` or `2` steps. In how many distinct ways can you climb to the top?",
+        "examples": [
+            {
+                "input": "n = 2",
+                "output": "2",
+                "explanation": "1. 1 step + 1 step\\n2. 2 steps"
+            },
+            {
+                "input": "n = 3",
+                "output": "3",
+                "explanation": "1. 1 step + 1 step + 1 step\\n2. 1 step + 2 steps\\n3. 2 steps + 1 step"
+            }
+        ],
+        "starterCode": {
+            "javascript": "function climbStairs(n) {\n  // Your code here\n}",
+            "python": "def climb_stairs(n):\n    pass",
+            "cpp": "int climbStairs(int n) {\n}"
+        },
+        "hints": [
+            "To reach step n, you could have come from step n-1 or step n-2.",
+            "Therefore, the total number of ways to reach step n is the sum of ways to reach step n-1 and ways to reach step n-2.",
+            "This is exactly the Fibonacci sequence. Can you optimize it to use O(1) space?"
+        ]
     }
 ]

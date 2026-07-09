@@ -10,7 +10,7 @@ const envSchema = z.object({
     PORT: z.coerce.number().int().positive().default(3000),
     MONGODB_URI: z.string().min(1).default('mongodb://127.0.0.1:27017/codex_environment'),
     JWT_SECRET: z.string().min(12).default(DEFAULT_JWT_SECRET),
-    FRONTEND_URL: z.url().default('http://localhost:5173'),
+    FRONTEND_URL: z.url().default('http://localhost:5174'),
     REQUEST_API_SECRET: z.string().optional().default(''),
     REQUESTAPISECRET: z.string().optional().default(''),
     GEMINI_API_KEY: z.string().optional().default(''),

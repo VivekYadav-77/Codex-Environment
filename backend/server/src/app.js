@@ -34,7 +34,7 @@ export function createApp() {
     app.use(requestIdMiddleware)
     app.use(cors({
         origin: (origin, callback) => {
-            const allowed = [env.frontendUrl, 'http://localhost:5173', 'http://localhost:3000'].filter(Boolean)
+            const allowed = [env.frontendUrl, 'http://localhost:5174', 'http://localhost:3000'].filter(Boolean)
             if (!origin || allowed.includes(origin)) return callback(null, true)
             callback(new Error('Not allowed by CORS'))
         },

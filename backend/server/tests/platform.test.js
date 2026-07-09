@@ -7,7 +7,7 @@ import { join } from 'path'
 process.env.NODE_ENV = 'test'
 process.env.MONGODB_URI = 'mongodb://127.0.0.1:27017/codex_environment_test'
 process.env.JWT_SECRET = 'test_secret_for_platform_checks'
-process.env.FRONTEND_URL = 'http://localhost:5173'
+process.env.FRONTEND_URL = 'http://localhost:5174'
 
 const { createApp } = await import('../src/app.js')
 const { connectDatabase } = await import('../src/config/db.js')

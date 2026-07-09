@@ -54,5 +54,89 @@
                 "answer": 1
             }
         ]
+    },
+    {
+        "id": "sliding-window",
+        "title": "Sliding Window Pattern",
+        "description": "Learn the sliding window technique to optimize array and string problems.",
+        "content": "# Sliding Window Pattern\n\nThe Sliding Window pattern is used to perform a required operation on a specific window size of a given array or linked list, such as finding the longest subarray containing all 1s. Sliding Windows start from the 1st element and keep shifting right by one element and adjust the length of the window according to the problem that you are solving.\n\n## When to Use It\n\n- The problem involves a data structure that is ordered and iterable like an array or a string.\n- You are asked to find a subrange in that array/string, like a longest, shortest or target value.\n- There is an apparent naive or brute force solution that runs in O(N²), O(2^N) or some other large time complexity.",
+        "quiz": [
+            {
+                "question": "What is the typical time complexity of an optimized sliding window algorithm?",
+                "options": [
+                    "O(1)",
+                    "O(N)",
+                    "O(N log N)",
+                    "O(N²)"
+                ],
+                "answer": 1
+            },
+            {
+                "question": "Which of these problems is best solved with a sliding window?",
+                "options": [
+                    "Sorting an array",
+                    "Finding the shortest path in a graph",
+                    "Finding the maximum sum of a contiguous subarray of size k",
+                    "Searching for an element in a sorted array"
+                ],
+                "answer": 2
+            }
+        ]
+    },
+    {
+        "id": "graph-representations",
+        "title": "Graph Representations",
+        "description": "Understand Adjacency Matrix vs Adjacency List for storing graphs.",
+        "content": "# Graph Representations\n\nGraphs can be represented in memory in two main ways: Adjacency Matrices and Adjacency Lists. Choosing the right one is crucial for performance.\n\n## Adjacency Matrix\n\nA 2D array of size V x V where V is the number of vertices. If `adj[i][j]` is 1, there is an edge from i to j.\n- **Space:** O(V²)\n- **Pros:** Fast O(1) edge lookup.\n- **Cons:** Wastes space for sparse graphs.\n\n## Adjacency List\n\nAn array of lists. `adj[i]` contains a list of all neighbors of vertex i.\n- **Space:** O(V + E)\n- **Pros:** Saves space for sparse graphs. Fast to iterate over neighbors.\n- **Cons:** Slower O(V) edge lookup.",
+        "quiz": [
+            {
+                "question": "Which representation is better for a dense graph?",
+                "options": [
+                    "Adjacency Matrix",
+                    "Adjacency List",
+                    "Edge List",
+                    "None of the above"
+                ],
+                "answer": 0
+            },
+            {
+                "question": "What is the space complexity of an Adjacency List?",
+                "options": [
+                    "O(V)",
+                    "O(E)",
+                    "O(V + E)",
+                    "O(V²)"
+                ],
+                "answer": 2
+            }
+        ]
+    },
+    {
+        "id": "dp-intro",
+        "title": "Dynamic Programming Intro",
+        "description": "Memoization (Top-Down) vs Tabulation (Bottom-Up).",
+        "content": "# Dynamic Programming\n\nDynamic Programming (DP) is a method for solving complex problems by breaking them down into simpler subproblems. It is applicable when subproblems overlap.\n\n## Two Approaches\n\n1. **Top-Down (Memoization):** Start solving the given problem by breaking it down. If you see that the problem has been solved already, then just return the saved answer. If it has not been solved, solve it and save the answer.\n2. **Bottom-Up (Tabulation):** Analyze the problem and see the order in which the sub-problems are solved and start solving from the trivial subproblem, up towards the given problem.",
+        "quiz": [
+            {
+                "question": "What is the key requirement for a problem to be solvable by DP?",
+                "options": [
+                    "It must involve a graph.",
+                    "It must have overlapping subproblems and optimal substructure.",
+                    "It must be a sorting problem.",
+                    "It must use O(1) space."
+                ],
+                "answer": 1
+            },
+            {
+                "question": "Which approach typically uses a recursive function with a cache?",
+                "options": [
+                    "Tabulation (Bottom-Up)",
+                    "Memoization (Top-Down)",
+                    "Greedy Approach",
+                    "Divide and Conquer"
+                ],
+                "answer": 1
+            }
+        ]
     }
 ]

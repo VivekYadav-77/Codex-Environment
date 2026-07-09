@@ -1892,5 +1892,117 @@
             "coding": "Implement Dequeue in a linked list based queue.",
             "interview": "Design a queue that supports enqueue, dequeue, and retrieving the maximum element in constant time."
         }
+    },
+    {
+        "id": "merge-sort",
+        "name": "Merge Sort",
+        "category": "sorting",
+        "complexity": {
+            "time": "O(n log n)",
+            "space": "O(n)"
+        },
+        "description": "A divide and conquer algorithm that divides the input array into two halves, calls itself for the two halves, and then merges the two sorted halves.",
+        "operations": [
+            "divide",
+            "merge",
+            "sort"
+        ],
+        "code": {
+            "javascript": "function mergeSort(arr) {\n  if (arr.length <= 1) return arr;\n  const mid = Math.floor(arr.length / 2);\n  const left = mergeSort(arr.slice(0, mid));\n  const right = mergeSort(arr.slice(mid));\n  return merge(left, right);\n}\nfunction merge(left, right) {\n  let res = [], i = 0, j = 0;\n  while (i < left.length && j < right.length) {\n    if (left[i] < right[j]) res.push(left[i++]);\n    else res.push(right[j++]);\n  }\n  return res.concat(left.slice(i)).concat(right.slice(j));\n}",
+            "python": "def merge_sort(arr):\n    if len(arr) <= 1: return arr\n    mid = len(arr) // 2\n    left = merge_sort(arr[:mid])\n    right = merge_sort(arr[mid:])\n    return merge(left, right)\ndef merge(left, right):\n    res = []\n    i = j = 0\n    while i < len(left) and j < len(right):\n        if left[i] < right[j]:\n            res.append(left[i])\n            i += 1\n        else:\n            res.append(right[j])\n            j += 1\n    res.extend(left[i:])\n    res.extend(right[j:])\n    return res",
+            "cpp": "void merge(vector<int>& arr, int l, int m, int r) {\n    // Implementation omitted for brevity\n}\nvoid mergeSort(vector<int>& arr, int l, int r) {\n    if (l >= r) return;\n    int m = l + (r - l) / 2;\n    mergeSort(arr, l, m);\n    mergeSort(arr, m + 1, r);\n    merge(arr, l, m, r);\n}"
+        },
+        "practice": {
+            "theory": [
+                "Is merge sort stable?",
+                "Why does merge sort require O(n) space complexity?"
+            ],
+            "coding": "Implement merge sort on a linked list in O(1) space.",
+            "interview": "Compare Merge Sort vs Quick Sort in terms of worst case and space complexity."
+        }
+    },
+    {
+        "id": "dfs",
+        "name": "Depth-First Search",
+        "category": "graphs",
+        "complexity": {
+            "time": "O(V + E)",
+            "space": "O(V)"
+        },
+        "description": "An algorithm for traversing or searching tree or graph data structures. The algorithm starts at the root node and explores as far as possible along each branch before backtracking.",
+        "operations": [
+            "traverse",
+            "backtrack",
+            "visit"
+        ],
+        "code": {
+            "javascript": "function dfs(graph, start, visited = new Set()) {\n  visited.add(start);\n  console.log(start);\n  for (let neighbor of graph[start]) {\n    if (!visited.has(neighbor)) {\n      dfs(graph, neighbor, visited);\n    }\n  }\n}",
+            "python": "def dfs(graph, start, visited=None):\n    if visited is None: visited = set()\n    visited.add(start)\n    print(start)\n    for next_node in graph[start]:\n        if next_node not in visited:\n            dfs(graph, next_node, visited)\n    return visited",
+            "cpp": "void dfs(int v, vector<vector<int>>& adj, vector<bool>& visited) {\n    visited[v] = true;\n    cout << v << \" \";\n    for (int u : adj[v]) {\n        if (!visited[u]) {\n            dfs(u, adj, visited);\n        }\n    }\n}"
+        },
+        "practice": {
+            "theory": [
+                "How does DFS differ from BFS?",
+                "Can DFS be used to detect a cycle in a graph?"
+            ],
+            "coding": "Use DFS to find all connected components in an undirected graph.",
+            "interview": "Explain how you would use DFS to topologically sort a directed acyclic graph."
+        }
+    },
+    {
+        "id": "bfs",
+        "name": "Breadth-First Search",
+        "category": "graphs",
+        "complexity": {
+            "time": "O(V + E)",
+            "space": "O(V)"
+        },
+        "description": "An algorithm for traversing graph data structures. It starts at a chosen node and explores all of its neighbors at the present depth prior to moving on to the nodes at the next depth level.",
+        "operations": [
+            "enqueue",
+            "dequeue",
+            "visit"
+        ],
+        "code": {
+            "javascript": "function bfs(graph, start) {\n  let visited = new Set([start]);\n  let queue = [start];\n  while (queue.length > 0) {\n    let curr = queue.shift();\n    console.log(curr);\n    for (let neighbor of graph[curr]) {\n      if (!visited.has(neighbor)) {\n        visited.add(neighbor);\n        queue.push(neighbor);\n      }\n    }\n  }\n}",
+            "python": "from collections import deque\ndef bfs(graph, start):\n    visited = set([start])\n    queue = deque([start])\n    while queue:\n        curr = queue.popleft()\n        print(curr)\n        for neighbor in graph[curr]:\n            if neighbor not in visited:\n                visited.add(neighbor)\n                queue.append(neighbor)",
+            "cpp": "void bfs(int start, vector<vector<int>>& adj, int V) {\n    vector<bool> visited(V, false);\n    queue<int> q;\n    visited[start] = true;\n    q.push(start);\n    while (!q.empty()) {\n        int curr = q.front();\n        q.pop();\n        cout << curr << \" \";\n        for (int u : adj[curr]) {\n            if (!visited[u]) {\n                visited[u] = true;\n                q.push(u);\n            }\n        }\n    }\n}"
+        },
+        "practice": {
+            "theory": [
+                "Why does BFS find the shortest path in an unweighted graph?",
+                "What data structure is used to implement BFS?"
+            ],
+            "coding": "Use BFS to find the shortest path in a 2D grid.",
+            "interview": "How does bidirectional BFS improve performance?"
+        }
+    },
+    {
+        "id": "lru-cache",
+        "name": "LRU Cache",
+        "category": "design",
+        "complexity": {
+            "time": "O(1)",
+            "space": "O(capacity)"
+        },
+        "description": "Design a data structure that follows the constraints of a Least Recently Used (LRU) cache. It supports getting and putting key-value pairs in O(1) time.",
+        "operations": [
+            "get",
+            "put",
+            "evict"
+        ],
+        "code": {
+            "javascript": "class LRUCache {\n  constructor(capacity) {\n    this.capacity = capacity;\n    this.map = new Map();\n  }\n  get(key) {\n    if (!this.map.has(key)) return -1;\n    const val = this.map.get(key);\n    this.map.delete(key);\n    this.map.set(key, val);\n    return val;\n  }\n  put(key, value) {\n    if (this.map.has(key)) this.map.delete(key);\n    this.map.set(key, value);\n    if (this.map.size > this.capacity) {\n      const lruKey = this.map.keys().next().value;\n      this.map.delete(lruKey);\n    }\n  }\n}",
+            "python": "from collections import OrderedDict\nclass LRUCache:\n    def __init__(self, capacity: int):\n        self.cache = OrderedDict()\n        self.capacity = capacity\n    def get(self, key: int) -> int:\n        if key not in self.cache:\n            return -1\n        self.cache.move_to_end(key)\n        return self.cache[key]\n    def put(self, key: int, value: int) -> None:\n        self.cache[key] = value\n        self.cache.move_to_end(key)\n        if len(self.cache) > self.capacity:\n            self.cache.popitem(last=False)",
+            "cpp": "class LRUCache {\n    int capacity;\n    list<pair<int, int>> cache;\n    unordered_map<int, list<pair<int, int>>::iterator> map;\npublic:\n    LRUCache(int capacity) : capacity(capacity) {}\n    int get(int key) {\n        if (map.find(key) == map.end()) return -1;\n        cache.splice(cache.begin(), cache, map[key]);\n        return map[key]->second;\n    }\n    void put(int key, int value) {\n        if (map.find(key) != map.end()) {\n            cache.splice(cache.begin(), cache, map[key]);\n            map[key]->second = value;\n            return;\n        }\n        if (cache.size() == capacity) {\n            int delKey = cache.back().first;\n            cache.pop_back();\n            map.erase(delKey);\n        }\n        cache.push_front({key, value});\n        map[key] = cache.begin();\n    }\n};"
+        },
+        "practice": {
+            "theory": [
+                "What two data structures are commonly combined to implement an LRU cache efficiently?",
+                "Why is a doubly linked list used instead of a singly linked list?"
+            ],
+            "coding": "Implement an LRU Cache without using built-in ordered dictionaries or maps.",
+            "interview": "How would you modify this to be an LFU (Least Frequently Used) cache?"
+        }
     }
 ]
