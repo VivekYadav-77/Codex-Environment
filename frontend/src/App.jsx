@@ -12,6 +12,8 @@ const Login = lazy(() => import('./pages/Auth/Login'))
 const Register = lazy(() => import('./pages/Auth/Register'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const Roadmap = lazy(() => import('./pages/Roadmap'))
+const DsaRoadmap = lazy(() => import('./pages/Roadmap/DsaRoadmap'))
+const SystemDesignRoadmap = lazy(() => import('./pages/Roadmap/SystemDesignRoadmap'))
 const PatternLesson = lazy(() => import('./pages/PatternLesson'))
 const Revision = lazy(() => import('./pages/Revision'))
 const SkillProfile = lazy(() => import('./pages/SkillProfile'))
@@ -52,7 +54,10 @@ export default function App() {
                             <Route path="/learn" element={<Learn />} />
                             <Route path="/system-design" element={<SystemDesign />} />
                             <Route path="/system-design/:slug" element={<SystemDesign />} />
-                            <Route path="/roadmap" element={<Roadmap />} />
+                            <Route path="/roadmap" element={<DsaRoadmap />} />
+                            <Route path="/roadmap/dsa" element={<DsaRoadmap />} />
+                            <Route path="/roadmap/dsa/:topicId" element={<DsaRoadmap />} />
+                            <Route path="/roadmap/system-design" element={<SystemDesignRoadmap />} />
                             <Route path="/roadmap/:patternSlug" element={<PatternLesson />} />
                             <Route path="/revision" element={<Revision />} />
                             <Route path="/profile/skills" element={<SkillProfile />} />

@@ -1,4 +1,4 @@
-import { beforeAll, afterAll, beforeEach, describe, expect, it } from 'vitest'
+import { beforeAll, afterAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import request from 'supertest'
 import mongoose from 'mongoose'
 import { readFileSync } from 'fs'
@@ -8,6 +8,30 @@ process.env.NODE_ENV = 'test'
 process.env.MONGODB_URI = 'mongodb://127.0.0.1:27017/codex_environment_test'
 process.env.JWT_SECRET = 'test_secret_for_platform_checks'
 process.env.FRONTEND_URL = 'http://localhost:5174'
+
+vi.mock('../src/modules/execution/executionQueue.service.js', async () => {
+    const { ExecutionJob } = await import('../src/modules/execution/executionJob.model.js')
+    const { runJudgedSubmission } = await import('../src/modules/execution/execution.service.js')
+    return {
+        runExecutionJob: async ({ userId, question, language, code }) => {
+            const jobRecord = await ExecutionJob.create({
+                userId,
+                questionId: question._id,
+                language,
+                status: 'queued',
+            })
+            const result = await runJudgedSubmission({ language, question, code })
+            jobRecord.status = result.status === 'time_limit_exceeded' ? 'timed_out' : 'completed'
+            jobRecord.runtimeMs = result.runtimeMs || 0
+            jobRecord.error = result.error
+            jobRecord.stderr = result.error
+            jobRecord.logs = result.error || `Execution finished with ${result.status}`
+            jobRecord.result = result
+            await jobRecord.save()
+            return { job: jobRecord, result }
+        }
+    }
+})
 
 const { createApp } = await import('../src/app.js')
 const { connectDatabase } = await import('../src/config/db.js')
@@ -22,7 +46,8 @@ const { ConceptCheck } = await import('../src/modules/conceptChecks/conceptCheck
 const { SystemDesignConcept } = await import('../src/modules/systemDesign/systemDesignConcept.model.js')
 const { SystemDesignPrompt } = await import('../src/modules/systemDesign/systemDesignPrompt.model.js')
 const { systemDesignConceptSeeds, systemDesignPromptSeeds } = await import('../src/modules/systemDesign/systemDesign.content.js')
-const { corePatterns, enrichQuestion, hashingJudge, trackSeed } = await import('../src/scripts/seedDatabase.js')
+const { corePatterns, enrichQuestion, hashingJudge, trackSeeds } = await import('../src/scripts/seedDatabase.js')
+const trackSeed = trackSeeds[0]
 
 const app = createApp()
 

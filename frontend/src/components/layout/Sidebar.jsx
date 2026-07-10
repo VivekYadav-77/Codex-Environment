@@ -31,8 +31,8 @@ const menuSections = [
         items: [
             { label: 'Learning Hub', path: '/learn', icon: Sparkles },
             { label: 'Structured Tracks', path: '/tracks', icon: BookOpen },
-            { label: 'DSA Roadmap', path: '/roadmap', icon: Map },
-            { label: 'System Design', path: '/system-design', icon: Network },
+            { label: 'DSA Roadmap', path: '/roadmap/dsa', icon: Map },
+            { label: 'System Design Roadmap', path: '/roadmap/system-design', icon: Network },
             { label: 'Visualizer', path: '/algorithms', icon: Play },
             { label: 'Complexity', path: '/tutorial/complexity', icon: BarChart3 },
         ],
@@ -57,6 +57,7 @@ const menuSections = [
             { label: 'Interview Mode', path: '/interview', icon: Briefcase },
             { label: 'Coding Practice', path: '/practice/mixed?mode=interview', icon: PenTool },
             { label: 'Design Drill', path: '/system-design', icon: Network },
+            { label: 'System Design Roadmap', path: '/roadmap/system-design', icon: Network },
         ],
     },
 ]

@@ -26,6 +26,7 @@ import analyticsRoutes from './modules/analytics/analytics.routes.js'
 import executionRoutes from './modules/execution/execution.routes.js'
 import onboardingRoutes from './modules/onboarding/onboarding.routes.js'
 import systemDesignRoutes from './modules/systemDesign/systemDesign.routes.js'
+import roadmapRoutes from './modules/roadmap/roadmap.routes.js'
 
 export function createApp() {
     const app = express()
@@ -87,6 +88,7 @@ export function createApp() {
     app.use('/api/execution', executionRoutes)
     app.use('/api/onboarding', onboardingRoutes)
     app.use('/api/system-design', systemDesignRoutes)
+    app.use('/api/roadmap', roadmapRoutes)
 
     app.use(notFound)
     app.use(errorMiddleware)
