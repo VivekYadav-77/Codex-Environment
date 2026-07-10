@@ -1,0 +1,321 @@
+[
+    {
+        "id": "big-o-notation",
+        "name": "Big O Notation",
+        "category": "complexity",
+        "complexity": { "time": "varies", "space": "O(1)" },
+        "description": "Big O notation describes the upper bound on an algorithm's resource usage (time or space) as input size grows. It lets us compare algorithms independently of hardware.",
+        "operations": ["analyze", "compare", "classify"],
+        "beginnerExplanation": "Think of Big O as a speed label for an algorithm. O(1) means instant regardless of how much data you have. O(n) means it takes proportionally longer as data grows. O(n²) means it gets very slow very fast. Big O ignores constants and small terms because we care about the general shape of growth, not exact numbers.",
+        "mentalModel": "Imagine timing how long it takes to find your phone in a room of n people. If you instantly check your pocket: O(1). If you check each person one by one: O(n). If every person checks every other person: O(n²).",
+        "learningObjectives": [
+            "Understand what Big O notation measures (worst-case growth rate)",
+            "Recognize common complexity classes: O(1), O(log n), O(n), O(n log n), O(n²), O(2ⁿ)",
+            "Drop constants and lower-order terms when simplifying",
+            "Know which DS operations have which complexity"
+        ],
+        "workedExample": {
+            "title": "Classify a Double Loop",
+            "body": "Given arr of size n, a double for-loop runs n × n = n² iterations. The inner body is O(1). Total = O(n²). If a second single loop follows, it's O(n² + n) = O(n²) after simplification."
+        },
+        "visualWalkthrough": [
+            "n=4: O(1)≈1 op, O(n)=4 ops, O(n²)=16 ops",
+            "n=16: O(n)=16, O(n²)=256 — already 16× worse",
+            "n=1000: O(n log n)≈10000, O(n²)=1,000,000",
+            "O(2ⁿ) at n=30 = 1 billion — completely impractical"
+        ],
+        "complexityReasoning": {
+            "body": "O(1) < O(log n) < O(n) < O(n log n) < O(n²) < O(n³) < O(2ⁿ) < O(n!). Algorithms above O(n log n) are generally unacceptable for large inputs."
+        },
+        "edgeCases": [
+            "O(n + m) when two separate inputs are involved (e.g., graph problems)",
+            "Amortized O(1) can hide occasional expensive operations (e.g., array resize)",
+            "Best/average/worst cases may differ dramatically (e.g., quicksort O(n log n) avg vs O(n²) worst)"
+        ],
+        "revisionPrompts": [
+            "What is the Big O of accessing element i in an array?",
+            "Which loop structure gives O(n log n)?",
+            "Can O(100n) ever beat O(n²) for small n?"
+        ],
+        "code": {
+            "javascript": "// Classifying time complexity examples\nfunction constant(arr) {\n  return arr[0]; // O(1)\n}\n\nfunction linear(arr) {\n  for (let x of arr) console.log(x); // O(n)\n}\n\nfunction quadratic(arr) {\n  for (let i = 0; i < arr.length; i++)\n    for (let j = 0; j < arr.length; j++)\n      console.log(arr[i], arr[j]); // O(n²)\n}\n\nfunction logarithmic(arr, target) {\n  let lo = 0, hi = arr.length - 1;\n  while (lo <= hi) {\n    const mid = (lo + hi) >> 1;\n    if (arr[mid] === target) return mid;\n    arr[mid] < target ? lo = mid + 1 : hi = mid - 1;\n  }\n  return -1; // O(log n)\n}",
+            "python": "# Classifying time complexity examples\ndef constant(arr):\n    return arr[0]  # O(1)\n\ndef linear(arr):\n    for x in arr:\n        print(x)  # O(n)\n\ndef quadratic(arr):\n    for i in arr:\n        for j in arr:\n            print(i, j)  # O(n²)\n\ndef logarithmic(arr, target):\n    lo, hi = 0, len(arr) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1  # O(log n)",
+            "cpp": "// Classifying time complexity examples\nint constant(vector<int>& arr) {\n    return arr[0]; // O(1)\n}\n\nvoid linear(vector<int>& arr) {\n    for (int x : arr) cout << x; // O(n)\n}\n\nvoid quadratic(vector<int>& arr) {\n    for (int i : arr)\n        for (int j : arr)\n            cout << i << j; // O(n²)\n}\n\nint logarithmic(vector<int>& arr, int target) {\n    int lo = 0, hi = arr.size() - 1;\n    while (lo <= hi) {\n        int mid = lo + (hi - lo) / 2;\n        if (arr[mid] == target) return mid;\n        arr[mid] < target ? lo = mid + 1 : hi = mid - 1;\n    }\n    return -1; // O(log n)\n}",
+            "java": "// Classifying time complexity examples\npublic int constant(int[] arr) {\n    return arr[0]; // O(1)\n}\n\npublic void linear(int[] arr) {\n    for (int x : arr) System.out.println(x); // O(n)\n}\n\npublic void quadratic(int[] arr) {\n    for (int i : arr)\n        for (int j : arr)\n            System.out.println(i + \" \" + j); // O(n²)\n}\n\npublic int logarithmic(int[] arr, int target) {\n    int lo = 0, hi = arr.length - 1;\n    while (lo <= hi) {\n        int mid = lo + (hi - lo) / 2;\n        if (arr[mid] == target) return mid;\n        if (arr[mid] < target) lo = mid + 1;\n        else hi = mid - 1;\n    }\n    return -1; // O(log n)\n}"
+        },
+        "practice": {
+            "theory": [
+                "What does O(1) mean, and give two real data structure operations that are O(1)?",
+                "Why do we drop constants in Big O? Is O(5n) different from O(n)?",
+                "What is the total complexity of a function that has an O(n log n) section followed by an O(n²) section?"
+            ],
+            "coding": "Write a function that takes a sorted array and a target value and returns the index using binary search. Analyze and state its time and space complexity.",
+            "interview": "Your interviewer shows you O(n) vs O(n log n) for a sorting variant. The constant for O(n log n) is 1 and for O(n) is 50. At what value of n does O(n log n) become worse? What does this tell you about Big O in practice?"
+        }
+    },
+    {
+        "id": "time-complexity",
+        "name": "Time Complexity",
+        "category": "complexity",
+        "complexity": { "time": "varies", "space": "O(1)" },
+        "description": "Time complexity measures how the running time of an algorithm scales with input size n. Use it to predict whether your code will be fast enough in production.",
+        "operations": ["count-steps", "worst-case", "best-case", "average-case"],
+        "beginnerExplanation": "Counting how many 'steps' an algorithm takes as a function of input size n. We care about worst-case because that's what determines production SLAs. A single for loop is O(n). Two nested loops are O(n²). Each halving step (like binary search) is O(log n).",
+        "mentalModel": "Imagine a recipe that works on n ingredients. Doing one thing to each ingredient is O(n). Doing every pair of ingredients is O(n²). Repeatedly splitting the work in half is O(log n).",
+        "learningObjectives": [
+            "Count basic operations per line of code",
+            "Identify loops, recursive calls, and their multiplicative effect",
+            "Distinguish worst/best/average case",
+            "Recognize common patterns: single loop = O(n), nested loops = O(n²), divide-and-halve = O(log n)"
+        ],
+        "workedExample": {
+            "title": "Analyze a Function Step by Step",
+            "body": "def find_max(arr): max_val = arr[0] # O(1); for x in arr: # n iterations;   if x > max_val: max_val = x # O(1) per iteration; return max_val # O(1). Total: O(1) + O(n) * O(1) + O(1) = O(n)."
+        },
+        "visualWalkthrough": [
+            "Line 1: max_val = arr[0] — O(1), executes once",
+            "Line 2: for x in arr — the loop iterates n times",
+            "Line 3: if x > max_val — O(1) comparison, n times total = O(n)",
+            "Line 5: return — O(1). Grand total: O(n)"
+        ],
+        "complexityReasoning": {
+            "body": "When loops are nested (outer n times, inner n times), multiply: O(n²). When sections are sequential, add then simplify: O(n) + O(n²) = O(n²). Recursive calls expand into T(n) = aT(n/b) + f(n) — use the Master Theorem to solve."
+        },
+        "edgeCases": [
+            "A loop that runs from 0 to sqrt(n) is O(√n)",
+            "Two separate sequential loops: O(n) + O(m) = O(n + m)",
+            "Early return via break: worst case still O(n) unless guaranteed early exit"
+        ],
+        "revisionPrompts": [
+            "What is the time complexity of checking if an element exists in a sorted array?",
+            "Two nested loops where the inner runs from j to n: what is the complexity?",
+            "A function that calls itself twice on n/2: what recurrence is this?"
+        ],
+        "code": {
+            "javascript": "// Time complexity examples\nfunction findMax(arr) {\n  let max = arr[0]; // O(1)\n  for (const x of arr) { // O(n)\n    if (x > max) max = x; // O(1)\n  }\n  return max; // Total: O(n)\n}\n\n// O(n²) — all pairs\nfunction allPairs(arr) {\n  const pairs = [];\n  for (let i = 0; i < arr.length; i++) // O(n)\n    for (let j = i + 1; j < arr.length; j++) // O(n)\n      pairs.push([arr[i], arr[j]]);\n  return pairs; // Total: O(n²)\n}",
+            "python": "def find_max(arr):\n    max_val = arr[0]  # O(1)\n    for x in arr:      # O(n)\n        if x > max_val:\n            max_val = x  # O(1)\n    return max_val  # Total: O(n)\n\n# O(n²) — all pairs\ndef all_pairs(arr):\n    pairs = []\n    for i in range(len(arr)):  # O(n)\n        for j in range(i + 1, len(arr)):  # O(n)\n            pairs.append((arr[i], arr[j]))\n    return pairs  # Total: O(n²)",
+            "cpp": "int findMax(vector<int>& arr) {\n    int maxVal = arr[0]; // O(1)\n    for (int x : arr)    // O(n)\n        if (x > maxVal) maxVal = x; // O(1)\n    return maxVal; // Total: O(n)\n}\n\nvector<pair<int,int>> allPairs(vector<int>& arr) {\n    vector<pair<int,int>> result;\n    int n = arr.size();\n    for (int i = 0; i < n; i++)    // O(n)\n        for (int j = i+1; j < n; j++) // O(n)\n            result.push_back({arr[i], arr[j]});\n    return result; // O(n²)\n}",
+            "java": "public int findMax(int[] arr) {\n    int max = arr[0]; // O(1)\n    for (int x : arr) // O(n)\n        if (x > max) max = x; // O(1)\n    return max; // Total: O(n)\n}\n\npublic List<int[]> allPairs(int[] arr) {\n    List<int[]> pairs = new ArrayList<>();\n    for (int i = 0; i < arr.length; i++) // O(n)\n        for (int j = i+1; j < arr.length; j++) // O(n)\n            pairs.add(new int[]{arr[i], arr[j]});\n    return pairs; // O(n²)\n}"
+        },
+        "practice": {
+            "theory": [
+                "What is the time complexity of a function with one loop inside another where the inner loop runs from 0 to i (not 0 to n)?",
+                "Distinguish between best, worst, and average case complexity with an example."
+            ],
+            "coding": "Write a function to check if an array has any duplicates. Implement two versions: one O(n²) using nested loops, and one O(n) using a hash set.",
+            "interview": "Given two algorithms — one O(n log n) and one O(n²) — when would you choose the O(n²) one? What factors beyond Big O matter in production?"
+        }
+    },
+    {
+        "id": "space-complexity",
+        "name": "Space Complexity",
+        "category": "complexity",
+        "complexity": { "time": "O(1)", "space": "varies" },
+        "description": "Space complexity measures the extra memory an algorithm uses beyond the input itself, as a function of input size n.",
+        "operations": ["count-memory", "in-place", "auxiliary-space"],
+        "beginnerExplanation": "Space complexity counts how much extra RAM your algorithm allocates. If you create a new array of size n, that's O(n) space. Recursion uses the call stack — each call frame is O(1) but k recursive calls = O(k) stack space. In-place algorithms like in-place quicksort use O(log n) stack space for recursion but O(1) extra data structures.",
+        "mentalModel": "Think of space complexity as the number of sticky notes you need to solve the problem. If you can solve it on your fingers: O(1). If you need one note per element: O(n). If you need a table of all pairs: O(n²).",
+        "learningObjectives": [
+            "Calculate auxiliary space: space used beyond the input itself",
+            "Account for recursive call stack depth",
+            "Recognize in-place (O(1) space) vs copy-based (O(n) space) algorithms",
+            "Understand space-time tradeoffs (memoization, caching)"
+        ],
+        "workedExample": {
+            "title": "Reverse an Array — Two Approaches",
+            "body": "Approach 1 (O(n) space): Create result = [], push elements in reverse, return result. Approach 2 (O(1) space): Use two pointers, swap arr[left] and arr[right] moving inward. Same time complexity O(n), but very different space usage."
+        },
+        "visualWalkthrough": [
+            "O(1): only 2 pointer variables created regardless of n",
+            "O(n): new array of size n allocated",
+            "O(log n): binary search recursion depth = log n stack frames",
+            "O(n): merge sort needs O(n) auxiliary for the merged halves"
+        ],
+        "complexityReasoning": {
+            "body": "Recursive algorithms pay O(depth) in stack space. Iterative replacements using an explicit stack are equivalent but make the space cost explicit. Memoization trades O(n) space for O(n) time savings."
+        },
+        "edgeCases": [
+            "Input space vs auxiliary space — Big O usually refers to auxiliary space",
+            "Tail-call optimization can reduce O(n) stack to O(1) in some languages",
+            "Hash maps for deduplication trade O(n) space for O(1) average lookup"
+        ],
+        "revisionPrompts": [
+            "What is the space complexity of a recursive Fibonacci without memoization?",
+            "How does the call stack contribute to space complexity?",
+            "Give an example of a space-time tradeoff."
+        ],
+        "code": {
+            "javascript": "// O(n) space - creates a new reversed array\nfunction reverseArray(arr) {\n  return [...arr].reverse(); // O(n) auxiliary\n}\n\n// O(1) space - reverses in place\nfunction reverseInPlace(arr) {\n  let l = 0, r = arr.length - 1;\n  while (l < r) {\n    [arr[l], arr[r]] = [arr[r], arr[l]];\n    l++; r--;\n  }\n  return arr; // O(1) auxiliary\n}\n\n// O(n) space - memoized Fibonacci\nconst memo = {};\nfunction fib(n) {\n  if (n <= 1) return n;\n  if (memo[n]) return memo[n];\n  return memo[n] = fib(n-1) + fib(n-2);\n}",
+            "python": "# O(n) space — new list\ndef reverse_array(arr):\n    return arr[::-1]  # O(n) auxiliary\n\n# O(1) space — in-place\ndef reverse_in_place(arr):\n    l, r = 0, len(arr) - 1\n    while l < r:\n        arr[l], arr[r] = arr[r], arr[l]\n        l += 1; r -= 1\n    return arr  # O(1) auxiliary\n\n# O(n) space — memoized fib\nfrom functools import lru_cache\n@lru_cache(maxsize=None)\ndef fib(n):\n    if n <= 1: return n\n    return fib(n-1) + fib(n-2)",
+            "cpp": "// O(n) space — reversed copy\nvector<int> reverseArray(vector<int> arr) {\n    reverse(arr.begin(), arr.end()); // in-place built-in O(1)\n    return arr;\n}\n\n// O(1) space — two pointer in-place\nvoid reverseInPlace(vector<int>& arr) {\n    int l = 0, r = arr.size() - 1;\n    while (l < r) swap(arr[l++], arr[r--]);\n}\n\n// O(n) memoized fibonacci\nunordered_map<int,long long> memo;\nlong long fib(int n) {\n    if (n <= 1) return n;\n    if (memo.count(n)) return memo[n];\n    return memo[n] = fib(n-1) + fib(n-2);\n}",
+            "java": "// O(n) space — new array\npublic int[] reverseArray(int[] arr) {\n    int n = arr.length;\n    int[] result = new int[n]; // O(n) space\n    for (int i = 0; i < n; i++) result[i] = arr[n-1-i];\n    return result;\n}\n\n// O(1) space — in-place\npublic void reverseInPlace(int[] arr) {\n    int l = 0, r = arr.length - 1;\n    while (l < r) {\n        int t = arr[l]; arr[l] = arr[r]; arr[r] = t;\n        l++; r--;\n    }\n}\n\n// O(n) memoized fib\nMap<Integer, Long> memo = new HashMap<>();\npublic long fib(int n) {\n    if (n <= 1) return n;\n    if (memo.containsKey(n)) return memo.get(n);\n    long result = fib(n-1) + fib(n-2);\n    memo.put(n, result);\n    return result;\n}"
+        },
+        "practice": {
+            "theory": [
+                "What is the difference between input space and auxiliary space?",
+                "What is the space complexity of an iterative vs recursive binary search?"
+            ],
+            "coding": "Implement a function to find all duplicates in an array of integers where 1 ≤ a[i] ≤ n. Do it in O(n) time and O(1) extra space (use the array itself as a hash map by sign-flipping).",
+            "interview": "You need to check if a string is a palindrome. Compare the two-pointer O(1) space approach against reversing the string. When does O(1) space actually matter in production?"
+        }
+    },
+    {
+        "id": "trie-prefix-search",
+        "name": "Trie — Prefix Search",
+        "category": "tries",
+        "complexity": { "time": "O(L) per query where L = word length", "space": "O(N × Σ) where N = words, Σ = alphabet size" },
+        "description": "A Trie (Prefix Tree) is a tree where each node represents a character. Insert/search/prefix queries all run in O(L) time — far faster than hash table for prefix matching.",
+        "operations": ["insert", "search", "startsWith", "delete"],
+        "beginnerExplanation": "A Trie organizes words character by character in a tree. Each path from root to a marked node spells out a word. Searching for a word 'car' means following root→c→a→r. If the r node is marked as an end, 'car' exists. If not, it doesn't. Prefix matching (startsWith) just checks if root→c→a→r exists at all, without checking the end marker.",
+        "mentalModel": "Think of a trie as a filing cabinet where each drawer level corresponds to a letter position. To find all words starting with 'ca', open the 'c' drawer, then the 'a' sub-drawer — everything inside are matches.",
+        "learningObjectives": [
+            "Implement TrieNode with children array/map and isEnd flag",
+            "Insert a word in O(L) time",
+            "Search for a word in O(L) time",
+            "Check prefix existence with startsWith in O(L) time",
+            "Apply tries to autocomplete and word search problems"
+        ],
+        "workedExample": {
+            "title": "Insert and Search 'card', 'care', 'cat'",
+            "body": "Insert 'card': root→c→a→r→d (mark d.end=true). Insert 'care': root→c→a→r→e (mark e.end=true). Insert 'cat': root→c→a→t (mark t.end=true). Search 'car': root→c→a→r exists but r.end=false → 'car' not in trie. startsWith('ca'): root→c→a both exist → true."
+        },
+        "visualWalkthrough": [
+            "root: {c: ...}",
+            "root→c→a→r→d (end), e (end)",
+            "root→c→a→t (end)",
+            "startsWith('car') = traverse root→c→a→r → true (node exists)"
+        ],
+        "complexityReasoning": {
+            "body": "Each insert/search traverses at most L nodes where L = word length. Space is proportional to total characters across all words, not words² — better than naive string comparisons."
+        },
+        "edgeCases": [
+            "Empty string insertion: just mark root.isEnd = true",
+            "Duplicate insertions: idempotent — second insert does nothing new",
+            "Case sensitivity: decide upfront whether to lowercase all inputs"
+        ],
+        "revisionPrompts": [
+            "Why is a trie better than a hash set for prefix queries?",
+            "What is the space complexity of a trie with n words each of length L?",
+            "How would you implement delete in a trie?"
+        ],
+        "code": {
+            "javascript": "class TrieNode {\n  constructor() {\n    this.children = {};\n    this.isEnd = false;\n  }\n}\n\nclass Trie {\n  constructor() { this.root = new TrieNode(); }\n\n  insert(word) {\n    let node = this.root;\n    for (const ch of word) {\n      if (!node.children[ch])\n        node.children[ch] = new TrieNode();\n      node = node.children[ch];\n    }\n    node.isEnd = true;\n  }\n\n  search(word) {\n    let node = this.root;\n    for (const ch of word) {\n      if (!node.children[ch]) return false;\n      node = node.children[ch];\n    }\n    return node.isEnd;\n  }\n\n  startsWith(prefix) {\n    let node = this.root;\n    for (const ch of prefix) {\n      if (!node.children[ch]) return false;\n      node = node.children[ch];\n    }\n    return true;\n  }\n}",
+            "python": "class TrieNode:\n    def __init__(self):\n        self.children = {}\n        self.is_end = False\n\nclass Trie:\n    def __init__(self):\n        self.root = TrieNode()\n\n    def insert(self, word: str) -> None:\n        node = self.root\n        for ch in word:\n            if ch not in node.children:\n                node.children[ch] = TrieNode()\n            node = node.children[ch]\n        node.is_end = True\n\n    def search(self, word: str) -> bool:\n        node = self.root\n        for ch in word:\n            if ch not in node.children:\n                return False\n            node = node.children[ch]\n        return node.is_end\n\n    def starts_with(self, prefix: str) -> bool:\n        node = self.root\n        for ch in prefix:\n            if ch not in node.children:\n                return False\n            node = node.children[ch]\n        return True",
+            "cpp": "struct TrieNode {\n    unordered_map<char, TrieNode*> children;\n    bool isEnd = false;\n};\n\nclass Trie {\n    TrieNode* root;\npublic:\n    Trie() { root = new TrieNode(); }\n\n    void insert(string word) {\n        TrieNode* node = root;\n        for (char c : word) {\n            if (!node->children.count(c))\n                node->children[c] = new TrieNode();\n            node = node->children[c];\n        }\n        node->isEnd = true;\n    }\n\n    bool search(string word) {\n        TrieNode* node = root;\n        for (char c : word) {\n            if (!node->children.count(c)) return false;\n            node = node->children[c];\n        }\n        return node->isEnd;\n    }\n\n    bool startsWith(string prefix) {\n        TrieNode* node = root;\n        for (char c : prefix) {\n            if (!node->children.count(c)) return false;\n            node = node->children[c];\n        }\n        return true;\n    }\n};",
+            "java": "class TrieNode {\n    Map<Character, TrieNode> children = new HashMap<>();\n    boolean isEnd = false;\n}\n\nclass Trie {\n    private TrieNode root = new TrieNode();\n\n    public void insert(String word) {\n        TrieNode node = root;\n        for (char c : word.toCharArray()) {\n            node.children.putIfAbsent(c, new TrieNode());\n            node = node.children.get(c);\n        }\n        node.isEnd = true;\n    }\n\n    public boolean search(String word) {\n        TrieNode node = root;\n        for (char c : word.toCharArray()) {\n            if (!node.children.containsKey(c)) return false;\n            node = node.children.get(c);\n        }\n        return node.isEnd;\n    }\n\n    public boolean startsWith(String prefix) {\n        TrieNode node = root;\n        for (char c : prefix.toCharArray()) {\n            if (!node.children.containsKey(c)) return false;\n            node = node.children.get(c);\n        }\n        return true;\n    }\n}"
+        },
+        "practice": {
+            "theory": [
+                "Why does a trie guarantee O(L) search where L is the word length, independent of the number of words stored?",
+                "How would you modify a Trie to support wildcard matching (e.g., 'c.r' matches 'car' or 'cor')?"
+            ],
+            "coding": "Implement a Trie that supports insert(word), search(word), startsWith(prefix), and an autocomplete(prefix) method that returns all words with that prefix.",
+            "interview": "Design an autocomplete system for a search engine. How does a Trie help? How would you rank suggestions by frequency? At what scale would you switch from an in-memory Trie to a distributed solution?"
+        }
+    },
+    {
+        "id": "master-theorem",
+        "name": "Master Theorem",
+        "category": "complexity",
+        "complexity": { "time": "varies by case", "space": "O(1)" },
+        "description": "The Master Theorem provides a formula to solve recurrences of the form T(n) = aT(n/b) + f(n), covering divide-and-conquer algorithms like merge sort, binary search, and Strassen's matrix multiplication.",
+        "operations": ["analyze-recurrence", "classify", "solve"],
+        "beginnerExplanation": "When an algorithm splits work into 'a' subproblems of size 'n/b' and does f(n) extra work at each level, use the Master Theorem. Compare f(n) to n^(log_b(a)). If f(n) is smaller: subproblem work dominates → O(n^log_b(a)). If they're equal: log factor kicks in → O(n^log_b(a) · log n). If f(n) is larger: extra work dominates → O(f(n)).",
+        "mentalModel": "Imagine splitting a problem into parts (a parts each of size n/b) and doing housekeeping work f(n) at each split level. The Master Theorem tells you who costs more: the subproblems or the housekeeping.",
+        "learningObjectives": [
+            "Identify the a, b, and f(n) in a recurrence",
+            "Compute n^log_b(a) and compare to f(n)",
+            "Apply all three cases of the Master Theorem",
+            "Recognize Merge Sort, Binary Search, Strassen as examples"
+        ],
+        "workedExample": {
+            "title": "Merge Sort: T(n) = 2T(n/2) + O(n)",
+            "body": "a=2, b=2, f(n)=O(n). n^log_2(2) = n^1 = n. f(n) = n = n^1 → Case 2 applies → T(n) = O(n log n)."
+        },
+        "visualWalkthrough": [
+            "Binary Search: T(n)=T(n/2)+1 → a=1,b=2,f(n)=O(1). n^log2(1)=n^0=1. f(n)=1=n^0 → Case 2 → O(log n)",
+            "Merge Sort: T(n)=2T(n/2)+n → a=2,b=2,f(n)=n. n^log2(2)=n. f(n)=n → Case 2 → O(n log n)",
+            "Strassen: T(n)=7T(n/2)+n² → a=7,b=2. n^log2(7)≈n^2.81. f(n)=n² < n^2.81 → Case 1 → O(n^2.81)"
+        ],
+        "complexityReasoning": {
+            "body": "Master Theorem Case 1: f(n) = O(n^(log_b(a) - ε)) for ε > 0. Case 2: f(n) = Θ(n^log_b(a)). Case 3: f(n) = Ω(n^(log_b(a) + ε)) and regularity condition. The theorem does NOT apply to T(n) = T(n-1) + n type recurrences."
+        },
+        "edgeCases": [
+            "T(n) = T(n-1) + O(n) — Master Theorem does NOT apply (not n/b subdivision)",
+            "When a < 1 the theorem doesn't apply (can't have fractional subproblems)",
+            "Floors and ceilings in n/b don't affect the asymptotic result"
+        ],
+        "revisionPrompts": [
+            "Apply the Master Theorem to T(n) = 4T(n/2) + n",
+            "Why can't you use the Master Theorem for T(n) = T(n-1) + n?",
+            "What is the complexity of Strassen's matrix multiplication and what theorem gives you that?"
+        ],
+        "code": {
+            "javascript": "// Master Theorem Examples\n\n// Case 2: Merge Sort — T(n) = 2T(n/2) + O(n) => O(n log n)\nfunction mergeSort(arr) {\n  if (arr.length <= 1) return arr;\n  const mid = Math.floor(arr.length / 2);\n  const left = mergeSort(arr.slice(0, mid)); // T(n/2)\n  const right = mergeSort(arr.slice(mid));   // T(n/2)\n  return merge(left, right);                  // O(n)\n}\n\n// Case 2: Binary Search — T(n) = T(n/2) + O(1) => O(log n)\nfunction binarySearch(arr, target, lo = 0, hi = arr.length - 1) {\n  if (lo > hi) return -1;\n  const mid = (lo + hi) >> 1;\n  if (arr[mid] === target) return mid;\n  if (arr[mid] < target) return binarySearch(arr, target, mid+1, hi); // T(n/2)\n  return binarySearch(arr, target, lo, mid-1); // T(n/2)\n}",
+            "python": "# Master Theorem Examples\n\n# Case 2: Merge Sort T(n) = 2T(n/2) + O(n) => O(n log n)\ndef merge_sort(arr):\n    if len(arr) <= 1:\n        return arr\n    mid = len(arr) // 2\n    left = merge_sort(arr[:mid])   # T(n/2)\n    right = merge_sort(arr[mid:])  # T(n/2)\n    return merge(left, right)       # O(n)\n\n# Case 2: Binary Search T(n) = T(n/2) + O(1) => O(log n)\ndef binary_search(arr, target, lo=0, hi=None):\n    if hi is None: hi = len(arr) - 1\n    if lo > hi: return -1\n    mid = (lo + hi) // 2\n    if arr[mid] == target: return mid\n    if arr[mid] < target:\n        return binary_search(arr, target, mid+1, hi)\n    return binary_search(arr, target, lo, mid-1)",
+            "cpp": "// Case 2: Merge Sort\nvector<int> mergeSort(vector<int> arr) {\n    if (arr.size() <= 1) return arr;\n    int mid = arr.size() / 2;\n    auto left = mergeSort(vector<int>(arr.begin(), arr.begin() + mid));\n    auto right = mergeSort(vector<int>(arr.begin() + mid, arr.end()));\n    return merge(left, right);\n}\n\n// Case 2: Binary Search\nint binarySearch(vector<int>& arr, int target, int lo, int hi) {\n    if (lo > hi) return -1;\n    int mid = lo + (hi - lo) / 2;\n    if (arr[mid] == target) return mid;\n    if (arr[mid] < target) return binarySearch(arr, target, mid+1, hi);\n    return binarySearch(arr, target, lo, mid-1);\n}",
+            "java": "// Case 2: Merge Sort\npublic int[] mergeSort(int[] arr) {\n    if (arr.length <= 1) return arr;\n    int mid = arr.length / 2;\n    int[] left = mergeSort(Arrays.copyOfRange(arr, 0, mid));\n    int[] right = mergeSort(Arrays.copyOfRange(arr, mid, arr.length));\n    return merge(left, right);\n}\n\n// Case 2: Binary Search\npublic int binarySearch(int[] arr, int target, int lo, int hi) {\n    if (lo > hi) return -1;\n    int mid = lo + (hi - lo) / 2;\n    if (arr[mid] == target) return mid;\n    if (arr[mid] < target) return binarySearch(arr, target, mid+1, hi);\n    return binarySearch(arr, target, lo, mid-1);\n}"
+        },
+        "practice": {
+            "theory": [
+                "Solve T(n) = 4T(n/2) + n using the Master Theorem. Which case applies?",
+                "Why doesn't the Master Theorem apply to T(n) = T(n-1) + O(n)?"
+            ],
+            "coding": "Implement a recursive matrix multiplication. Then implement Strassen's algorithm conceptually (split into 7 recursive calls on n/2 matrices). State the recurrence and apply the Master Theorem.",
+            "interview": "Your teammate wrote a recursive algorithm with T(n) = 3T(n/3) + O(n). What is its complexity? How does it compare to T(n) = 2T(n/2) + O(n) (merge sort)?"
+        }
+    },
+    {
+        "id": "amortized-analysis",
+        "name": "Amortized Analysis",
+        "category": "complexity",
+        "complexity": { "time": "O(1) amortized per operation", "space": "O(n)" },
+        "description": "Amortized analysis gives the true average cost per operation in a sequence, accounting for occasional expensive operations spread over many cheap ones. Critical for understanding dynamic arrays, union-find, and hash tables.",
+        "operations": ["aggregate", "accounting", "potential-method"],
+        "beginnerExplanation": "Some operations are expensive rarely, but cheap almost always. Amortized analysis asks: 'If I do n operations total, what's the average cost each?' Dynamic array append is the classic example. 99% of appends are O(1). But when the array fills, we pay O(n) to double capacity. Spread across n appends: total cost = O(n), amortized cost per append = O(1).",
+        "mentalModel": "Think of a bank account. Every cheap operation deposits $1 of credit. When an expensive operation hits, you withdraw from accumulated savings. If the balance never goes negative, every operation is amortized O(1).",
+        "learningObjectives": [
+            "Understand what amortized analysis measures and when to use it",
+            "Apply aggregate analysis: total cost / n operations",
+            "Recognize O(1) amortized data structures: dynamic array, stack with multipop",
+            "Understand why hash table operations are O(1) amortized"
+        ],
+        "workedExample": {
+            "title": "Dynamic Array Append — Aggregate Analysis",
+            "body": "Start capacity=1. n appends total. Each regular append: O(1). Resize at capacity 1,2,4,8,...,n: costs 1+2+4+...+n = 2n-1 = O(n) total resize cost. n cheap appends add n cost. Total = n + 2n = 3n = O(n) for n operations. Amortized per operation = O(1)."
+        },
+        "visualWalkthrough": [
+            "Push 1: cap=1, size=1. Cost=1",
+            "Push 2: resize! cap→2, copy 1 element. Cost=2. Push: cost=1. Total=3 for 2 ops → avg=1.5",
+            "Push 3,4: resize! cap→4, copy 2. Cost=3. Push 3: 1. Push 4: 1. Running total=8 for 4 ops → avg=2",
+            "After n ops: total cost ≤ 3n → amortized O(1) per op"
+        ],
+        "complexityReasoning": {
+            "body": "The trick: each element is copied at most log n times (once per doubling). Total copies = n · log? No — actually sum of geometric series 1+2+4+...+n/2 = n-1. So total work = O(n) for all resizes."
+        },
+        "edgeCases": [
+            "Deletion from dynamic array is also O(1) amortized if we halve at 1/4 capacity",
+            "Python list.append() is O(1) amortized for this exact reason",
+            "Union-Find with path compression has amortized O(α(n)) ≈ O(1) per operation"
+        ],
+        "revisionPrompts": [
+            "What is the amortized cost of append to a dynamic array?",
+            "If you pop from an expensive-resize-capable stack, is it O(1) amortized?",
+            "How does path compression in Union-Find achieve near-O(1) amortized?"
+        ],
+        "code": {
+            "javascript": "// Dynamic Array with amortized O(1) append\nclass DynamicArray {\n  constructor() {\n    this.data = new Array(1);\n    this.size = 0;\n    this.capacity = 1;\n  }\n\n  push(val) {\n    if (this.size === this.capacity) {\n      // Resize: O(n) but happens rarely\n      const newData = new Array(this.capacity * 2);\n      for (let i = 0; i < this.size; i++) newData[i] = this.data[i];\n      this.data = newData;\n      this.capacity *= 2;\n    }\n    this.data[this.size++] = val; // O(1) amortized\n  }\n\n  get(i) { return this.data[i]; } // O(1)\n}",
+            "python": "class DynamicArray:\n    def __init__(self):\n        self._data = [None]  # initial capacity 1\n        self._size = 0\n        self._capacity = 1\n\n    def push(self, val):\n        if self._size == self._capacity:\n            # Resize: O(n), but amortized O(1)\n            new_data = [None] * (self._capacity * 2)\n            for i in range(self._size):\n                new_data[i] = self._data[i]\n            self._data = new_data\n            self._capacity *= 2\n        self._data[self._size] = val\n        self._size += 1\n\n    def __getitem__(self, i):\n        return self._data[i]  # O(1)",
+            "cpp": "template<typename T>\nclass DynamicArray {\n    T* data;\n    int sz = 0, cap = 1;\npublic:\n    DynamicArray() { data = new T[1]; }\n\n    void push(T val) {\n        if (sz == cap) {\n            T* newData = new T[cap * 2];\n            for (int i = 0; i < sz; i++) newData[i] = data[i];\n            delete[] data;\n            data = newData;\n            cap *= 2;\n        }\n        data[sz++] = val; // O(1) amortized\n    }\n\n    T get(int i) { return data[i]; } // O(1)\n};",
+            "java": "public class DynamicArray {\n    private int[] data;\n    private int size = 0, capacity = 1;\n\n    public DynamicArray() { data = new int[1]; }\n\n    public void push(int val) {\n        if (size == capacity) {\n            // Resize: O(n), amortized O(1)\n            int[] newData = new int[capacity * 2];\n            System.arraycopy(data, 0, newData, 0, size);\n            data = newData;\n            capacity *= 2;\n        }\n        data[size++] = val; // O(1) amortized\n    }\n\n    public int get(int i) { return data[i]; } // O(1)\n}"
+        },
+        "practice": {
+            "theory": [
+                "Explain amortized analysis using the aggregate method for a dynamic array that doubles in capacity.",
+                "Is amortized O(1) the same as average O(1)? What's the difference?"
+            ],
+            "coding": "Implement a stack that supports push, pop, and getMin in O(1) amortized time. (Hint: maintain a secondary stack for minimums.)",
+            "interview": "Python's list.append() is O(1) amortized. Your interviewer asks: 'When would append be slow?' How do you answer, and how would you design a system to avoid this latency spike in real-time applications?"
+        }
+    }
+]

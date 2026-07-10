@@ -689,7 +689,19 @@ export async function seed() {
     await connectDatabase()
 
     const questions = readJson('questions.json').map(enrichQuestion)
-    const algorithms = readJson('algorithms.json').map(enrichAlgorithm)
+
+    // Merge main algorithms with all supplementary phase files
+    const baseAlgorithms = readJson('algorithms.json')
+    const supplementaryFiles = ['algorithms_phase1.json']
+    const extraAlgorithms = supplementaryFiles.flatMap(f => {
+        try { return readJson(f) } catch { return [] }
+    })
+    // De-duplicate by id (supplementary overrides base if same id)
+    const allAlgorithmMap = new Map()
+    for (const a of [...baseAlgorithms, ...extraAlgorithms]) {
+        allAlgorithmMap.set(a.id || a.slug, a)
+    }
+    const algorithms = [...allAlgorithmMap.values()].map(enrichAlgorithm)
 
     await Question.deleteMany({})
     await Algorithm.deleteMany({})

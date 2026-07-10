@@ -249,7 +249,7 @@ export default function DsaRoadmap() {
                                                                 </div>
                                                                 {topic.algorithmId && (
                                                                     <Link
-                                                                        to={`/algorithms/${topic.algorithmId}`}
+                                                                        to={`/algorithms/${topic.category || 'sorting'}/${topic.algorithmId}`}
                                                                         onClick={(e) => e.stopPropagation()}
                                                                         className="flex-shrink-0 p-1 rounded-lg bg-google-blue/20 hover:bg-google-blue/30 transition-colors"
                                                                         title="View in Visualizer"
@@ -311,7 +311,7 @@ export default function DsaRoadmap() {
                                     <div className="space-y-3">
                                         {selectedTopic.algorithmId && (
                                             <Link
-                                                to={`/algorithms/${selectedTopic.algorithmId}`}
+                                                to={`/algorithms/${selectedTopic.category || 'sorting'}/${selectedTopic.algorithmId}`}
                                                 className="flex items-center justify-between w-full p-4 rounded-xl bg-google-blue/20 border border-google-blue/30 hover:bg-google-blue/30 transition-colors group"
                                             >
                                                 <div className="flex items-center gap-3">

@@ -562,6 +562,144 @@ const HashTableVisualization = ({ step }) => {
     )
 }
 
+// Complexity Chart Visualization — interactive Big O curve comparison
+const ComplexityVisualization = ({ step }) => {
+    const [n, setN] = useState(step.n || 10)
+    const width = 340
+    const height = 220
+    const pad = { l: 38, r: 12, t: 12, b: 36 }
+    const innerW = width - pad.l - pad.r
+    const innerH = height - pad.t - pad.b
+
+    const curves = [
+        { label: 'O(1)',        fn: () => 1,                   color: '#34A853', dash: '' },
+        { label: 'O(log n)',    fn: x => Math.log2(x + 1),    color: '#4285F4', dash: '' },
+        { label: 'O(n)',        fn: x => x,                    color: '#FBBC04', dash: '' },
+        { label: 'O(n log n)', fn: x => x * Math.log2(x + 1), color: '#F97316', dash: '6,3' },
+        { label: 'O(n²)',       fn: x => x * x,                color: '#EA4335', dash: '4,2' },
+    ]
+
+    const highlighted = step.highlighted || []
+    const maxN = Math.max(n, 2)
+    const yMax = Math.min(maxN * maxN, 400)
+
+    const toSvgX = x => pad.l + (x / maxN) * innerW
+    const toSvgY = y => pad.t + innerH - Math.min(y / yMax, 1) * innerH
+
+    const buildPath = (fn) => {
+        const pts = Array.from({ length: 60 }, (_, i) => {
+            const x = (i / 59) * maxN
+            return `${toSvgX(x).toFixed(1)},${toSvgY(fn(x)).toFixed(1)}`
+        })
+        return `M ${pts.join(' L ')}`
+    }
+
+    return (
+        <div className="flex flex-col items-center gap-4">
+            <div className="flex items-center gap-3">
+                <label className="text-xs text-gray-400">N =</label>
+                <input
+                    type="range" min={4} max={50} value={n}
+                    onChange={e => setN(Number(e.target.value))}
+                    className="w-32 accent-google-blue"
+                />
+                <span className="text-sm font-mono text-white w-6">{n}</span>
+            </div>
+            <svg width={width} height={height} className="overflow-visible">
+                {/* Axes */}
+                <line x1={pad.l} y1={pad.t} x2={pad.l} y2={pad.t + innerH} stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
+                <line x1={pad.l} y1={pad.t + innerH} x2={pad.l + innerW} y2={pad.t + innerH} stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
+                <text x={pad.l + innerW / 2} y={height - 4} textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize="9">Input Size (n)</text>
+                {/* Curves */}
+                {curves.map(({ label, fn, color, dash }) => {
+                    const isHl = highlighted.length === 0 || highlighted.includes(label)
+                    return (
+                        <g key={label} opacity={isHl ? 1 : 0.18}>
+                            <path d={buildPath(fn)} fill="none" stroke={color} strokeWidth={isHl ? 2.5 : 1.5} strokeDasharray={dash} />
+                            <text x={toSvgX(maxN) + 4} y={Math.max(pad.t + 4, Math.min(toSvgY(fn(maxN)) + 4, pad.t + innerH))} fill={color} fontSize="9" fontWeight="600">{label}</text>
+                        </g>
+                    )
+                })}
+                {/* Vertical marker at current n */}
+                <line x1={toSvgX(n)} y1={pad.t} x2={toSvgX(n)} y2={pad.t + innerH} stroke="rgba(255,255,255,0.25)" strokeDasharray="4,3" strokeWidth="1" />
+                {curves.map(({ fn, color }) => (
+                    <circle key={color} cx={toSvgX(n)} cy={toSvgY(fn(n))} r={3} fill={color} />
+                ))}
+            </svg>
+            {/* Legend table */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-1 text-xs mt-1">
+                {curves.map(({ label, fn, color }) => (
+                    <div key={label} className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
+                        <span className="text-gray-300">{label} ≈ {fn(n).toFixed(0)} ops</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    )
+}
+
+// Trie Visualization — shows prefix tree as layered nodes
+const TrieVisualization = ({ step }) => {
+    const words = step.words || ['cat', 'car', 'card', 'care', 'bat']
+    const prefix = step.prefix || ''
+    const highlight = step.highlight || []
+
+    // Build trie structure
+    const buildTrie = (ws) => {
+        const root = { char: '', children: {}, end: false }
+        for (const w of ws) {
+            let node = root
+            for (const c of w) {
+                if (!node.children[c]) node.children[c] = { char: c, children: {}, end: false }
+                node = node.children[c]
+            }
+            node.end = true
+        }
+        return root
+    }
+
+    const trie = buildTrie(words)
+
+    // Flatten trie into renderable nodes breadth-first
+    const flatNodes = []
+    const bfsQueue = [{ node: trie, level: 0, x: 0.5, parentX: null, parentY: null, pathSoFar: '' }]
+    const levelWidths = {}
+    const levelCounts = {}
+
+    const q = [...bfsQueue]
+    while (q.length > 0) {
+        const { node, level, x, parentX, parentY, pathSoFar } = q.shift()
+        const y = 30 + level * 55
+        const isHighlighted = highlight.includes(pathSoFar) || prefix.startsWith(pathSoFar) && pathSoFar.length <= prefix.length
+        if (node.char !== '' || level === 0) {
+            flatNodes.push({ char: node.char, x: x * 300, y, isHighlighted, parentX, parentY, end: node.end, path: pathSoFar })
+        }
+        const children = Object.values(node.children)
+        children.forEach((child, i) => {
+            const childX = children.length === 1 ? x : x - 0.15 * (children.length - 1) / 2 + i * 0.15
+            q.push({ node: child, level: level + 1, x: Math.max(0.08, Math.min(0.92, childX)), parentX: x * 300, parentY: y, pathSoFar: pathSoFar + child.char })
+        })
+    }
+
+    return (
+        <div className="flex flex-col items-center gap-2">
+            <svg width={300} height={220} className="overflow-visible">
+                {flatNodes.map((node, i) => (
+                    <g key={i}>
+                        {node.parentX !== null && (
+                            <line x1={node.parentX} y1={node.parentY} x2={node.x} y2={node.y} stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" />
+                        )}
+                        <circle cx={node.x} cy={node.y} r={16} fill={node.isHighlighted ? '#4285F4' : 'rgba(255,255,255,0.08)'} stroke={node.end ? '#34A853' : 'rgba(255,255,255,0.2)'} strokeWidth={node.end ? 2 : 1} />
+                        <text x={node.x} y={node.y + 4} textAnchor="middle" fill="white" fontSize="12" fontWeight="700">{node.char || '◎'}</text>
+                    </g>
+                ))}
+            </svg>
+            {prefix && <div className="text-xs text-gray-400">Searching prefix: <span className="text-google-blue font-mono font-bold">{prefix}</span></div>}
+        </div>
+    )
+}
+
 // Get visualization type based on category
 const getVisualizationType = (category) => {
     const vizMap = {
@@ -576,9 +714,17 @@ const getVisualizationType = (category) => {
         'hashing': 'hashtable',
         'strings': 'array',
         'dynamic-programming': 'array',
+        'dp': 'array',
         'greedy': 'array',
         'bit-manipulation': 'array',
         'advanced': 'array',
+        'complexity': 'complexity',
+        'tries': 'trie',
+        'patterns': 'array',
+        'interview': 'array',
+        'design': 'array',
+        'backtracking': 'array',
+        'divide-and-conquer': 'array',
     }
     return vizMap[category] || 'array'
 }
@@ -598,6 +744,10 @@ const VisualizationRenderer = ({ type, step, maxValue }) => {
             return <QueueVisualization step={step} />
         case 'hashtable':
             return <HashTableVisualization step={step} />
+        case 'complexity':
+            return <ComplexityVisualization step={step} />
+        case 'trie':
+            return <TrieVisualization step={step} />
         case 'array':
         default:
             return <ArrayVisualization step={step} maxValue={maxValue} />
@@ -3948,8 +4098,7 @@ const hashingGenerators = {
                     operation: 'search'
                 })
             }
-
-            if (table[hash] === null) {
+if (table[hash] === null) {
                 table[hash] = val
                 steps.push({
                     array: table.map(v => v || 0),
@@ -3963,46 +4112,62 @@ const hashingGenerators = {
                 })
             }
         }
-
-        steps.push({
-            array: table.map(v => v || 0),
-            buckets: table.map(v => v !== null ? [v] : []),
-            message: `Linear Probing insertion complete.`,
-            line: 6
-        })
-        return steps
-    },
-
-    'hash-table': (arr) => {
-        const steps = []
-        const nums = arr.slice(0, 10)
-        const buckets = Array(7).fill(null).map(() => [])
-
-        steps.push({
-            array: [],
-            buckets: JSON.parse(JSON.stringify(buckets)),
-            message: `Building Hash Table (Chaining)`,
-        })
-
-        for (let i = 0; i < nums.length; i++) {
-            const val = nums[i]
-            const hash = Math.abs(val % 7)
-
-            buckets[hash].push(val)
-            steps.push({
-                array: nums.slice(0, i + 1),
-                buckets: JSON.parse(JSON.stringify(buckets)),
-                currentHash: hash,
-                message: `Insert key ${val} → Hash: ${val} % 7 = ${hash}`,
-                key: val,
-                operation: 'insert'
-            })
-        }
         return steps
     }
 }
 
-// Combine all generators
+// Complexity generators
+const complexityGenerators = {
+    'big-o-notation': () => [
+        { n: 4, highlighted: [], message: 'Adjust N with the slider to compare how each complexity class grows.', line: 0 },
+        { n: 8, highlighted: ['O(1)', 'O(log n)'], message: 'O(1) and O(log n) stay nearly flat as n grows.', line: 1 },
+        { n: 16, highlighted: ['O(n)', 'O(n log n)'], message: 'O(n) and O(n log n) grow moderately with n.', line: 2 },
+        { n: 20, highlighted: ['O(n²)'], message: 'O(n²) explodes quickly — nested loops are expensive!', line: 3 },
+        { n: 20, highlighted: [], message: 'Choosing the right algorithm is the most impactful optimization.', line: 4 },
+    ],
+    'time-complexity': () => [
+        { n: 5, highlighted: ['O(1)'], message: 'O(1) — Constant time: array index access, hash lookup. Input size does not matter.', line: 0 },
+        { n: 10, highlighted: ['O(log n)'], message: 'O(log n) — Logarithmic: binary search halves the search space each step.', line: 1 },
+        { n: 15, highlighted: ['O(n)'], message: 'O(n) — Linear: scanning every element once (single loop).', line: 2 },
+        { n: 15, highlighted: ['O(n log n)'], message: 'O(n log n) — Merge sort, heap sort — the practical sorting sweet spot.', line: 3 },
+        { n: 15, highlighted: ['O(n²)'], message: 'O(n²) — Quadratic: bubble sort, selection sort — two nested loops.', line: 4 },
+    ],
+    'space-complexity': () => [
+        { n: 6, highlighted: ['O(1)'], message: 'O(1) space: in-place algorithms use no extra memory proportional to n.', line: 0 },
+        { n: 12, highlighted: ['O(log n)'], message: 'O(log n) space: recursive binary search uses log n stack frames.', line: 1 },
+        { n: 18, highlighted: ['O(n)'], message: 'O(n) space: storing a copy of the array or a call stack of depth n.', line: 2 },
+        { n: 18, highlighted: ['O(n²)'], message: 'O(n²) space: 2D DP tables — be careful on memory-constrained systems.', line: 3 },
+    ],
+    'master-theorem': () => [
+        { n: 8, highlighted: ['O(n)'], message: 'Case 1: f(n) grows slower than n^log_b(a). Result: T(n) = Θ(n^log_b(a)). Example: T(n)=2T(n/2)+1 → O(n).', line: 0 },
+        { n: 16, highlighted: ['O(n log n)'], message: 'Case 2: f(n) = n^log_b(a). Result: T(n) = Θ(n^log_b(a) · log n). Merge Sort: T(n)=2T(n/2)+n → O(n log n).', line: 1 },
+        { n: 20, highlighted: ['O(n²)'], message: 'Case 3: f(n) grows faster than n^log_b(a). Result: T(n) = Θ(f(n)). T(n)=T(n/2)+n² → O(n²).', line: 2 },
+    ],
+    'amortized-analysis': () => [
+        { array: [1], comparing: [], swapping: [], sorted: [], message: 'Dynamic array starts with capacity 1. First insertion is free.', line: 0 },
+        { array: [1, 2], comparing: [1], swapping: [], sorted: [], message: 'Push 2: capacity doubles to 2. Paid cost = 2 (copy 1 + insert). Amortized = O(1).', line: 1 },
+        { array: [1, 2, 3, 4], comparing: [2, 3], swapping: [], sorted: [], message: 'Push 3: double to 4. Total cost spread across 3 ops ≈ O(1) amortized each.', line: 2 },
+        { array: [1, 2, 3, 4, 5], comparing: [4], swapping: [], sorted: [0, 1, 2, 3], message: 'Push 5: double to 8. Amortized analysis proves O(1) per push on average.', line: 3 },
+    ],
+}
+
+// Trie generators
+const trieGenerators = {
+    'trie-prefix-search': () => [
+        { words: ['cat', 'car', 'card', 'care', 'bat'], prefix: '', highlight: [], message: 'Trie built from 5 words. Root node connects to all first characters.', line: 0 },
+        { words: ['cat', 'car', 'card', 'care', 'bat'], prefix: 'c', highlight: ['c'], message: "Search prefix 'c': follow root → 'c' node. All 'cat','car','card','care' are candidates.", line: 1 },
+        { words: ['cat', 'car', 'card', 'care', 'bat'], prefix: 'ca', highlight: ['ca'], message: "Search prefix 'ca': follow 'c' → 'a' node. Still 4 candidates.", line: 2 },
+        { words: ['cat', 'car', 'card', 'care', 'bat'], prefix: 'car', highlight: ['car', 'card', 'care'], message: "Prefix 'car': matches car, card, care — found in O(L) time. Green = word endpoint.", line: 3 },
+        { words: ['cat', 'car', 'card', 'care', 'bat'], prefix: 'bat', highlight: ['bat'], message: "Prefix 'bat': single match. This is why tries beat hashmaps for prefix queries.", line: 4 },
+    ],
+    'trie-autocomplete': () => [
+        { words: ['apple', 'app', 'apply', 'apt', 'apex'], prefix: 'ap', highlight: ['ap'], message: "Autocomplete query: 'ap'. Traverse root → 'a' → 'p'.", line: 0 },
+        { words: ['apple', 'app', 'apply', 'apt', 'apex'], prefix: 'ap', highlight: ['app', 'apple', 'apply', 'apt', 'apex'], message: "DFS from 'ap' node collects all completions: app, apple, apply, apt, apex.", line: 1 },
+        { words: ['apple', 'app', 'apply', 'apt', 'apex'], prefix: 'appl', highlight: ['appl', 'apple', 'apply'], message: "Narrowed to 'appl': completions are apple, apply.", line: 2 },
+    ],
+}
+
+// Combine all step generators
 const allGenerators = {
     ...sortingGenerators,
     ...searchingGenerators,
@@ -4019,6 +4184,8 @@ const allGenerators = {
     ...greedyGenerators,
     ...bitManipulationGenerators,
     ...advancedGenerators,
+    ...complexityGenerators,
+    ...trieGenerators,
 }
 
 const generateRandomArray = (size = 10, max = 100) => {
@@ -4026,19 +4193,14 @@ const generateRandomArray = (size = 10, max = 100) => {
 }
 
 const generateRandomGraph = (nodeCount = 6) => {
-    // Cap node count for visualization clarity
     const count = Math.min(Math.max(nodeCount, 3), 10)
     const nodes = Array.from({ length: count }, (_, i) => i)
     const edges = []
-
-    // Create random edges
     for (let i = 0; i < count; i++) {
-        // Connect to 1-2 other nodes
         const numEdges = Math.floor(Math.random() * 2) + 1
         for (let k = 0; k < numEdges; k++) {
             const potentialTarget = Math.floor(Math.random() * count)
             if (potentialTarget !== i) {
-                // Avoid duplicates (undirected)
                 const exists = edges.some(([u, v]) =>
                     (u === i && v === potentialTarget) || (u === potentialTarget && v === i)
                 )
@@ -4049,7 +4211,6 @@ const generateRandomGraph = (nodeCount = 6) => {
             }
         }
     }
-    // Ensure all nodes have at least one edge? Optional.
     return { nodes, edges }
 }
 

@@ -7,18 +7,18 @@
     "icon": "BarChart3",
     "tier": "beginner",
     "topics": [
-      { "id": "why-complexity-matters", "title": "Why Complexity Matters", "description": "Understand why analyzing algorithm efficiency is crucial before writing a single line of code.", "type": "concept", "algorithmId": null },
-      { "id": "time-complexity", "title": "Time Complexity", "description": "Learn to count operations and express how runtime grows with input size.", "type": "concept", "algorithmId": null },
-      { "id": "space-complexity", "title": "Space Complexity", "description": "Analyze how much memory an algorithm uses relative to input size.", "type": "concept", "algorithmId": null },
-      { "id": "big-o-notation", "title": "Big O Notation", "description": "The standard notation for describing upper bounds on algorithm growth rates.", "type": "concept", "algorithmId": null },
-      { "id": "big-theta-notation", "title": "Big Theta Notation", "description": "Tight bounds that describe both the upper and lower limits of complexity.", "type": "concept", "algorithmId": null },
-      { "id": "big-omega-notation", "title": "Big Omega Notation", "description": "Lower bounds describing the best-case growth rate of an algorithm.", "type": "concept", "algorithmId": null },
-      { "id": "amortized-analysis", "title": "Amortized Analysis", "description": "Analyze the average cost per operation over a sequence of operations, not just the worst single case.", "type": "concept", "algorithmId": null },
-      { "id": "best-case-analysis", "title": "Best Case Analysis", "description": "Evaluate how an algorithm performs under the most favorable input conditions.", "type": "concept", "algorithmId": null },
-      { "id": "average-case-analysis", "title": "Average Case Analysis", "description": "Calculate expected performance across all possible inputs using probability.", "type": "concept", "algorithmId": null },
-      { "id": "worst-case-analysis", "title": "Worst Case Analysis", "description": "Determine the maximum possible runtime for any valid input — the foundation of guarantees.", "type": "concept", "algorithmId": null },
-      { "id": "recurrence-relation", "title": "Recurrence Relation", "description": "Express the time complexity of recursive algorithms using mathematical recurrences.", "type": "concept", "algorithmId": null },
-      { "id": "master-theorem", "title": "Master Theorem", "description": "A powerful formula to solve common divide-and-conquer recurrences in one step.", "type": "concept", "algorithmId": null }
+      { "id": "why-complexity-matters", "title": "Why Complexity Matters", "description": "Understand why analyzing algorithm efficiency is crucial before writing a single line of code.", "type": "concept", "algorithmId": "big-o-notation", "category": "complexity" },
+      { "id": "time-complexity", "title": "Time Complexity", "description": "Learn to count operations and express how runtime grows with input size.", "type": "concept", "algorithmId": "time-complexity", "category": "complexity" },
+      { "id": "space-complexity", "title": "Space Complexity", "description": "Analyze how much memory an algorithm uses relative to input size.", "type": "concept", "algorithmId": "space-complexity", "category": "complexity" },
+      { "id": "big-o-notation", "title": "Big O Notation", "description": "The standard notation for describing upper bounds on algorithm growth rates.", "type": "concept", "algorithmId": "big-o-notation", "category": "complexity" },
+      { "id": "big-theta-notation", "title": "Big Theta Notation", "description": "Tight bounds that describe both the upper and lower limits of complexity.", "type": "concept", "algorithmId": "big-o-notation", "category": "complexity" },
+      { "id": "big-omega-notation", "title": "Big Omega Notation", "description": "Lower bounds describing the best-case growth rate of an algorithm.", "type": "concept", "algorithmId": "big-o-notation", "category": "complexity" },
+      { "id": "amortized-analysis", "title": "Amortized Analysis", "description": "Analyze the average cost per operation over a sequence of operations, not just the worst single case.", "type": "concept", "algorithmId": "amortized-analysis", "category": "complexity" },
+      { "id": "best-case-analysis", "title": "Best Case Analysis", "description": "Evaluate how an algorithm performs under the most favorable input conditions.", "type": "concept", "algorithmId": "time-complexity", "category": "complexity" },
+      { "id": "average-case-analysis", "title": "Average Case Analysis", "description": "Calculate expected performance across all possible inputs using probability.", "type": "concept", "algorithmId": "time-complexity", "category": "complexity" },
+      { "id": "worst-case-analysis", "title": "Worst Case Analysis", "description": "Determine the maximum possible runtime for any valid input — the foundation of guarantees.", "type": "concept", "algorithmId": "time-complexity", "category": "complexity" },
+      { "id": "recurrence-relation", "title": "Recurrence Relation", "description": "Express the time complexity of recursive algorithms using mathematical recurrences.", "type": "concept", "algorithmId": "master-theorem", "category": "complexity" },
+      { "id": "master-theorem", "title": "Master Theorem", "description": "A powerful formula to solve common divide-and-conquer recurrences in one step.", "type": "concept", "algorithmId": "master-theorem", "category": "complexity" }
     ]
   },
   {
