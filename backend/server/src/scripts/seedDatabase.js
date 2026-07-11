@@ -692,7 +692,7 @@ export async function seed() {
 
     // Merge main algorithms with all supplementary phase files
     const baseAlgorithms = readJson('algorithms.json')
-    const supplementaryFiles = ['algorithms_phase1.json', 'algorithms_phase2_4.json', 'algorithms_phase5_9.json']
+    const supplementaryFiles = ['algorithms_phase1.json', 'algorithms_phase2_4.json', 'algorithms_phase5_9.json', 'algorithms_phase10_13.json']
     const extraAlgorithms = supplementaryFiles.flatMap(f => {
         try { return readJson(f) } catch { return [] }
     })

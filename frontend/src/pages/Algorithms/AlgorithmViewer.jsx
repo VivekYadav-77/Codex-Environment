@@ -26,6 +26,7 @@ import {
     setPlaybackSpeed,
     setInputData,
 } from '../../store/slices/executionSlice'
+import { phase10to13Generators } from './phase10to13Generators'
 
 
 const ArrayVisualization = ({ step, maxValue }) => {
@@ -801,10 +802,11 @@ const getVisualizationType = (category) => {
         'greedy': 'array',
         'bit-manipulation': 'array',
         'advanced': 'array',
+        'advanced-structures': 'array',
+        'patterns': 'array',
+        'interview-prep': 'array',
         'complexity': 'complexity',
         'tries': 'trie',
-        'patterns': 'array',
-        'interview': 'array',
         'design': 'array',
         'backtracking': 'array',
         'divide-and-conquer': 'array',
@@ -5994,6 +5996,7 @@ const phase5to9Generators = {
 };
 
 const allGenerators = {
+    ...phase10to13Generators,
     ...newGenerators,
     ...phase5to9Generators,
     ...sortingGenerators,

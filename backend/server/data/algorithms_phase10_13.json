@@ -1,0 +1,1481 @@
+[
+    {
+        "id": "sweep-line",
+        "name": "Sweep Line",
+        "category": "advanced",
+        "complexity": { "time": "O(n log n)", "space": "O(n)" },
+        "description": "Process events by sweeping a line from left to right, handling starts and ends of intervals to solve geometric and interval-based problems.",
+        "beginnerExplanation": "Imagine a vertical line moving from left to right across a number line. At each position, you process 'events' (like the start or end of an interval). This technique eliminates the need to compare every pair and reduces overlap/union/area problems to an O(n log n) solution by sorting events first.",
+        "mentalModel": "Visualize airport arrivals and departures: sweep time from 00:00 to 24:00. At each event (arrival +1, departure -1), update a running counter. The maximum counter at any point is the peak number of planes at the gate.",
+        "learningObjectives": [
+            "Understand how to decompose intervals into discrete start/end events",
+            "Sort events and process them with a counter or priority queue",
+            "Apply sweep line to interval union, meeting rooms, and skyline problems",
+            "Recognize the O(n log n) signature from sorting events"
+        ],
+        "workedExample": {
+            "title": "Find Maximum Simultaneous Intervals",
+            "body": "Intervals: [1,4], [2,6], [5,8]. Events: (1,+1),(2,+1),(4,-1),(5,+1),(6,-1),(8,-1). Sort events: 1+,2+,4-,5+,6-,8-. Sweep: count=1→2→1→2→1→0. Peak = 2 overlapping intervals."
+        },
+        "visualWalkthrough": [
+            "Sort all events: start points as +1, end points as -1",
+            "At x=1: start event, count=1 (one interval active)",
+            "At x=2: start event, count=2 (two intervals now overlap)",
+            "At x=4: end event, count=1 (first interval ends)",
+            "At x=5: start event, count=2 again (new interval begins)"
+        ],
+        "complexityReasoning": { "body": "Sorting n events costs O(n log n). Sweeping processes each event once in O(1). Total: O(n log n). Space is O(n) for the event list." },
+        "edgeCases": [
+            "Ties in event positions: end events should be processed before start events to avoid off-by-one in counts",
+            "Single interval: peak = 1",
+            "Empty input: return 0"
+        ],
+        "revisionPrompts": [
+            "How do you handle an event where a start and end occur at the same x-coordinate?",
+            "What data structure do you use if you need to query which intervals are active at any x?",
+            "Can sweep line be applied in 2D? (Yes — by sweeping one axis and using a segment tree for the other)"
+        ],
+        "code": {
+            "javascript": "function maxOverlap(intervals) {\n  const events = [];\n  for (const [s, e] of intervals) {\n    events.push([s, 1]);\n    events.push([e, -1]);\n  }\n  events.sort((a, b) => a[0] - b[0] || a[1] - b[1]);\n  let maxCount = 0, count = 0;\n  for (const [_, delta] of events) {\n    count += delta;\n    maxCount = Math.max(maxCount, count);\n  }\n  return maxCount;\n}",
+            "python": "def max_overlap(intervals):\n    events = []\n    for s, e in intervals:\n        events.append((s, 1))\n        events.append((e, -1))\n    events.sort(key=lambda x: (x[0], x[1]))\n    max_count = count = 0\n    for _, delta in events:\n        count += delta\n        max_count = max(max_count, count)\n    return max_count",
+            "cpp": "int maxOverlap(vector<pair<int,int>>& intervals) {\n    vector<pair<int,int>> events;\n    for (auto& [s,e] : intervals) {\n        events.push_back({s, 1});\n        events.push_back({e, -1});\n    }\n    sort(events.begin(), events.end());\n    int maxCount = 0, count = 0;\n    for (auto& [x, d] : events) {\n        count += d;\n        maxCount = max(maxCount, count);\n    }\n    return maxCount;\n}",
+            "java": "public int maxOverlap(int[][] intervals) {\n    List<int[]> events = new ArrayList<>();\n    for (int[] iv : intervals) {\n        events.add(new int[]{iv[0], 1});\n        events.add(new int[]{iv[1], -1});\n    }\n    events.sort((a, b) -> a[0] != b[0] ? a[0]-b[0] : a[1]-b[1]);\n    int maxCount = 0, count = 0;\n    for (int[] ev : events) {\n        count += ev[1];\n        maxCount = Math.max(maxCount, count);\n    }\n    return maxCount;\n}"
+        },
+        "practice": {
+            "theory": [
+                "Why do we sort end events before start events at the same coordinate?",
+                "How would you use sweep line to compute the union length of overlapping intervals?",
+                "What is the 'Skyline Problem' and how does sweep line solve it?"
+            ],
+            "coding": "Meeting Rooms II: Given meeting time intervals, find the minimum number of conference rooms required.",
+            "interview": "Explain how sweep line achieves O(n log n) for interval union problems. What would brute force be and why is it worse?"
+        }
+    },
+    {
+        "id": "meet-in-the-middle",
+        "name": "Meet in the Middle",
+        "category": "advanced",
+        "complexity": { "time": "O(2^(n/2))", "space": "O(2^(n/2))" },
+        "description": "Split the input into two halves, enumerate all possible states for each half independently, then combine the two half-results to find optimal solutions.",
+        "beginnerExplanation": "Brute force a problem of size n takes O(2^n). Meet in the Middle splits it into two halves of size n/2, each taking O(2^(n/2)). Then you sort one half and binary-search for complements in it using the other half. This reduces the exponent from n to n/2, which for n=40 is the difference between 1 trillion and 1 million operations.",
+        "mentalModel": "Two groups of explorers start from opposite sides of a mountain range. Each maps their own half. When they meet in the middle, they compare notes to find the best overall route — far more efficient than one group mapping everything.",
+        "learningObjectives": [
+            "Recognize problems where brute force is O(2^n) but n/2 < 25 (making 2^(n/2) feasible)",
+            "Enumerate all subsets for each half and store them",
+            "Sort one half and binary-search for complements from the other half",
+            "Apply to subset sum, 4-SUM, and closest pair problems"
+        ],
+        "workedExample": {
+            "title": "Subset Sum Target T",
+            "body": "n=4, arr=[3,1,5,2], T=6. Left half: [3,1]→sums={0,3,1,4}. Right half: [5,2]→sums={0,5,2,7}. For each left sum s, search right for T-s: 6-0=6(no), 6-3=3(no), 6-1=5(yes!→1+5=6). Found!"
+        },
+        "visualWalkthrough": [
+            "Split array into left=[3,1] and right=[5,2]",
+            "Enumerate left subset sums: {}, {3}, {1}, {3,1} → sums=[0,3,1,4]",
+            "Enumerate right subset sums: {}, {5}, {2}, {5,2} → sums=[0,5,2,7]",
+            "Sort right sums: [0,2,5,7]",
+            "For each left sum, binary search right for T-leftSum. Found 1+5=6!"
+        ],
+        "complexityReasoning": { "body": "Each half has n/2 elements, so 2^(n/2) subsets each. Sorting right half: O(2^(n/2) * n/2). Binary searching n=2^(n/2) times: O(2^(n/2) * log(2^(n/2))). Total: O(2^(n/2) * n) — much better than O(2^n)." },
+        "edgeCases": [
+            "n=0: empty array, only valid sum is 0",
+            "T=0: the empty subset is always valid",
+            "Negative numbers: handle with sorted merge approach"
+        ],
+        "revisionPrompts": [
+            "When is Meet in the Middle applicable vs. dynamic programming?",
+            "How would you use it for the 4-SUM problem?",
+            "Why must n/2 be roughly ≤ 25 for this approach to be practical?"
+        ],
+        "code": {
+            "javascript": "function subsetSumExists(arr, T) {\n  const n = arr.length;\n  const mid = Math.floor(n / 2);\n  const left = arr.slice(0, mid);\n  const right = arr.slice(mid);\n  const leftSums = getAllSums(left);\n  const rightSums = getAllSums(right);\n  rightSums.sort((a, b) => a - b);\n  for (const s of leftSums) {\n    const need = T - s;\n    let lo = 0, hi = rightSums.length - 1;\n    while (lo <= hi) {\n      const m = (lo + hi) >> 1;\n      if (rightSums[m] === need) return true;\n      rightSums[m] < need ? lo = m + 1 : hi = m - 1;\n    }\n  }\n  return false;\n}\nfunction getAllSums(arr) {\n  const sums = [0];\n  for (const x of arr)\n    for (let i = sums.length - 1; i >= 0; i--)\n      sums.push(sums[i] + x);\n  return sums;\n}",
+            "python": "def subset_sum_exists(arr, T):\n    n = len(arr)\n    mid = n // 2\n    left_sums = get_all_sums(arr[:mid])\n    right_sums = sorted(get_all_sums(arr[mid:]))\n    import bisect\n    for s in left_sums:\n        need = T - s\n        idx = bisect.bisect_left(right_sums, need)\n        if idx < len(right_sums) and right_sums[idx] == need:\n            return True\n    return False\n\ndef get_all_sums(arr):\n    sums = [0]\n    for x in arr:\n        sums += [s + x for s in sums]\n    return sums",
+            "cpp": "bool subsetSumExists(vector<int>& arr, int T) {\n    int n = arr.size(), mid = n / 2;\n    auto leftSums = getAllSums(arr, 0, mid);\n    auto rightSums = getAllSums(arr, mid, n);\n    sort(rightSums.begin(), rightSums.end());\n    for (int s : leftSums) {\n        int need = T - s;\n        if (binary_search(rightSums.begin(), rightSums.end(), need))\n            return true;\n    }\n    return false;\n}",
+            "java": "public boolean subsetSumExists(int[] arr, int T) {\n    int mid = arr.length / 2;\n    List<Integer> left = getAllSums(arr, 0, mid);\n    List<Integer> right = getAllSums(arr, mid, arr.length);\n    Collections.sort(right);\n    for (int s : left) {\n        int need = T - s;\n        int idx = Collections.binarySearch(right, need);\n        if (idx >= 0) return true;\n    }\n    return false;\n}"
+        },
+        "practice": {
+            "theory": [
+                "What is the time complexity of Meet in the Middle vs brute force for n=40?",
+                "How does Meet in the Middle differ from Divide and Conquer?",
+                "Name two problems where Meet in the Middle applies but DP does not."
+            ],
+            "coding": "Find if there's a subset of the given array whose sum equals a target T. Array size n ≤ 40.",
+            "interview": "Your system needs to find the best combination of features from two independent halves of a dataset. Walk through how Meet in the Middle applies and what the time/space trade-off is."
+        }
+    },
+    {
+        "id": "lazy-propagation",
+        "name": "Lazy Propagation",
+        "category": "advanced",
+        "complexity": { "time": "O(log n) range update, O(log n) query", "space": "O(n)" },
+        "description": "Extend Segment Trees to support O(log n) range updates by deferring (lazily) the propagation of updates to child nodes until they are actually needed.",
+        "beginnerExplanation": "A standard Segment Tree handles point updates in O(log n). But if you need to add 5 to all elements in a range [l, r], updating every leaf is O(n). Lazy Propagation fixes this: when you update a range, you mark the node as 'dirty' with a pending update. When you later query a child of that node, you push the pending update down just-in-time. This defers work and keeps both updates and queries at O(log n).",
+        "mentalModel": "Imagine a manager who assigns tasks to teams lazily — they don't tell each team member individually right away. They write a note on the team's board. When an individual needs to check in, the manager first passes on the team note to that person. This deferred distribution is Lazy Propagation.",
+        "learningObjectives": [
+            "Understand why Segment Trees need lazy propagation for range updates",
+            "Implement a lazy[] array alongside the segment tree",
+            "Know when and how to 'push down' lazy values to children",
+            "Handle composition of multiple lazy updates (e.g., add then multiply)"
+        ],
+        "workedExample": {
+            "title": "Range Add + Range Sum Query",
+            "body": "Array=[1,2,3,4]. Build segment tree (root=10). Update range [0,1] += 5: mark node covering [0,1] as lazy=5, tree[node]+=5*2=10. Root now=20. Query [0,3]: returns 20 (no children visited yet). Query [0,1]: push lazy(5) down to leaves, leaf[0]=6, leaf[1]=7, return 13."
+        },
+        "visualWalkthrough": [
+            "Build segment tree: [10, 3, 7, 1, 2, 3, 4] (node, left-subtree, right-subtree)",
+            "Range update [0,1] += 5: Node covers [0,1], mark lazy[node]=5, node value += 5*2=10",
+            "Tree root now reflects the update (10+10=20)",
+            "Next query [0,1]: visit node, pushDown — send lazy=5 to both leaf children",
+            "Leaf 0 becomes 1+5=6, Leaf 1 becomes 2+5=7"
+        ],
+        "complexityReasoning": { "body": "Each range update visits O(log n) nodes (full coverage), marking them lazy instead of propagating deeper. Each query visits O(log n) nodes, pushing down lazily along the way. Both operations are O(log n)." },
+        "edgeCases": [
+            "Multiple accumulated lazy values: ensure proper composition (e.g., add before multiply)",
+            "Initializing lazy array to 0 (identity element for addition)",
+            "Ensure pushDown is called before any query that recurses into children"
+        ],
+        "revisionPrompts": [
+            "What is the difference between a standard Segment Tree update and a Lazy Propagation update?",
+            "When exactly should you call pushDown(node)?",
+            "How do you handle lazy for range assignment (set all to value) vs range addition?"
+        ],
+        "code": {
+            "javascript": "class LazySegTree {\n  constructor(n) {\n    this.n = n;\n    this.tree = new Array(4 * n).fill(0);\n    this.lazy = new Array(4 * n).fill(0);\n  }\n  build(arr, node, s, e) {\n    if (s === e) { this.tree[node] = arr[s]; return; }\n    const mid = (s + e) >> 1;\n    this.build(arr, 2*node, s, mid);\n    this.build(arr, 2*node+1, mid+1, e);\n    this.tree[node] = this.tree[2*node] + this.tree[2*node+1];\n  }\n  pushDown(node, s, e) {\n    if (this.lazy[node]) {\n      const mid = (s + e) >> 1;\n      this.tree[2*node] += this.lazy[node] * (mid - s + 1);\n      this.tree[2*node+1] += this.lazy[node] * (e - mid);\n      this.lazy[2*node] += this.lazy[node];\n      this.lazy[2*node+1] += this.lazy[node];\n      this.lazy[node] = 0;\n    }\n  }\n  update(node, s, e, l, r, val) {\n    if (r < s || e < l) return;\n    if (l <= s && e <= r) {\n      this.tree[node] += val * (e - s + 1);\n      this.lazy[node] += val;\n      return;\n    }\n    this.pushDown(node, s, e);\n    const mid = (s + e) >> 1;\n    this.update(2*node, s, mid, l, r, val);\n    this.update(2*node+1, mid+1, e, l, r, val);\n    this.tree[node] = this.tree[2*node] + this.tree[2*node+1];\n  }\n  query(node, s, e, l, r) {\n    if (r < s || e < l) return 0;\n    if (l <= s && e <= r) return this.tree[node];\n    this.pushDown(node, s, e);\n    const mid = (s + e) >> 1;\n    return this.query(2*node, s, mid, l, r) + this.query(2*node+1, mid+1, e, l, r);\n  }\n}",
+            "python": "class LazySegTree:\n    def __init__(self, n):\n        self.n = n\n        self.tree = [0] * (4 * n)\n        self.lazy = [0] * (4 * n)\n    def push_down(self, node, s, e):\n        if self.lazy[node]:\n            mid = (s + e) // 2\n            self.tree[2*node] += self.lazy[node] * (mid - s + 1)\n            self.tree[2*node+1] += self.lazy[node] * (e - mid)\n            self.lazy[2*node] += self.lazy[node]\n            self.lazy[2*node+1] += self.lazy[node]\n            self.lazy[node] = 0\n    def update(self, node, s, e, l, r, val):\n        if r < s or e < l: return\n        if l <= s <= e <= r:\n            self.tree[node] += val * (e - s + 1)\n            self.lazy[node] += val\n            return\n        self.push_down(node, s, e)\n        mid = (s + e) // 2\n        self.update(2*node, s, mid, l, r, val)\n        self.update(2*node+1, mid+1, e, l, r, val)\n        self.tree[node] = self.tree[2*node] + self.tree[2*node+1]\n    def query(self, node, s, e, l, r):\n        if r < s or e < l: return 0\n        if l <= s <= e <= r: return self.tree[node]\n        self.push_down(node, s, e)\n        mid = (s + e) // 2\n        return self.query(2*node, s, mid, l, r) + self.query(2*node+1, mid+1, e, l, r)",
+            "cpp": "struct LazySegTree {\n    int n;\n    vector<long long> tree, lazy;\n    LazySegTree(int n): n(n), tree(4*n,0), lazy(4*n,0){}\n    void pushDown(int node, int s, int e) {\n        if (!lazy[node]) return;\n        int mid = (s+e)/2;\n        tree[2*node] += lazy[node]*(mid-s+1);\n        tree[2*node+1] += lazy[node]*(e-mid);\n        lazy[2*node] += lazy[node];\n        lazy[2*node+1] += lazy[node];\n        lazy[node] = 0;\n    }\n    void update(int node,int s,int e,int l,int r,long long val){\n        if(r<s||e<l) return;\n        if(l<=s&&e<=r){tree[node]+=val*(e-s+1);lazy[node]+=val;return;}\n        pushDown(node,s,e);\n        int mid=(s+e)/2;\n        update(2*node,s,mid,l,r,val);\n        update(2*node+1,mid+1,e,l,r,val);\n        tree[node]=tree[2*node]+tree[2*node+1];\n    }\n    long long query(int node,int s,int e,int l,int r){\n        if(r<s||e<l) return 0;\n        if(l<=s&&e<=r) return tree[node];\n        pushDown(node,s,e);\n        int mid=(s+e)/2;\n        return query(2*node,s,mid,l,r)+query(2*node+1,mid+1,e,l,r);\n    }\n};",
+            "java": "class LazySegTree {\n    int n;\n    long[] tree, lazy;\n    LazySegTree(int n) {\n        this.n = n;\n        tree = new long[4*n];\n        lazy = new long[4*n];\n    }\n    void pushDown(int node, int s, int e) {\n        if (lazy[node] == 0) return;\n        int mid = (s+e)/2;\n        tree[2*node] += lazy[node]*(mid-s+1);\n        tree[2*node+1] += lazy[node]*(e-mid);\n        lazy[2*node] += lazy[node];\n        lazy[2*node+1] += lazy[node];\n        lazy[node] = 0;\n    }\n    void update(int node,int s,int e,int l,int r,long val){\n        if(r<s||e<l) return;\n        if(l<=s&&e<=r){tree[node]+=val*(e-s+1);lazy[node]+=val;return;}\n        pushDown(node,s,e);\n        int mid=(s+e)/2;\n        update(2*node,s,mid,l,r,val);\n        update(2*node+1,mid+1,e,l,r,val);\n        tree[node]=tree[2*node]+tree[2*node+1];\n    }\n    long query(int node,int s,int e,int l,int r){\n        if(r<s||e<l) return 0;\n        if(l<=s&&e<=r) return tree[node];\n        pushDown(node,s,e);\n        int mid=(s+e)/2;\n        return query(2*node,s,mid,l,r)+query(2*node+1,mid+1,e,l,r);\n    }\n}"
+        },
+        "practice": {
+            "theory": [
+                "What problem does lazy propagation solve that a standard segment tree cannot handle efficiently?",
+                "Why must pushDown be called before recursing into children?",
+                "How would you handle lazy propagation for range-set (assign all values) instead of range-add?"
+            ],
+            "coding": "Range Sum with Range Update: Given an array, support both range-add (add val to all elements in [l,r]) and range-sum queries in O(log n) each.",
+            "interview": "Describe a real-world use case for Lazy Propagation. How does deferred computation reduce the overall work compared to eager propagation?"
+        }
+    },
+    {
+        "id": "z-algorithm",
+        "name": "Z-Algorithm",
+        "category": "advanced",
+        "complexity": { "time": "O(n)", "space": "O(n)" },
+        "description": "Computes the Z-array where Z[i] is the length of the longest substring starting from index i that matches a prefix of the string. Enables powerful O(n) pattern matching.",
+        "beginnerExplanation": "Z[i] answers: 'How many characters starting at position i match the start of the string?' For string 'aabxaa', Z[4]=2 because 'aa' at position 4 matches the 'aa' prefix. This lets you find a pattern P in text T in O(n+m) by creating string P+'$'+T and checking where Z[i] equals len(P).",
+        "mentalModel": "Imagine you have a stencil (the pattern). You slide it along the string. The Z-array tells you, at each position, how far the stencil matches before breaking. A Z value equal to pattern length = full match found.",
+        "learningObjectives": [
+            "Understand the Z-array definition: Z[i] = length of longest prefix match starting at i",
+            "Implement the O(n) Z-algorithm using the [L,R] window trick to avoid re-comparisons",
+            "Apply Z-array to string pattern matching by concatenation with a sentinel character",
+            "Distinguish Z-algorithm from KMP (similar goal, different implementation)"
+        ],
+        "workedExample": {
+            "title": "Compute Z-array for 'aabxaab'",
+            "body": "Z[0]=7(full), Z[1]=1('a' matches prefix 'a'), Z[2]=0('b' != 'a'), Z[3]=0('x' != 'a'), Z[4]=3('aab' matches prefix 'aab'), Z[5]=1, Z[6]=0. Pattern 'aab' in text 'xaab': concat='aab$xaab'. Z[5]=3=len('aab')→match at position 5-4=1."
+        },
+        "visualWalkthrough": [
+            "Z[0] = n by convention (or undefined, the whole string)",
+            "Maintain window [L, R]: rightmost Z-box found so far",
+            "For i > R: naive compare from scratch, update [L,R]",
+            "For i inside [L,R]: use Z[i-L] as starting point (avoid re-comparison)",
+            "This maintains O(n) since each character is compared at most twice"
+        ],
+        "complexityReasoning": { "body": "The [L,R] window ensures each character is matched at most once in the 'naive comparison' phase. The reuse from Z[i-L] avoids redundant work. Total comparisons = O(n). Space O(n) for Z-array." },
+        "edgeCases": [
+            "Z[0] is either n or left undefined (convention varies — use n for clarity)",
+            "Single character string: Z = [1]",
+            "Sentinel '$' must not appear in pattern or text"
+        ],
+        "revisionPrompts": [
+            "What is the Z-box [L,R] and how does it prevent O(n²) comparisons?",
+            "How do you use the Z-algorithm to find all occurrences of pattern P in text T?",
+            "Compare Z-algorithm and KMP — what is different in their auxiliary structures?"
+        ],
+        "code": {
+            "javascript": "function zArray(s) {\n  const n = s.length;\n  const z = new Array(n).fill(0);\n  let l = 0, r = 0;\n  for (let i = 1; i < n; i++) {\n    if (i < r) z[i] = Math.min(r - i, z[i - l]);\n    while (i + z[i] < n && s[z[i]] === s[i + z[i]]) z[i]++;\n    if (i + z[i] > r) { l = i; r = i + z[i]; }\n  }\n  z[0] = n;\n  return z;\n}\nfunction findPattern(text, pattern) {\n  const s = pattern + '$' + text;\n  const z = zArray(s);\n  const m = pattern.length, matches = [];\n  for (let i = m + 1; i < s.length; i++)\n    if (z[i] === m) matches.push(i - m - 1);\n  return matches;\n}",
+            "python": "def z_array(s):\n    n = len(s)\n    z = [0] * n\n    z[0] = n\n    l = r = 0\n    for i in range(1, n):\n        if i < r:\n            z[i] = min(r - i, z[i - l])\n        while i + z[i] < n and s[z[i]] == s[i + z[i]]:\n            z[i] += 1\n        if i + z[i] > r:\n            l, r = i, i + z[i]\n    return z\n\ndef find_pattern(text, pattern):\n    s = pattern + '$' + text\n    z = z_array(s)\n    m = len(pattern)\n    return [i - m - 1 for i in range(m+1, len(s)) if z[i] == m]",
+            "cpp": "vector<int> zArray(const string& s) {\n    int n = s.size();\n    vector<int> z(n, 0);\n    z[0] = n;\n    for (int i=1, l=0, r=0; i<n; i++) {\n        if (i < r) z[i] = min(r-i, z[i-l]);\n        while (i+z[i]<n && s[z[i]]==s[i+z[i]]) z[i]++;\n        if (i+z[i] > r) { l=i; r=i+z[i]; }\n    }\n    return z;\n}\nvector<int> findPattern(const string& text, const string& pat) {\n    string s = pat + '$' + text;\n    auto z = zArray(s);\n    int m = pat.size();\n    vector<int> res;\n    for (int i=m+1; i<(int)s.size(); i++)\n        if (z[i]==m) res.push_back(i-m-1);\n    return res;\n}",
+            "java": "public int[] zArray(String s) {\n    int n = s.length();\n    int[] z = new int[n];\n    z[0] = n;\n    for (int i=1, l=0, r=0; i<n; i++) {\n        if (i < r) z[i] = Math.min(r-i, z[i-l]);\n        while (i+z[i]<n && s.charAt(z[i])==s.charAt(i+z[i])) z[i]++;\n        if (i+z[i] > r) { l=i; r=i+z[i]; }\n    }\n    return z;\n}\npublic List<Integer> findPattern(String text, String pat) {\n    String s = pat + '$' + text;\n    int[] z = zArray(s);\n    int m = pat.length();\n    List<Integer> res = new ArrayList<>();\n    for (int i=m+1; i<s.length(); i++)\n        if (z[i]==m) res.add(i-m-1);\n    return res;\n}"
+        },
+        "practice": {
+            "theory": [
+                "What does Z[i] represent, and how does it differ from the failure function in KMP?",
+                "Why do we use a sentinel character '$' when concatenating pattern and text?",
+                "What is the Z-box [L,R] and how does it make the algorithm O(n)?"
+            ],
+            "coding": "Find all occurrences of pattern P in text T using the Z-algorithm in O(n+m).",
+            "interview": "Walk through computing the Z-array for 'aabcaab'. How does this help find the pattern 'aab' in 'xyzaabcaab'?"
+        }
+    },
+    {
+        "id": "manacher",
+        "name": "Manacher's Algorithm",
+        "category": "advanced",
+        "complexity": { "time": "O(n)", "space": "O(n)" },
+        "description": "Finds all palindromic substrings in O(n) using a center-expansion approach with a 'mirror trick' to reuse previously computed palindrome radii.",
+        "beginnerExplanation": "Checking all palindromes naively is O(n²). Manacher's inserts '#' separators between characters to unify odd/even palindromes, then sweeps left to right. For each center, it uses the rightmost palindrome discovered so far as a 'mirror' to get a free head start on the radius — avoiding redundant comparisons. The result is an array p[] where p[i] is the radius of the longest palindrome centered at i.",
+        "mentalModel": "Like Z-algorithm, but for palindromes. You maintain a rightmost palindrome [C, R]. For new centers inside R, you get a free mirror-start from p[2C-i]. This 'umbrella' effect makes each character part of at most two radius expansions total, giving O(n).",
+        "learningObjectives": [
+            "Transform string with '#' separators to handle even-length palindromes uniformly",
+            "Understand the center C and right boundary R of the rightmost palindrome",
+            "Apply the mirror trick: p[i] = min(R-i, p[2C-i]) as a starting radius",
+            "Extract original palindrome info from the transformed string's p-array"
+        ],
+        "workedExample": {
+            "title": "Apply Manacher to 'abba'",
+            "body": "Transform: '#a#b#b#a#'. p[]=[0,1,0,3,0,3,0,1,0]. Max p[i]=3 at index 3 and 5. Original palindrome starts at (3-3)/2=0, length=3 → 'abb'? No: actual center i=3 in transformed → original center 3//2=1, length=3 → 'abba' (length 2*3+1-1... use (p[i]-1)/2... length=p[i]=3 means 3 original chars on each side → 'abba' all 4)."
+        },
+        "visualWalkthrough": [
+            "Original: 'abba' → Transformed: '#a#b#b#a#'",
+            "Compute p[]: [0,1,0,3,0,3,0,1,0]",
+            "At index 3 ('#b#b#' centered): p[3]=3 → palindrome radius 3",
+            "At index 5 ('#b#a#' centered): p[5]=3 → palindrome radius 3",
+            "Longest palindrome: p[i]=3 at center 3 → 'abba' (all 4 chars)"
+        ],
+        "complexityReasoning": { "body": "Each character in the transformed string (length 2n+1) participates in at most one 'new comparison' as the right boundary R expands. Once R moves past a character, it's never re-examined. Total comparisons = O(n), space O(n) for p-array." },
+        "edgeCases": [
+            "All same characters: 'aaaa' → one long palindrome",
+            "Empty string: return ''",
+            "Single character: p=[0], longest = 1"
+        ],
+        "revisionPrompts": [
+            "Why do we insert '#' separators? What problem does it solve?",
+            "What is the mirror index 2C-i and why does p[2C-i] give us a free head start?",
+            "How do you extract the actual longest palindromic substring from the p[] array?"
+        ],
+        "code": {
+            "javascript": "function manacher(s) {\n  const t = '#' + s.split('').join('#') + '#';\n  const n = t.length, p = new Array(n).fill(0);\n  let c = 0, r = 0;\n  for (let i = 0; i < n; i++) {\n    const mirror = 2 * c - i;\n    if (i < r) p[i] = Math.min(r - i, p[mirror]);\n    while (i + p[i] + 1 < n && i - p[i] - 1 >= 0 &&\n           t[i + p[i] + 1] === t[i - p[i] - 1]) p[i]++;\n    if (i + p[i] > r) { c = i; r = i + p[i]; }\n  }\n  const maxR = Math.max(...p);\n  const centerIdx = p.indexOf(maxR);\n  const start = (centerIdx - maxR) / 2;\n  return s.substring(start, start + maxR);\n}",
+            "python": "def manacher(s):\n    t = '#' + '#'.join(s) + '#'\n    n = len(t)\n    p = [0] * n\n    c = r = 0\n    for i in range(n):\n        mirror = 2 * c - i\n        if i < r:\n            p[i] = min(r - i, p[mirror])\n        while i + p[i] + 1 < n and i - p[i] - 1 >= 0 and t[i+p[i]+1] == t[i-p[i]-1]:\n            p[i] += 1\n        if i + p[i] > r:\n            c, r = i, i + p[i]\n    max_r = max(p)\n    center = p.index(max_r)\n    start = (center - max_r) // 2\n    return s[start:start + max_r]",
+            "cpp": "string manacher(const string& s) {\n    string t = \"#\";\n    for (char c : s) { t += c; t += '#'; }\n    int n = t.size();\n    vector<int> p(n, 0);\n    int c = 0, r = 0;\n    for (int i = 0; i < n; i++) {\n        int mirror = 2*c - i;\n        if (i < r) p[i] = min(r-i, p[mirror]);\n        while (i+p[i]+1 < n && i-p[i]-1 >= 0 && t[i+p[i]+1] == t[i-p[i]-1]) p[i]++;\n        if (i+p[i] > r) { c=i; r=i+p[i]; }\n    }\n    int maxR = *max_element(p.begin(), p.end());\n    int ci = max_element(p.begin(), p.end()) - p.begin();\n    return s.substr((ci - maxR) / 2, maxR);\n}",
+            "java": "public String manacher(String s) {\n    StringBuilder sb = new StringBuilder(\"#\");\n    for (char c : s.toCharArray()) { sb.append(c); sb.append('#'); }\n    String t = sb.toString();\n    int n = t.length();\n    int[] p = new int[n];\n    int c = 0, r = 0;\n    for (int i = 0; i < n; i++) {\n        int mirror = 2*c - i;\n        if (i < r) p[i] = Math.min(r-i, p[mirror]);\n        while (i+p[i]+1 < n && i-p[i]-1 >= 0 && t.charAt(i+p[i]+1) == t.charAt(i-p[i]-1)) p[i]++;\n        if (i+p[i] > r) { c=i; r=i+p[i]; }\n    }\n    int maxR = 0, ci = 0;\n    for (int i = 0; i < n; i++) if (p[i] > maxR) { maxR = p[i]; ci = i; }\n    return s.substring((ci-maxR)/2, (ci-maxR)/2+maxR);\n}"
+        },
+        "practice": {
+            "theory": [
+                "Why does Manacher's algorithm handle even-length palindromes by inserting '#' characters?",
+                "What is the 'center C and right boundary R' and how do they define the rightmost palindrome seen so far?",
+                "How does the mirror index 2C-i prevent redundant character comparisons?"
+            ],
+            "coding": "Find the longest palindromic substring in a given string using Manacher's algorithm in O(n).",
+            "interview": "Compare Manacher's algorithm with the expand-around-center approach. Both find palindromes — what makes Manacher O(n) vs O(n²)?"
+        }
+    },
+    {
+        "id": "suffix-array",
+        "name": "Suffix Array",
+        "category": "advanced",
+        "complexity": { "time": "O(n log n) build, O(m log n) search", "space": "O(n)" },
+        "description": "An array of all suffixes of a string sorted lexicographically. Combined with the LCP (Longest Common Prefix) array, it enables powerful string operations including pattern matching, repeated substring finding, and string compression.",
+        "beginnerExplanation": "If you take string 'banana', write all its suffixes ('banana','anana','nana','ana','na','a'), sort them ('a','ana','anana','banana','na','nana'), and store their original starting indices — that's the suffix array: [5,3,1,0,4,2]. Now you can binary search for any pattern in O(m log n) using this sorted list.",
+        "mentalModel": "Think of an index at the back of a book: all 'suffixes' of the book's text are sorted. If you want to find every occurrence of a word, you binary search the sorted index. The suffix array is that sorted index for a string.",
+        "learningObjectives": [
+            "Understand what a suffix array is and how it differs from a suffix trie",
+            "Build a suffix array using the O(n log n) prefix-doubling algorithm",
+            "Use the LCP array with the suffix array for efficient string operations",
+            "Apply suffix arrays to pattern search, longest repeated substring, and more"
+        ],
+        "workedExample": {
+            "title": "Suffix Array for 'banana'",
+            "body": "Suffixes: 0='banana', 1='anana', 2='nana', 3='ana', 4='na', 5='a'. Sort: 5='a', 3='ana', 1='anana', 0='banana', 4='na', 2='nana'. SA=[5,3,1,0,4,2]. LCP=[0,1,3,0,0,2]. LCP[2]=3 means 'anana' and 'banana' share 3-char prefix 'ana'."
+        },
+        "visualWalkthrough": [
+            "List all n suffixes of 'banana' (n=6 suffixes)",
+            "Sort suffixes lexicographically",
+            "SA = [5,3,1,0,4,2] (starting indices in sorted order)",
+            "Build LCP array: LCP[i] = length of common prefix between SA[i-1] and SA[i]",
+            "LCP = [0,1,3,0,0,2] → max LCP=3 at position 2 = longest repeated substring 'ana'"
+        ],
+        "complexityReasoning": { "body": "O(n log n) build with prefix-doubling: sort ranks in O(log n) rounds, each O(n log n) with radix sort. LCP construction (Kasai's algorithm) is O(n). Pattern search is O(m log n) via binary search on the sorted suffix array." },
+        "edgeCases": [
+            "Append '$' (sentinel, lexicographically smallest) to handle suffix boundaries correctly",
+            "All same characters: LCP values = n-1, n-2, ..., 1, 0",
+            "Empty string: return empty SA"
+        ],
+        "revisionPrompts": [
+            "How does a Suffix Array differ from a Suffix Trie in terms of space complexity?",
+            "How is the LCP array computed from the Suffix Array (Kasai's algorithm)?",
+            "How do you find the number of distinct substrings using SA + LCP?"
+        ],
+        "code": {
+            "javascript": "function buildSA(s) {\n  s += '$';\n  const n = s.length;\n  let sa = Array.from({length: n}, (_, i) => i);\n  let rank = s.split('').map(c => c.charCodeAt(0));\n  for (let gap = 1; gap < n; gap *= 2) {\n    const rankCopy = [...rank];\n    const key = i => [rankCopy[i], i + gap < n ? rankCopy[i + gap] : -1];\n    sa.sort((a, b) => {\n      const ka = key(a), kb = key(b);\n      return ka[0] - kb[0] || ka[1] - kb[1];\n    });\n    rank[sa[0]] = 0;\n    for (let i = 1; i < n; i++)\n      rank[sa[i]] = rank[sa[i-1]] + (JSON.stringify(key(sa[i])) !== JSON.stringify(key(sa[i-1])) ? 1 : 0);\n  }\n  return sa;\n}",
+            "python": "def build_sa(s):\n    s += '$'\n    n = len(s)\n    sa = sorted(range(n), key=lambda i: s[i:])\n    rank = [0] * n\n    for i, idx in enumerate(sa):\n        rank[idx] = i\n    gap = 1\n    while gap < n:\n        def key(i):\n            return (rank[i], rank[i+gap] if i+gap < n else -1)\n        sa.sort(key=key)\n        tmp = [0] * n\n        tmp[sa[0]] = 0\n        for i in range(1, n):\n            tmp[sa[i]] = tmp[sa[i-1]] + (1 if key(sa[i]) != key(sa[i-1]) else 0)\n        rank = tmp\n        gap *= 2\n    return sa",
+            "cpp": "vector<int> buildSA(string s) {\n    s += '$';\n    int n = s.size();\n    vector<int> sa(n), rank_(n), tmp(n);\n    iota(sa.begin(), sa.end(), 0);\n    for (int i=0; i<n; i++) rank_[i]=s[i];\n    for (int gap=1; gap<n; gap*=2) {\n        auto cmp = [&](int a, int b){\n            if(rank_[a]!=rank_[b]) return rank_[a]<rank_[b];\n            int ra=a+gap<n?rank_[a+gap]:-1;\n            int rb=b+gap<n?rank_[b+gap]:-1;\n            return ra<rb;\n        };\n        sort(sa.begin(),sa.end(),cmp);\n        tmp[sa[0]]=0;\n        for(int i=1;i<n;i++) tmp[sa[i]]=tmp[sa[i-1]]+(cmp(sa[i-1],sa[i])?1:0);\n        rank_=tmp;\n    }\n    return sa;\n}",
+            "java": "public int[] buildSA(String s) {\n    s += '$';\n    int n = s.length();\n    Integer[] sa = new Integer[n];\n    for (int i=0;i<n;i++) sa[i]=i;\n    int[] rank = new int[n];\n    for (int i=0;i<n;i++) rank[i]=s.charAt(i);\n    final int[] r = rank;\n    for (int gap=1; gap<n; gap*=2) {\n        final int g = gap;\n        Arrays.sort(sa,(a,b)->{\n            if(r[a]!=r[b]) return r[a]-r[b];\n            int ra=a+g<n?r[a+g]:-1;\n            int rb=b+g<n?r[b+g]:-1;\n            return ra-rb;\n        });\n        int[] tmp=new int[n];\n        tmp[sa[0]]=0;\n        for(int i=1;i<n;i++){\n            int a=sa[i-1],b=sa[i];\n            boolean diff=r[a]!=r[b]||(a+g<n?r[a+g]:-1)!=(b+g<n?r[b+g]:-1);\n            tmp[sa[i]]=tmp[sa[i-1]]+(diff?1:0);\n        }\n        System.arraycopy(tmp,0,r,0,n);\n    }\n    return Arrays.stream(sa).mapToInt(Integer::intValue).toArray();\n}"
+        },
+        "practice": {
+            "theory": [
+                "What is the relationship between a Suffix Array and a Suffix Trie?",
+                "How does the LCP array enable finding the longest repeated substring in O(n)?",
+                "Explain how to count the number of distinct substrings using SA + LCP."
+            ],
+            "coding": "Build a suffix array for a given string and use it to find all occurrences of a pattern P in O(m log n).",
+            "interview": "Compare Suffix Array vs KMP for pattern matching. When would you prefer a Suffix Array?"
+        }
+    },
+    {
+        "id": "interval-tree",
+        "name": "Interval Tree",
+        "category": "advanced-structures",
+        "complexity": { "time": "O(log n + k) query, O(n log n) build", "space": "O(n)" },
+        "description": "An augmented BST where each node stores an interval. Each node also tracks the maximum right endpoint in its subtree, enabling efficient overlap queries.",
+        "beginnerExplanation": "An Interval Tree answers: 'Which intervals overlap with [l, r]?' A sorted list would require O(n) scans. The Interval Tree augments a BST with the max right endpoint of each subtree — this lets you prune entire branches that cannot possibly overlap your query interval, making queries O(log n + k) where k is the number of results.",
+        "mentalModel": "Think of a filing cabinet where each drawer is labeled with the range of files it holds, plus the latest expiry date of anything inside. To find overlapping files, you check if the drawer's max-expiry is still relevant — if not, skip the whole drawer.",
+        "learningObjectives": [
+            "Understand what 'overlap' means for intervals: [a,b] overlaps [c,d] iff a<=d and c<=b",
+            "Know that each node stores (interval, maxRight) where maxRight = max of all rights in subtree",
+            "Traverse left if left child's maxRight >= query.left (potential overlap)",
+            "Use as an alternative to the simpler Segment Tree for dynamic interval queries"
+        ],
+        "workedExample": {
+            "title": "Query overlapping intervals",
+            "body": "Intervals: [1,5],[2,8],[3,6],[7,10]. Tree sorted by left endpoints. Query [4,9]: check root [1,5]: 1<=9 and 4<=5 → overlap! Go right to [7,10]: 7<=9 and 4<=10 → overlap! Go right to null. Go left to [3,6]: 3<=9 and 4<=6 → overlap! Result: [1,5],[3,6],[7,10] all overlap [4,9]."
+        },
+        "visualWalkthrough": [
+            "Insert intervals sorted by left endpoint into a BST",
+            "Each node stores: interval, maxRight in subtree",
+            "Query [4,9]: check root [1,5], maxRight=10≥4 → recurse left + check overlap",
+            "[1,5] overlaps [4,9]? 1≤9 and 4≤5 → YES",
+            "Continue right subtree — [7,10] overlaps [4,9]? 7≤9 and 4≤10 → YES"
+        ],
+        "complexityReasoning": { "body": "Build is O(n log n). Each query prunes branches where maxRight < query.left. In practice O(log n + k). Worst case O(n) if all intervals overlap." },
+        "edgeCases": [
+            "Point query [x,x]: an interval [a,b] overlaps iff a<=x<=b",
+            "Empty tree: return []",
+            "All intervals overlapping each other: O(n) results"
+        ],
+        "revisionPrompts": [
+            "What does the 'maxRight' augmentation give us that a plain BST cannot?",
+            "How does the overlap condition a<=d AND c<=b work? Why both conditions?",
+            "When would you choose an Interval Tree over a simpler sorted array approach?"
+        ],
+        "code": {
+            "javascript": "class IntervalNode {\n  constructor(interval) {\n    this.interval = interval;\n    this.maxRight = interval[1];\n    this.left = this.right = null;\n  }\n}\nclass IntervalTree {\n  insert(root, interval) {\n    if (!root) return new IntervalNode(interval);\n    if (interval[0] < root.interval[0])\n      root.left = this.insert(root.left, interval);\n    else\n      root.right = this.insert(root.right, interval);\n    root.maxRight = Math.max(root.maxRight, interval[1]);\n    return root;\n  }\n  query(root, lo, hi, result) {\n    if (!root || root.maxRight < lo) return;\n    if (root.interval[0] <= hi && lo <= root.interval[1])\n      result.push(root.interval);\n    this.query(root.left, lo, hi, result);\n    this.query(root.right, lo, hi, result);\n  }\n}",
+            "python": "class IntervalNode:\n    def __init__(self, interval):\n        self.interval = interval\n        self.max_right = interval[1]\n        self.left = self.right = None\n\ndef insert(root, interval):\n    if not root:\n        return IntervalNode(interval)\n    if interval[0] < root.interval[0]:\n        root.left = insert(root.left, interval)\n    else:\n        root.right = insert(root.right, interval)\n    root.max_right = max(root.max_right, interval[1])\n    return root\n\ndef query(root, lo, hi, result):\n    if not root or root.max_right < lo:\n        return\n    if root.interval[0] <= hi and lo <= root.interval[1]:\n        result.append(root.interval)\n    query(root.left, lo, hi, result)\n    query(root.right, lo, hi, result)",
+            "cpp": "struct IntervalNode {\n    pair<int,int> iv;\n    int maxRight;\n    IntervalNode *left, *right;\n    IntervalNode(pair<int,int> i): iv(i), maxRight(i.second), left(nullptr), right(nullptr){}\n};\nIntervalNode* insert(IntervalNode* root, pair<int,int> iv) {\n    if (!root) return new IntervalNode(iv);\n    if (iv.first < root->iv.first) root->left = insert(root->left, iv);\n    else root->right = insert(root->right, iv);\n    root->maxRight = max(root->maxRight, iv.second);\n    return root;\n}\nvoid query(IntervalNode* root, int lo, int hi, vector<pair<int,int>>& res) {\n    if (!root || root->maxRight < lo) return;\n    if (root->iv.first <= hi && lo <= root->iv.second) res.push_back(root->iv);\n    query(root->left, lo, hi, res);\n    query(root->right, lo, hi, res);\n}",
+            "java": "class IntervalNode {\n    int[] iv; int maxRight;\n    IntervalNode left, right;\n    IntervalNode(int[] iv){this.iv=iv; this.maxRight=iv[1];}\n}\nclass IntervalTree {\n    IntervalNode insert(IntervalNode root, int[] iv) {\n        if (root==null) return new IntervalNode(iv);\n        if (iv[0]<root.iv[0]) root.left=insert(root.left, iv);\n        else root.right=insert(root.right, iv);\n        root.maxRight=Math.max(root.maxRight, iv[1]);\n        return root;\n    }\n    void query(IntervalNode root, int lo, int hi, List<int[]> res) {\n        if (root==null||root.maxRight<lo) return;\n        if (root.iv[0]<=hi&&lo<=root.iv[1]) res.add(root.iv);\n        query(root.left, lo, hi, res);\n        query(root.right, lo, hi, res);\n    }\n}"
+        },
+        "practice": {
+            "theory": [
+                "What is the overlap condition for two intervals [a,b] and [c,d]?",
+                "Why is the maxRight augmentation essential for efficient querying?",
+                "How does an Interval Tree differ from a Segment Tree?"
+            ],
+            "coding": "Given a list of intervals and a query interval [lo, hi], find all intervals that overlap with the query.",
+            "interview": "Design a calendar application that efficiently checks if a new meeting [start, end] conflicts with any existing meetings. What data structure would you use?"
+        }
+    },
+    {
+        "id": "order-statistic-tree",
+        "name": "Order Statistic Tree",
+        "category": "advanced-structures",
+        "complexity": { "time": "O(log n) all ops", "space": "O(n)" },
+        "description": "An augmented BST (typically a Red-Black Tree) where each node also stores the size of its subtree, enabling O(log n) rank and select queries alongside standard BST operations.",
+        "beginnerExplanation": "A normal BST lets you find if a value exists in O(log n). But asking 'what is the rank (position) of value x?' or 'what is the k-th smallest element?' would be O(n). An Order Statistic Tree adds a size field to each node. size[node] = size[left] + size[right] + 1. With this, rank and select become O(log n) by counting left subtree sizes as you traverse.",
+        "mentalModel": "A leaderboard where each entry knows exactly how many people are ranked below them. With this count, you can instantly answer 'what position is Alice?' (rank query) or 'who is ranked 5th?' (select query) without scanning all entries.",
+        "learningObjectives": [
+            "Understand the size augmentation: size[node] = 1 + size[left] + size[right]",
+            "Implement rank(x): count how many elements < x exist in the tree",
+            "Implement select(k): find the k-th smallest element using subtree sizes",
+            "Know that C++ policy-based data structures provide this directly"
+        ],
+        "workedExample": {
+            "title": "Find rank and k-th element",
+            "body": "Tree contains [10,20,30,40,50]. Nodes augmented with sizes. select(3): root=30, left.size=2, k=3>2+1=3 → root itself! So 30 is the 3rd smallest. rank(40): traverse right from root, count 3 (left subtree + root), arrive at 40 → rank=4."
+        },
+        "visualWalkthrough": [
+            "Build BST from [10,20,30,40,50] with size augmentation",
+            "Root=30: size=5, left=20(size=2), right=40(size=2)",
+            "select(3): left.size=2, k=3=2+1 → current node is answer: 30",
+            "rank(40): traverse right from 30, add 1+left.size=3, reach 40 → rank=4",
+            "rank(10): traverse left, no elements before it → rank=1"
+        ],
+        "complexityReasoning": { "body": "All BST operations remain O(log n). Size augmentation adds O(1) per rotation in rebalancing. Rank and select traverse one root-to-leaf path = O(log n)." },
+        "edgeCases": [
+            "Duplicate elements: define rank as number of elements strictly less than x",
+            "k larger than tree size: return null",
+            "Empty tree: rank=0, select(k)=null"
+        ],
+        "revisionPrompts": [
+            "Why does size[node] = 1 + size[left] + size[right] enable O(log n) rank queries?",
+            "How do you maintain the size field during rotations in a Red-Black Tree?",
+            "How is Order Statistic Tree different from simply sorting an array?"
+        ],
+        "code": {
+            "javascript": "class OSTNode {\n  constructor(val) {\n    this.val = val; this.left = this.right = null; this.size = 1;\n  }\n}\nfunction getSize(node) { return node ? node.size : 0; }\nfunction insert(root, val) {\n  if (!root) return new OSTNode(val);\n  if (val < root.val) root.left = insert(root.left, val);\n  else root.right = insert(root.right, val);\n  root.size = 1 + getSize(root.left) + getSize(root.right);\n  return root;\n}\nfunction select(root, k) {\n  const leftSize = getSize(root.left);\n  if (k <= leftSize) return select(root.left, k);\n  if (k === leftSize + 1) return root.val;\n  return select(root.right, k - leftSize - 1);\n}\nfunction rank(root, val) {\n  if (!root) return 0;\n  if (val < root.val) return rank(root.left, val);\n  if (val > root.val) return 1 + getSize(root.left) + rank(root.right, val);\n  return getSize(root.left) + 1;\n}",
+            "python": "class OSTNode:\n    def __init__(self, val):\n        self.val = val\n        self.left = self.right = None\n        self.size = 1\n\ndef size(node):\n    return node.size if node else 0\n\ndef insert(root, val):\n    if not root: return OSTNode(val)\n    if val < root.val: root.left = insert(root.left, val)\n    else: root.right = insert(root.right, val)\n    root.size = 1 + size(root.left) + size(root.right)\n    return root\n\ndef select(root, k):\n    ls = size(root.left)\n    if k <= ls: return select(root.left, k)\n    if k == ls + 1: return root.val\n    return select(root.right, k - ls - 1)\n\ndef rank(root, val):\n    if not root: return 0\n    if val < root.val: return rank(root.left, val)\n    if val > root.val: return 1 + size(root.left) + rank(root.right, val)\n    return size(root.left) + 1",
+            "cpp": "// In C++, use policy-based tree:\n// #include <ext/pb_ds/assoc_container.hpp>\n// #include <ext/pb_ds/tree_policy.hpp>\n// using namespace __gnu_pbds;\n// typedef tree<int,null_type,less<int>,rb_tree_tag,tree_order_statistics_node_update> OST;\n// OST t;\n// t.insert(x); t.find_by_order(k); t.order_of_key(x);",
+            "java": "// Java: use TreeMap with manual rank tracking or\n// implement augmented BST:\nclass OST {\n    int[] val, size, left, right;\n    int root = -1, cnt = 0;\n    OST(int n){ val=new int[n]; size=new int[n]; left=new int[n]; right=new int[n]; }\n    int newNode(int v){ val[cnt]=v; size[cnt]=1; left[cnt]=right[cnt]=-1; return cnt++; }\n    // Full implementation requires AVL/Red-Black rebalancing\n}"
+        },
+        "practice": {
+            "theory": [
+                "What two operations does Order Statistic Tree add to a standard BST?",
+                "How does the size augmentation allow O(log n) select(k)?",
+                "In C++, how can you use the policy-based tree to get Order Statistic Tree behavior?"
+            ],
+            "coding": "Find the k-th largest element in a stream of integers in O(log n) time per insertion and query.",
+            "interview": "You have a list of employee salaries. Support: (1) add a salary, (2) find the median salary, (3) find the rank of a specific salary. Design a data structure."
+        }
+    },
+    {
+        "id": "bloom-filter",
+        "name": "Bloom Filter",
+        "category": "advanced-structures",
+        "complexity": { "time": "O(k) insert and query", "space": "O(m bits)" },
+        "description": "A space-efficient probabilistic data structure that tests whether an element is a member of a set. False positives are possible, false negatives are not.",
+        "beginnerExplanation": "A Bloom Filter is a large bit array of m bits and k hash functions. To insert 'apple': hash it k times to get k bit positions, set all those bits to 1. To check if 'mango' exists: hash it k times — if ALL k bits are 1, 'mango' MIGHT be in the set (could be a false positive). If ANY bit is 0, 'mango' is DEFINITELY NOT in the set. Used in databases, CDNs, and spell checkers where memory is critical.",
+        "mentalModel": "A Bloom Filter is like a nightclub stamp. When you enter, you get k stamps on k different spots on your arm. To check if you've been before, staff checks if all k spots are stamped. Someone else might have the same k spots stamped by coincidence (false positive), but if any spot is missing, you've never been there.",
+        "learningObjectives": [
+            "Understand the trade-off: no false negatives, but possible false positives",
+            "Know how to calculate optimal m (bit array size) and k (hash functions) for a target false positive rate p",
+            "Formula: m = -n*ln(p) / (ln2)², k = (m/n)*ln2",
+            "Know that Bloom Filters do not support deletion (unless using Counting Bloom Filter)"
+        ],
+        "workedExample": {
+            "title": "Insert 'cat' and 'dog', check 'cat' and 'rat'",
+            "body": "m=8 bits, k=2 hash functions. Insert 'cat': h1('cat')=1, h2('cat')=5 → bits[1]=bits[5]=1. Insert 'dog': h1('dog')=3, h2('dog')=5 → bits[3]=bits[5]=1. Check 'cat': bits[1]=1, bits[5]=1 → POSSIBLY in set. Check 'rat': h1('rat')=2, h2('rat')=7 → bits[2]=0 → DEFINITELY NOT in set."
+        },
+        "visualWalkthrough": [
+            "Initialize bit array [0,0,0,0,0,0,0,0] (m=8 bits)",
+            "Insert 'cat': hash positions 1 and 5 → [0,1,0,0,0,1,0,0]",
+            "Insert 'dog': hash positions 3 and 5 → [0,1,0,1,0,1,0,0]",
+            "Query 'cat': check bits[1]=1 and bits[5]=1 → 'maybe present'",
+            "Query 'rat': check bits[2]=0 → 'definitely not present'"
+        ],
+        "complexityReasoning": { "body": "Each insert/query runs k hash functions (O(k) = O(1) for fixed k). Space is O(m) bits — much smaller than storing elements directly. Trade-off: false positive rate p = (1 - e^(-kn/m))^k." },
+        "edgeCases": [
+            "Hash function collision: two elements could hash to same k bits (false positive)",
+            "Too many elements: as m fills up, false positive rate rises — resize if needed",
+            "Deletion: not supported in basic Bloom Filter (use Counting Bloom Filter)"
+        ],
+        "revisionPrompts": [
+            "Why are false negatives impossible in a Bloom Filter?",
+            "How does increasing k (number of hash functions) affect false positive rate?",
+            "Name three real-world applications of Bloom Filters."
+        ],
+        "code": {
+            "javascript": "class BloomFilter {\n  constructor(m = 1000, k = 5) {\n    this.m = m; this.k = k;\n    this.bits = new Uint8Array(Math.ceil(m / 8));\n  }\n  hash(item, seed) {\n    let h = seed;\n    for (const c of String(item)) h = (h * 31 + c.charCodeAt(0)) % this.m;\n    return ((h % this.m) + this.m) % this.m;\n  }\n  add(item) {\n    for (let i = 0; i < this.k; i++) {\n      const pos = this.hash(item, i);\n      this.bits[pos >> 3] |= (1 << (pos & 7));\n    }\n  }\n  has(item) {\n    for (let i = 0; i < this.k; i++) {\n      const pos = this.hash(item, i);\n      if (!(this.bits[pos >> 3] & (1 << (pos & 7)))) return false;\n    }\n    return true; // PROBABLY in set\n  }\n}",
+            "python": "class BloomFilter:\n    def __init__(self, m=1000, k=5):\n        self.m = m\n        self.k = k\n        self.bits = bytearray(m)\n    def _hash(self, item, seed):\n        h = seed\n        for c in str(item):\n            h = (h * 31 + ord(c)) % self.m\n        return ((h % self.m) + self.m) % self.m\n    def add(self, item):\n        for i in range(self.k):\n            self.bits[self._hash(item, i)] = 1\n    def __contains__(self, item):\n        return all(self.bits[self._hash(item, i)] for i in range(self.k))",
+            "cpp": "#include <vector>\n#include <functional>\nclass BloomFilter {\n    int m, k;\n    vector<bool> bits;\npublic:\n    BloomFilter(int m, int k): m(m), k(k), bits(m, false){}\n    int hash_(const string& s, int seed) {\n        int h = seed;\n        for (char c : s) h = (h * 31 + c) % m;\n        return ((h%m)+m)%m;\n    }\n    void add(const string& s) {\n        for (int i=0;i<k;i++) bits[hash_(s,i)]=true;\n    }\n    bool has(const string& s) {\n        for (int i=0;i<k;i++) if(!bits[hash_(s,i)]) return false;\n        return true;\n    }\n};",
+            "java": "import java.util.BitSet;\nclass BloomFilter {\n    int m, k;\n    BitSet bits;\n    BloomFilter(int m, int k){this.m=m; this.k=k; bits=new BitSet(m);}\n    int hash_(String s, int seed){\n        int h=seed;\n        for(char c:s.toCharArray()) h=(h*31+c)%m;\n        return ((h%m)+m)%m;\n    }\n    void add(String s){ for(int i=0;i<k;i++) bits.set(hash_(s,i)); }\n    boolean has(String s){\n        for(int i=0;i<k;i++) if(!bits.get(hash_(s,i))) return false;\n        return true;\n    }\n}"
+        },
+        "practice": {
+            "theory": [
+                "Why is a Bloom Filter said to have no false negatives but possible false positives?",
+                "What happens to the false positive rate as you insert more elements?",
+                "How do you choose optimal m and k given expected number of elements n and desired false positive rate p?"
+            ],
+            "coding": "Implement a Bloom Filter with m=100 bits and k=3 hash functions. Insert 10 strings and test membership.",
+            "interview": "Google uses Bloom Filters in Bigtable to avoid disk lookups for missing keys. Explain how this works and what the trade-offs are."
+        }
+    },
+    {
+        "id": "skip-list",
+        "name": "Skip List",
+        "category": "advanced-structures",
+        "complexity": { "time": "O(log n) avg search/insert/delete", "space": "O(n log n) avg" },
+        "description": "A probabilistic layered linked list that achieves O(log n) average search, insertion, and deletion by maintaining multiple levels of linked lists, each a subset of the level below.",
+        "beginnerExplanation": "A Skip List is like an express train system. Level 0 is the local train (all stops). Level 1 skips some stops. Level 2 skips more. Level 3 is the express (very few stops). To find element 70: take the express train as far as possible, drop down to the next level, continue. This achieves O(log n) average case without the rotations needed by balanced BSTs.",
+        "mentalModel": "Imagine a phone book but with multiple layers of indexes: an express index (every 100th entry), a regional index (every 10th entry), and the full list. To find a name, start with the express index, narrow down, then use the detailed list. This multi-level structure is a Skip List.",
+        "learningObjectives": [
+            "Understand the multi-level linked list structure with probabilistic level promotion",
+            "Know that each element is promoted to level k with probability p^k (usually p=0.5)",
+            "Implement search: start at highest level, move forward, drop down when you overshoot",
+            "Compare with AVL/Red-Black: simpler to implement, similar average performance"
+        ],
+        "workedExample": {
+            "title": "Search for 50 in Skip List",
+            "body": "Levels: L3: 10→90→∞. L2: 10→50→90→∞. L1: 10→30→50→70→90→∞. L0: 10→20→30→40→50→60→70→80→90→∞. Search 50: L3: 10<50, 90>50→drop to L2. L2: 10<50, next=50=target! Found in 3 hops instead of scanning all 9 elements on L0."
+        },
+        "visualWalkthrough": [
+            "L3 (express): [10] → [90] → [∞]",
+            "L2: [10] → [50] → [90] → [∞]",
+            "L1: [10] → [30] → [50] → [70] → [90] → [∞]",
+            "L0 (full): [10] → [20] → [30] → ... → [90] → [∞]",
+            "Search 50: start L3 at head, 10<50, next=90>50 → drop to L2. At L2 position 10, next=50=target!"
+        ],
+        "complexityReasoning": { "body": "Expected height of tallest node = O(log n). Expected search length at each level = O(1/p). Total expected search = O(log n / p) = O(log n) for p=0.5. Space = O(n) total nodes across all levels on average." },
+        "edgeCases": [
+            "Maximum level: cap at log(n)/log(1/p) levels to avoid degenerate growth",
+            "Random promotion: use random to decide whether to promote each inserted node",
+            "Deletion: mark nodes as deleted lazily or fully remove across all levels"
+        ],
+        "revisionPrompts": [
+            "What is the role of the 'sentinel' head and tail nodes in a Skip List?",
+            "How is the level of a new node determined during insertion?",
+            "Why are Skip Lists sometimes preferred over balanced BSTs in concurrent settings?"
+        ],
+        "code": {
+            "javascript": "class SkipNode {\n  constructor(val, level) {\n    this.val = val;\n    this.next = new Array(level + 1).fill(null);\n  }\n}\nclass SkipList {\n  constructor(maxLevel = 16, p = 0.5) {\n    this.maxLevel = maxLevel; this.p = p;\n    this.head = new SkipNode(-Infinity, maxLevel);\n    this.level = 0;\n  }\n  randomLevel() {\n    let lvl = 0;\n    while (Math.random() < this.p && lvl < this.maxLevel) lvl++;\n    return lvl;\n  }\n  search(val) {\n    let cur = this.head;\n    for (let i = this.level; i >= 0; i--)\n      while (cur.next[i] && cur.next[i].val < val) cur = cur.next[i];\n    return cur.next[0]?.val === val;\n  }\n  insert(val) {\n    const update = new Array(this.maxLevel + 1).fill(this.head);\n    let cur = this.head;\n    for (let i = this.level; i >= 0; i--)\n      while (cur.next[i] && cur.next[i].val < val) cur = cur.next[i], update[i] = cur;\n    const newLevel = this.randomLevel();\n    if (newLevel > this.level) {\n      for (let i = this.level + 1; i <= newLevel; i++) update[i] = this.head;\n      this.level = newLevel;\n    }\n    const node = new SkipNode(val, newLevel);\n    for (let i = 0; i <= newLevel; i++) { node.next[i] = update[i].next[i]; update[i].next[i] = node; }\n  }\n}",
+            "python": "import random\nclass SkipNode:\n    def __init__(self, val, level):\n        self.val = val\n        self.next = [None] * (level + 1)\n\nclass SkipList:\n    def __init__(self, max_level=16, p=0.5):\n        self.max_level = max_level\n        self.p = p\n        self.head = SkipNode(float('-inf'), max_level)\n        self.level = 0\n    def random_level(self):\n        lvl = 0\n        while random.random() < self.p and lvl < self.max_level:\n            lvl += 1\n        return lvl\n    def search(self, val):\n        cur = self.head\n        for i in range(self.level, -1, -1):\n            while cur.next[i] and cur.next[i].val < val:\n                cur = cur.next[i]\n        cur = cur.next[0]\n        return cur and cur.val == val\n    def insert(self, val):\n        update = [self.head] * (self.max_level + 1)\n        cur = self.head\n        for i in range(self.level, -1, -1):\n            while cur.next[i] and cur.next[i].val < val:\n                cur = cur.next[i]\n            update[i] = cur\n        new_level = self.random_level()\n        if new_level > self.level:\n            for i in range(self.level+1, new_level+1):\n                update[i] = self.head\n            self.level = new_level\n        node = SkipNode(val, new_level)\n        for i in range(new_level+1):\n            node.next[i] = update[i].next[i]\n            update[i].next[i] = node",
+            "cpp": "// Simplified Skip List in C++\nstruct SkipNode {\n    int val;\n    vector<SkipNode*> next;\n    SkipNode(int v, int lvl): val(v), next(lvl+1, nullptr){}\n};\nclass SkipList {\n    int maxLevel, level;\n    double p;\n    SkipNode* head;\npublic:\n    SkipList(int ml=16, double p=0.5): maxLevel(ml), level(0), p(p){\n        head=new SkipNode(INT_MIN, ml);\n    }\n    int randomLevel(){int l=0; while((double)rand()/RAND_MAX<p&&l<maxLevel)l++; return l;}\n    bool search(int val){\n        SkipNode* cur=head;\n        for(int i=level;i>=0;i--) while(cur->next[i]&&cur->next[i]->val<val) cur=cur->next[i];\n        return cur->next[0]&&cur->next[0]->val==val;\n    }\n};",
+            "java": "class SkipList {\n    int maxLevel, level;\n    double p;\n    int[] headVals;\n    // Simplified: use ArrayList of levels\n    // Full implementation would have node[] next per node\n    SkipList(int maxLevel, double p){\n        this.maxLevel=maxLevel; this.level=0; this.p=p;\n    }\n    int randomLevel(){\n        int l=0;\n        while(Math.random()<p && l<maxLevel) l++;\n        return l;\n    }\n    // Full insert/search similar to Python version above\n}"
+        },
+        "practice": {
+            "theory": [
+                "How is the level of a new node determined in a Skip List?",
+                "What is the expected time complexity of Skip List search and why?",
+                "Compare Skip Lists with Red-Black Trees in terms of implementation complexity and performance."
+            ],
+            "coding": "Implement a Skip List that supports insert, search, and delete operations with O(log n) average time complexity.",
+            "interview": "Redis uses Skip Lists for sorted sets. Why might Skip Lists be preferred over balanced BSTs in a concurrent environment like Redis?"
+        }
+    },
+    {
+        "id": "lsm-tree",
+        "name": "LSM Tree",
+        "category": "advanced-structures",
+        "complexity": { "time": "O(1) amortized write, O(log n) read", "space": "O(n)" },
+        "description": "Log-Structured Merge-Tree: optimizes write throughput by buffering writes in memory, flushing sorted runs to disk, and periodically merging them. Used in LevelDB, RocksDB, Cassandra, and HBase.",
+        "beginnerExplanation": "Traditional B-Trees update data in-place on disk, which causes many random I/Os (slow). LSM Trees instead buffer all writes in memory (MemTable), and periodically flush sorted blocks (SSTables) to disk in sequential order (fast!). Reads must check MemTable + multiple SSTables, so reads are slower but writes are dramatically faster. This is a write-optimized structure.",
+        "mentalModel": "Imagine a whiteboard (MemTable) where you quickly jot new notes. When it's full, you copy everything to a sorted filing cabinet drawer (SSTable). When too many drawers pile up, you merge them into one larger drawer. Reading means checking the whiteboard first, then the drawers.",
+        "learningObjectives": [
+            "Understand the MemTable (in-memory sorted structure, usually a Red-Black Tree or Skip List)",
+            "Know that flushes create immutable SSTables (sorted files on disk)",
+            "Understand Compaction: merging multiple SSTables to reduce read amplification",
+            "Know the read/write/space amplification trade-offs for LSM Trees"
+        ],
+        "workedExample": {
+            "title": "LSM Tree Write and Read Path",
+            "body": "Write 'key=5': goes to MemTable immediately (O(1)). MemTable full → flush to SSTable L0. Read 'key=5': check MemTable (not there) → check L0 SSTable (found!). Compaction: merge 4 L0 SSTables into 1 L1 SSTable (reduce number of files to scan on read)."
+        },
+        "visualWalkthrough": [
+            "Level 0: MemTable (in-memory sorted write buffer)",
+            "Level 1: L0 SSTables flushed from MemTable when full",
+            "Level 2: L1 SSTables created by compacting L0",
+            "Read: check MemTable → L0 files → L1 files (newest-first with Bloom Filter shortcuts)",
+            "Compaction: merge + sort overlapping SSTables to reduce read overhead"
+        ],
+        "complexityReasoning": { "body": "Writes are O(1) amortized (sorted insert to MemTable). Reads may scan multiple levels: O(log n) with Bloom Filters on each SSTable. Compaction runs in background, keeping total data amplification bounded." },
+        "edgeCases": [
+            "Tombstone records for deletions (can't remove directly from SSTables)",
+            "Write amplification: data may be rewritten multiple times during compaction",
+            "Crash recovery: WAL (Write-Ahead Log) replays MemTable from disk after failure"
+        ],
+        "revisionPrompts": [
+            "What is the role of the MemTable in an LSM Tree?",
+            "Why are SSTables immutable and what advantage does this provide?",
+            "Explain the read amplification problem in LSM Trees and how Bloom Filters help."
+        ],
+        "code": {
+            "javascript": "class LSMTree {\n  constructor() {\n    this.memTable = new Map(); // In-memory buffer\n    this.wal = [];             // Write-Ahead Log\n    this.ssTables = [];        // Sorted String Tables (simplified as arrays)\n    this.threshold = 4;        // Flush when memTable hits threshold\n  }\n  write(key, value) {\n    this.wal.push({key, value}); // Durability\n    this.memTable.set(key, value);\n    if (this.memTable.size >= this.threshold) this.flush();\n  }\n  flush() {\n    // Sort memTable and create new SSTable\n    const sorted = [...this.memTable.entries()].sort((a,b) => a[0].localeCompare(b[0]));\n    this.ssTables.unshift(sorted); // Newest first\n    this.memTable.clear();\n    if (this.ssTables.length >= 4) this.compact();\n  }\n  compact() {\n    // Merge all SSTables (simplified 2-way merge)\n    const merged = new Map();\n    for (const ss of this.ssTables.reverse())\n      for (const [k,v] of ss) merged.set(k,v);\n    this.ssTables = [Array.from(merged.entries()).sort()];\n  }\n  read(key) {\n    if (this.memTable.has(key)) return this.memTable.get(key);\n    for (const ss of this.ssTables) {\n      // Binary search each SSTable\n      const found = ss.find(([k]) => k === key);\n      if (found) return found[1];\n    }\n    return null;\n  }\n}",
+            "python": "import sortedcontainers\nclass LSMTree:\n    def __init__(self, threshold=4):\n        self.mem_table = {}  # In-memory buffer (use SortedDict in real impl)\n        self.ss_tables = []  # List of sorted lists (newest first)\n        self.threshold = threshold\n    def write(self, key, value):\n        self.mem_table[key] = value\n        if len(self.mem_table) >= self.threshold:\n            self.flush()\n    def flush(self):\n        sorted_pairs = sorted(self.mem_table.items())\n        self.ss_tables.insert(0, sorted_pairs)  # Newest first\n        self.mem_table.clear()\n        if len(self.ss_tables) >= 4:\n            self.compact()\n    def compact(self):\n        merged = {}\n        for ss in reversed(self.ss_tables):\n            for k, v in ss:\n                merged[k] = v\n        self.ss_tables = [sorted(merged.items())]\n    def read(self, key):\n        if key in self.mem_table:\n            return self.mem_table[key]\n        for ss in self.ss_tables:\n            # Binary search\n            lo, hi = 0, len(ss)-1\n            while lo <= hi:\n                mid = (lo+hi)//2\n                if ss[mid][0] == key: return ss[mid][1]\n                elif ss[mid][0] < key: lo = mid+1\n                else: hi = mid-1\n        return None",
+            "cpp": "// Conceptual LSM Tree structure in C++\n// Production: use RocksDB or LevelDB directly\nclass LSMTree {\n    map<string,string> memTable;\n    vector<vector<pair<string,string>>> ssTables;\n    int threshold;\npublic:\n    LSMTree(int t=4): threshold(t){}\n    void write(const string& k, const string& v){\n        memTable[k]=v;\n        if((int)memTable.size()>=threshold) flush();\n    }\n    void flush(){\n        ssTables.insert(ssTables.begin(), vector<pair<string,string>>(memTable.begin(), memTable.end()));\n        memTable.clear();\n    }\n    string read(const string& k){\n        if(memTable.count(k)) return memTable[k];\n        for(auto& ss: ssTables){\n            auto it=lower_bound(ss.begin(),ss.end(),make_pair(k,string()));\n            if(it!=ss.end()&&it->first==k) return it->second;\n        }\n        return \"\";\n    }\n};",
+            "java": "class LSMTree {\n    TreeMap<String,String> memTable = new TreeMap<>();\n    List<List<Map.Entry<String,String>>> ssTables = new ArrayList<>();\n    int threshold;\n    LSMTree(int threshold){this.threshold=threshold;}\n    void write(String k, String v){\n        memTable.put(k, v);\n        if(memTable.size()>=threshold) flush();\n    }\n    void flush(){\n        ssTables.add(0, new ArrayList<>(memTable.entrySet()));\n        memTable.clear();\n    }\n    String read(String k){\n        if(memTable.containsKey(k)) return memTable.get(k);\n        for(var ss: ssTables){\n            for(var e: ss) if(e.getKey().equals(k)) return e.getValue();\n        }\n        return null;\n    }\n}"
+        },
+        "practice": {
+            "theory": [
+                "What is a MemTable and why is it important in an LSM Tree?",
+                "What is compaction and why is it necessary?",
+                "Explain write amplification in LSM Trees and the trade-off with read amplification."
+            ],
+            "coding": "Implement a simplified LSM Tree supporting write(key, value) and read(key) with a MemTable that flushes to a sorted SSTable when full.",
+            "interview": "You're designing a database optimized for write-heavy workloads. Why would you choose LSM Trees over B-Trees? What are the read performance implications?"
+        }
+    },
+    {
+        "id": "quad-tree",
+        "name": "Quad Tree",
+        "category": "advanced-structures",
+        "complexity": { "time": "O(log n) avg query", "space": "O(n)" },
+        "description": "A tree that recursively partitions 2D space into four quadrants. Used for spatial indexing, collision detection in games, image compression, and geographic data.",
+        "beginnerExplanation": "A Quad Tree divides a 2D region into 4 equal quadrants (NW, NE, SW, SE). Each quadrant that contains too many points is subdivided again, recursively. Think of Google Maps: when you zoom in on a city, it loads more detail. Quad Trees power this hierarchical spatial indexing, letting you find all points near a location without checking every point.",
+        "mentalModel": "Imagine dividing a map into 4 quadrants. Each quadrant with cities gets subdivided into 4 more. Keep subdividing until each leaf has at most 1 point (or a small threshold). To find all points near you, only check the relevant quadrants — skip all others.",
+        "learningObjectives": [
+            "Understand the recursive 4-way spatial partitioning",
+            "Know when to subdivide a node (capacity threshold exceeded)",
+            "Implement range queries: find all points within a rectangle",
+            "Apply Quad Trees to collision detection, spatial indexing, and image compression"
+        ],
+        "workedExample": {
+            "title": "Insert points and query a range",
+            "body": "Points: (1,1),(7,2),(4,6),(8,8). Region [0-10, 0-10]. Insert (1,1): fits in NW [0-5, 0-5]. Insert (7,2): SE [5-10, 0-5]. Insert (4,6): NE [0-5, 5-10]. Insert (8,8): NE [5-10, 5-10]. Range query [3-9, 1-7]: check intersecting quadrants only — skip unrelated ones."
+        },
+        "visualWalkthrough": [
+            "Root: Region [0,10]x[0,10], capacity=2",
+            "Insert (1,1) and (7,2): root has 2 points, at capacity",
+            "Insert (4,6): subdivide! 4 children: NW, NE, SW, SE",
+            "(1,1) → SW, (7,2) → SE, (4,6) → NW",
+            "Range query [3-9,1-7]: only intersecting quadrants are visited"
+        ],
+        "complexityReasoning": { "body": "Best case O(log n) for uniformly distributed points. Worst case O(n) for clustered points in one region. Space O(n) nodes total. Depth = O(log n) average." },
+        "edgeCases": [
+            "All points at same location: tree degenerates, need a depth limit",
+            "Empty region: all queries return []",
+            "Points on boundary between quadrants: assign consistently (e.g., left/bottom inclusive)"
+        ],
+        "revisionPrompts": [
+            "What are the four regions a Quad Tree splits into and how are they defined?",
+            "When does a Quad Tree node split (subdivide)?",
+            "How does a Quad Tree improve range queries over a naive O(n) scan?"
+        ],
+        "code": {
+            "javascript": "class QuadTree {\n  constructor(x, y, w, h, capacity = 4) {\n    this.bounds = {x, y, w, h};\n    this.capacity = capacity;\n    this.points = [];\n    this.divided = false;\n  }\n  contains(px, py) {\n    const {x,y,w,h} = this.bounds;\n    return px >= x && px < x+w && py >= y && py < y+h;\n  }\n  intersects(rx, ry, rw, rh) {\n    const {x,y,w,h} = this.bounds;\n    return !(rx > x+w || rx+rw < x || ry > y+h || ry+rh < y);\n  }\n  subdivide() {\n    const {x,y,w,h} = this.bounds;\n    this.NW = new QuadTree(x, y, w/2, h/2, this.capacity);\n    this.NE = new QuadTree(x+w/2, y, w/2, h/2, this.capacity);\n    this.SW = new QuadTree(x, y+h/2, w/2, h/2, this.capacity);\n    this.SE = new QuadTree(x+w/2, y+h/2, w/2, h/2, this.capacity);\n    this.divided = true;\n  }\n  insert(px, py) {\n    if (!this.contains(px, py)) return false;\n    if (this.points.length < this.capacity) { this.points.push([px,py]); return true; }\n    if (!this.divided) this.subdivide();\n    return this.NW.insert(px,py)||this.NE.insert(px,py)||\n           this.SW.insert(px,py)||this.SE.insert(px,py);\n  }\n  query(rx, ry, rw, rh, found = []) {\n    if (!this.intersects(rx, ry, rw, rh)) return found;\n    for (const [px,py] of this.points)\n      if (px >= rx && px < rx+rw && py >= ry && py < ry+rh) found.push([px,py]);\n    if (this.divided) {\n      this.NW.query(rx,ry,rw,rh,found); this.NE.query(rx,ry,rw,rh,found);\n      this.SW.query(rx,ry,rw,rh,found); this.SE.query(rx,ry,rw,rh,found);\n    }\n    return found;\n  }\n}",
+            "python": "class QuadTree:\n    def __init__(self, x, y, w, h, capacity=4):\n        self.bounds = (x, y, w, h)\n        self.capacity = capacity\n        self.points = []\n        self.divided = False\n        self.children = []\n    def contains(self, px, py):\n        x,y,w,h = self.bounds\n        return x<=px<x+w and y<=py<y+h\n    def intersects(self, rx, ry, rw, rh):\n        x,y,w,h = self.bounds\n        return not (rx>x+w or rx+rw<x or ry>y+h or ry+rh<y)\n    def subdivide(self):\n        x,y,w,h = self.bounds\n        self.children = [\n            QuadTree(x,y,w/2,h/2,self.capacity),\n            QuadTree(x+w/2,y,w/2,h/2,self.capacity),\n            QuadTree(x,y+h/2,w/2,h/2,self.capacity),\n            QuadTree(x+w/2,y+h/2,w/2,h/2,self.capacity)\n        ]\n        self.divided = True\n    def insert(self, px, py):\n        if not self.contains(px, py): return False\n        if len(self.points) < self.capacity:\n            self.points.append((px,py)); return True\n        if not self.divided: self.subdivide()\n        return any(c.insert(px,py) for c in self.children)\n    def query(self, rx, ry, rw, rh, found=None):\n        if found is None: found = []\n        if not self.intersects(rx,ry,rw,rh): return found\n        for px,py in self.points:\n            if rx<=px<rx+rw and ry<=py<ry+rh: found.append((px,py))\n        if self.divided:\n            for c in self.children: c.query(rx,ry,rw,rh,found)\n        return found",
+            "cpp": "// QuadTree structure in C++ (simplified)\nstruct Point { float x, y; };\nstruct Rect { float x, y, w, h;\n    bool contains(float px,float py){return px>=x&&px<x+w&&py>=y&&py<y+h;}\n    bool intersects(const Rect& r){return !(r.x>x+w||r.x+r.w<x||r.y>y+h||r.y+r.h<y);}\n};\nstruct QuadTree {\n    Rect bounds; int capacity;\n    vector<Point> points;\n    unique_ptr<QuadTree> nw,ne,sw,se;\n    bool divided=false;\n    QuadTree(Rect b,int cap):bounds(b),capacity(cap){}\n    // insert and query methods follow same pattern as JavaScript version\n};",
+            "java": "class QuadTree {\n    float x,y,w,h; int capacity;\n    List<float[]> points = new ArrayList<>();\n    QuadTree nw,ne,sw,se; boolean divided;\n    QuadTree(float x,float y,float w,float h,int cap){\n        this.x=x;this.y=y;this.w=w;this.h=h;capacity=cap;\n    }\n    boolean contains(float px,float py){return px>=x&&px<x+w&&py>=y&&py<y+h;}\n    boolean intersects(float rx,float ry,float rw,float rh){\n        return !(rx>x+w||rx+rw<x||ry>y+h||ry+rh<y);\n    }\n    void subdivide(){\n        nw=new QuadTree(x,y,w/2,h/2,capacity);\n        ne=new QuadTree(x+w/2,y,w/2,h/2,capacity);\n        sw=new QuadTree(x,y+h/2,w/2,h/2,capacity);\n        se=new QuadTree(x+w/2,y+h/2,w/2,h/2,capacity);\n        divided=true;\n    }\n}"
+        },
+        "practice": {
+            "theory": [
+                "Why is a Quad Tree more efficient than a flat list for 2D range queries?",
+                "When and why does a Quad Tree node subdivide?",
+                "Name two real-world applications of Quad Trees beyond range queries."
+            ],
+            "coding": "Implement a QuadTree that supports inserting 2D points and querying all points within a given rectangular region.",
+            "interview": "A game has 10,000 objects on a 2D map. For each frame, you need to find all pairs of objects within collision distance. How would a Quad Tree help?"
+        }
+    },
+    {
+        "id": "kd-tree",
+        "name": "K-D Tree",
+        "category": "advanced-structures",
+        "complexity": { "time": "O(log n) avg nearest-neighbor, O(n^(1-1/k)) worst", "space": "O(n)" },
+        "description": "A binary tree for organizing k-dimensional points, enabling efficient nearest-neighbor searches and range queries in multiple dimensions.",
+        "beginnerExplanation": "A K-D Tree (k-dimensional tree) is like a multidimensional binary search tree. At each level, you split points by alternating dimensions: level 0 splits by X, level 1 by Y, level 2 by Z (for 3D), etc. To find the nearest neighbor to a query point, you traverse the tree using the current dimension's split, pruning branches that are farther than the current best distance.",
+        "mentalModel": "Imagine dividing a 2D map first with a vertical line (by X), then each half with horizontal lines (by Y), then each quarter with vertical lines again. To find the nearest store to your location, you start in your quadrant and prune any areas that can't possibly be closer than the best store you've found so far.",
+        "learningObjectives": [
+            "Understand alternating dimension splitting at each tree level",
+            "Build a K-D Tree by median splitting along alternating dimensions",
+            "Implement nearest-neighbor search with branch pruning",
+            "Distinguish when K-D Trees excel (k small) vs degrade (high k, curse of dimensionality)"
+        ],
+        "workedExample": {
+            "title": "Find nearest neighbor to (5,4) in 2D K-D Tree",
+            "body": "Points: (2,3),(5,4),(9,6),(4,7),(8,1),(7,2). Build tree: split by X at median=5→root=(7,2). Left subtree has (2,3),(5,4),(4,7). Find NN(5,4): go left (5<7), find (5,4) itself — distance 0! Return (5,4)."
+        },
+        "visualWalkthrough": [
+            "Sort by X, pick median (7,2) as root, depth=0",
+            "Left subtree (X≤7): [(2,3),(5,4),(4,7)] — split by Y at next level",
+            "Right subtree (X>7): [(9,6),(8,1)] — split by Y at next level",
+            "NN query (5,4): compare X: 5<7 → go left, find (5,4) → exact match!",
+            "Backtrack: check if right subtree could have closer point (7-5=2 > current best=0 → prune!)"
+        ],
+        "complexityReasoning": { "body": "Average O(log n) for balanced trees with uniformly distributed data. Worst case degrades with high dimensions (curse of dimensionality: all branches must be checked). Build: O(n log n). Space: O(n)." },
+        "edgeCases": [
+            "All points with same coordinate in one dimension: tree becomes unbalanced, use tie-breaking",
+            "High dimensions (k > 10): K-D Trees lose efficiency; consider approximate methods",
+            "Query point outside all existing points: still finds closest, but must check many branches"
+        ],
+        "revisionPrompts": [
+            "Why do we alternate dimensions at each level of a K-D Tree?",
+            "Describe the pruning step in nearest-neighbor search. When can you prune a subtree?",
+            "For what values of k (dimensions) does a K-D Tree remain efficient?"
+        ],
+        "code": {
+            "javascript": "class KDNode {\n  constructor(point) { this.point = point; this.left = this.right = null; }\n}\nfunction buildKDTree(points, depth = 0) {\n  if (!points.length) return null;\n  const k = points[0].length;\n  const axis = depth % k;\n  points.sort((a, b) => a[axis] - b[axis]);\n  const mid = Math.floor(points.length / 2);\n  const node = new KDNode(points[mid]);\n  node.left = buildKDTree(points.slice(0, mid), depth + 1);\n  node.right = buildKDTree(points.slice(mid + 1), depth + 1);\n  return node;\n}\nfunction dist(a, b) { return Math.sqrt(a.reduce((s,v,i) => s + (v-b[i])**2, 0)); }\nfunction nearestNeighbor(root, target, depth = 0, best = {node: null, dist: Infinity}) {\n  if (!root) return best;\n  const d = dist(root.point, target);\n  if (d < best.dist) best = {node: root, dist: d};\n  const axis = depth % target.length;\n  const diff = target[axis] - root.point[axis];\n  const near = diff < 0 ? root.left : root.right;\n  const far = diff < 0 ? root.right : root.left;\n  best = nearestNeighbor(near, target, depth + 1, best);\n  if (Math.abs(diff) < best.dist) best = nearestNeighbor(far, target, depth + 1, best);\n  return best;\n}",
+            "python": "class KDNode:\n    def __init__(self, point):\n        self.point = point\n        self.left = self.right = None\n\ndef build_kd_tree(points, depth=0):\n    if not points: return None\n    k = len(points[0])\n    axis = depth % k\n    points.sort(key=lambda p: p[axis])\n    mid = len(points) // 2\n    node = KDNode(points[mid])\n    node.left = build_kd_tree(points[:mid], depth+1)\n    node.right = build_kd_tree(points[mid+1:], depth+1)\n    return node\n\ndef dist(a, b):\n    return sum((x-y)**2 for x,y in zip(a,b)) ** 0.5\n\ndef nearest_neighbor(root, target, depth=0, best=None):\n    if not root: return best\n    d = dist(root.point, target)\n    if best is None or d < best[1]:\n        best = (root.point, d)\n    axis = depth % len(target)\n    diff = target[axis] - root.point[axis]\n    near = root.left if diff < 0 else root.right\n    far = root.right if diff < 0 else root.left\n    best = nearest_neighbor(near, target, depth+1, best)\n    if abs(diff) < best[1]:\n        best = nearest_neighbor(far, target, depth+1, best)\n    return best",
+            "cpp": "struct KDNode {\n    vector<float> point;\n    KDNode *left, *right;\n    KDNode(vector<float> p): point(p), left(nullptr), right(nullptr){}\n};\nKDNode* buildKDTree(vector<vector<float>>& pts, int depth=0) {\n    if (pts.empty()) return nullptr;\n    int k=pts[0].size(), axis=depth%k;\n    sort(pts.begin(),pts.end(),[axis](auto& a,auto& b){return a[axis]<b[axis];});\n    int mid=pts.size()/2;\n    KDNode* node=new KDNode(pts[mid]);\n    vector<vector<float>> left(pts.begin(),pts.begin()+mid);\n    vector<vector<float>> right(pts.begin()+mid+1,pts.end());\n    node->left=buildKDTree(left,depth+1);\n    node->right=buildKDTree(right,depth+1);\n    return node;\n}",
+            "java": "class KDNode {\n    double[] point;\n    KDNode left, right;\n    KDNode(double[] p){point=p;}\n}\nclass KDTree {\n    KDNode build(double[][] pts, int depth){\n        if(pts.length==0) return null;\n        int k=pts[0].length, axis=depth%k;\n        int finalAxis=axis;\n        Arrays.sort(pts, (a,b)->Double.compare(a[finalAxis],b[finalAxis]));\n        int mid=pts.length/2;\n        KDNode node=new KDNode(pts[mid]);\n        // split arrays and recurse\n        return node;\n    }\n    double dist(double[] a, double[] b){\n        double s=0;\n        for(int i=0;i<a.length;i++) s+=(a[i]-b[i])*(a[i]-b[i]);\n        return Math.sqrt(s);\n    }\n}"
+        },
+        "practice": {
+            "theory": [
+                "How does a K-D Tree differ from a standard BST for multidimensional data?",
+                "Why does nearest-neighbor search in a K-D Tree have worst case O(n) in high dimensions?",
+                "When should you use approximate nearest-neighbor algorithms instead of a K-D Tree?"
+            ],
+            "coding": "Build a 2D K-D Tree for a set of points and implement a nearest-neighbor search query.",
+            "interview": "You're building a ride-sharing app. Drivers are represented as 2D GPS coordinates. When a rider requests a trip, find the nearest available driver. How does a K-D Tree help? What are its limitations?"
+        }
+    },
+    {
+        "id": "pattern-fast-slow",
+        "name": "Fast & Slow Pointer Pattern",
+        "category": "patterns",
+        "complexity": { "time": "O(n)", "space": "O(1)" },
+        "description": "Use two pointers at different speeds (tortoise and hare) to detect cycles, find midpoints, and solve various linked list problems without extra space.",
+        "beginnerExplanation": "Move two pointers through a data structure: slow moves 1 step at a time, fast moves 2 steps. If there's a cycle, fast will eventually lap slow and they'll meet. If not, fast reaches the end. When fast reaches the end, slow is exactly at the middle. This single mechanism solves cycle detection, finding the middle node, and more.",
+        "mentalModel": "Two runners on a circular track: one twice as fast. If there's a loop, the fast runner will eventually catch up from behind. On a straight track, when the fast runner hits the end, the slow runner is at the halfway point.",
+        "learningObjectives": [
+            "Recognize when fast-slow pointers solve cycle detection (Floyd's algorithm)",
+            "Use fast-slow to find the middle of a linked list",
+            "Identify the start of a cycle after detection",
+            "Apply to 'happy number' and similar problems involving value cycles"
+        ],
+        "workedExample": {
+            "title": "Detect cycle in linked list",
+            "body": "List: 1→2→3→4→5→3(loop). slow=1, fast=1. Step1: slow=2, fast=3. Step2: slow=3, fast=5. Step3: slow=4, fast=4. slow==fast → cycle detected! To find start: reset slow to head. Advance both 1 step at a time. They meet at node 3 (cycle start)."
+        },
+        "visualWalkthrough": [
+            "Initialize: slow=head, fast=head",
+            "Step 1: slow→2, fast→3 (fast jumps 2)",
+            "Step 2: slow→3, fast→5",
+            "Step 3: slow→4, fast→4 (met!). Cycle confirmed.",
+            "Find cycle start: reset slow to head, advance both 1 step → meet at node 3"
+        ],
+        "complexityReasoning": { "body": "Each pointer traverses at most O(n) nodes before meeting (or fast reaching null). Detection + finding start = O(n). Space O(1) — only two pointers needed." },
+        "edgeCases": [
+            "Empty list: return false/null",
+            "Single node with self-loop: fast.next = fast → detect on first step",
+            "No cycle: fast reaches null, return false"
+        ],
+        "revisionPrompts": [
+            "After cycle detection, why does resetting slow to head and advancing both 1 step find the cycle start?",
+            "How would you find the length of the cycle once detected?",
+            "How does fast-slow find the middle of a non-cyclic linked list?"
+        ],
+        "code": {
+            "javascript": "function hasCycle(head) {\n  let slow = head, fast = head;\n  while (fast && fast.next) {\n    slow = slow.next;\n    fast = fast.next.next;\n    if (slow === fast) return true;\n  }\n  return false;\n}\nfunction cycleStart(head) {\n  let slow = head, fast = head;\n  while (fast && fast.next) {\n    slow = slow.next;\n    fast = fast.next.next;\n    if (slow === fast) {\n      slow = head;\n      while (slow !== fast) { slow = slow.next; fast = fast.next; }\n      return slow; // cycle start\n    }\n  }\n  return null;\n}\nfunction middleNode(head) {\n  let slow = head, fast = head;\n  while (fast && fast.next) { slow = slow.next; fast = fast.next.next; }\n  return slow;\n}",
+            "python": "def has_cycle(head):\n    slow = fast = head\n    while fast and fast.next:\n        slow = slow.next\n        fast = fast.next.next\n        if slow is fast:\n            return True\n    return False\n\ndef cycle_start(head):\n    slow = fast = head\n    while fast and fast.next:\n        slow = slow.next\n        fast = fast.next.next\n        if slow is fast:\n            slow = head\n            while slow is not fast:\n                slow = slow.next\n                fast = fast.next\n            return slow\n    return None\n\ndef middle_node(head):\n    slow = fast = head\n    while fast and fast.next:\n        slow = slow.next\n        fast = fast.next.next\n    return slow",
+            "cpp": "bool hasCycle(ListNode* head) {\n    ListNode *slow = head, *fast = head;\n    while (fast && fast->next) {\n        slow = slow->next;\n        fast = fast->next->next;\n        if (slow == fast) return true;\n    }\n    return false;\n}\nListNode* middleNode(ListNode* head) {\n    ListNode *slow = head, *fast = head;\n    while (fast && fast->next) {\n        slow = slow->next;\n        fast = fast->next->next;\n    }\n    return slow;\n}",
+            "java": "public boolean hasCycle(ListNode head) {\n    ListNode slow = head, fast = head;\n    while (fast != null && fast.next != null) {\n        slow = slow.next;\n        fast = fast.next.next;\n        if (slow == fast) return true;\n    }\n    return false;\n}\npublic ListNode middleNode(ListNode head) {\n    ListNode slow = head, fast = head;\n    while (fast != null && fast.next != null) {\n        slow = slow.next;\n        fast = fast.next.next;\n    }\n    return slow;\n}"
+        },
+        "practice": {
+            "theory": [
+                "Why does moving fast by 2 and slow by 1 guarantee they'll meet if there's a cycle?",
+                "After detection, why does resetting slow to head and advancing both by 1 give the cycle start?",
+                "How would you use fast-slow pointers to check if a number is 'happy'?"
+            ],
+            "coding": "Given a linked list, determine if it has a cycle and if so, return the node where the cycle begins.",
+            "interview": "Explain Floyd's cycle detection algorithm. Why does it work? What is its time and space complexity compared to using a HashSet?"
+        }
+    },
+    {
+        "id": "pattern-merge-interval",
+        "name": "Merge Interval Pattern",
+        "category": "patterns",
+        "complexity": { "time": "O(n log n)", "space": "O(n)" },
+        "description": "Sort intervals by start time, then merge overlapping intervals in a single linear sweep. Recognizes when intervals can be collapsed or extended.",
+        "beginnerExplanation": "Sort intervals by start. Keep a running 'current' interval. For each next interval: if it overlaps current (next.start ≤ current.end), merge them by taking max(current.end, next.end). If it doesn't overlap, push current to result and start fresh. The sort makes this a linear scan after O(n log n) sorting.",
+        "mentalModel": "Imagine scheduling meetings and combining any that overlap into a single longer block. Sort all meetings by start time. Walk through and extend the last meeting's end time whenever the next meeting overlaps. When there's a gap, the block is finalized.",
+        "learningObjectives": [
+            "Sort by start time to make overlaps detectable in order",
+            "Recognize overlap condition: next.start <= current.end",
+            "Merge by extending end: max(current.end, next.end)",
+            "Apply to insert interval, meeting rooms, and interval list intersections"
+        ],
+        "workedExample": {
+            "title": "Merge [[1,3],[2,6],[8,10],[15,18]]",
+            "body": "Sort: already sorted. Start with [1,3]. Next [2,6]: 2<=3 → merge to [1,6]. Next [8,10]: 8>6 → push [1,6], current=[8,10]. Next [15,18]: 15>10 → push [8,10], current=[15,18]. Push [15,18]. Result: [[1,6],[8,10],[15,18]]."
+        },
+        "visualWalkthrough": [
+            "Input: [[1,3],[2,6],[8,10],[15,18]] (already sorted by start)",
+            "current=[1,3]. Next=[2,6]: 2<=3 → merge → current=[1,6]",
+            "Next=[8,10]: 8>6 → finalize [1,6], current=[8,10]",
+            "Next=[15,18]: 15>10 → finalize [8,10], current=[15,18]",
+            "End of list → finalize [15,18]. Result: [[1,6],[8,10],[15,18]]"
+        ],
+        "complexityReasoning": { "body": "Sort: O(n log n). Single linear sweep: O(n). Total: O(n log n). Space: O(n) for result array." },
+        "edgeCases": [
+            "Empty input: return []",
+            "Single interval: return as-is",
+            "All intervals overlapping: one merged interval in result",
+            "Intervals already sorted: sort is still needed since input may not be"
+        ],
+        "revisionPrompts": [
+            "Why must intervals be sorted by start time before merging?",
+            "How do you handle inserting a new interval into an already-merged list?",
+            "How does the Merge Interval pattern apply to 'Meeting Rooms II' (find minimum rooms needed)?"
+        ],
+        "code": {
+            "javascript": "function merge(intervals) {\n  if (!intervals.length) return [];\n  intervals.sort((a, b) => a[0] - b[0]);\n  const result = [intervals[0]];\n  for (let i = 1; i < intervals.length; i++) {\n    const last = result[result.length - 1];\n    if (intervals[i][0] <= last[1])\n      last[1] = Math.max(last[1], intervals[i][1]);\n    else\n      result.push(intervals[i]);\n  }\n  return result;\n}",
+            "python": "def merge(intervals):\n    if not intervals: return []\n    intervals.sort(key=lambda x: x[0])\n    result = [intervals[0]]\n    for start, end in intervals[1:]:\n        if start <= result[-1][1]:\n            result[-1][1] = max(result[-1][1], end)\n        else:\n            result.append([start, end])\n    return result",
+            "cpp": "vector<vector<int>> merge(vector<vector<int>>& intervals) {\n    sort(intervals.begin(), intervals.end());\n    vector<vector<int>> res = {intervals[0]};\n    for (int i=1; i<(int)intervals.size(); i++) {\n        if (intervals[i][0] <= res.back()[1])\n            res.back()[1] = max(res.back()[1], intervals[i][1]);\n        else\n            res.push_back(intervals[i]);\n    }\n    return res;\n}",
+            "java": "public int[][] merge(int[][] intervals) {\n    Arrays.sort(intervals, (a,b) -> a[0]-b[0]);\n    List<int[]> res = new ArrayList<>();\n    res.add(intervals[0]);\n    for (int i=1; i<intervals.length; i++) {\n        int[] last = res.get(res.size()-1);\n        if (intervals[i][0] <= last[1])\n            last[1] = Math.max(last[1], intervals[i][1]);\n        else\n            res.add(intervals[i]);\n    }\n    return res.toArray(new int[0][]);\n}"
+        },
+        "practice": {
+            "theory": [
+                "What is the overlap condition for merging two intervals [a,b] and [c,d]?",
+                "Why does sorting by start time enable a linear merge pass?",
+                "How would you insert a new interval into a sorted list of non-overlapping intervals?"
+            ],
+            "coding": "Given a list of intervals, merge all overlapping intervals and return a list of non-overlapping intervals.",
+            "interview": "LeetCode 56 - Merge Intervals. Walk through your solution, explain sorting choice, and state the time complexity."
+        }
+    },
+    {
+        "id": "pattern-cyclic-sort",
+        "name": "Cyclic Sort Pattern",
+        "category": "patterns",
+        "complexity": { "time": "O(n)", "space": "O(1)" },
+        "description": "Place each number at its correct index position in O(n) time by cycling through misplaced elements. Ideal for problems with numbers in range [1,n].",
+        "beginnerExplanation": "If you have an array with numbers 1 to n, each number belongs at index (number-1). Cyclic Sort: iterate through the array. If arr[i] is not at its correct index, swap arr[i] with arr[arr[i]-1]. Keep swapping until arr[i] is in its right place, then move to the next index. After this O(n) pass, any numbers at wrong indices are duplicates or missing.",
+        "mentalModel": "Think of numbered parking spots 1 to n. If car #5 is in spot 3, move it to spot 5. The car that was in spot 5 goes somewhere else. Repeat until every car is in the correct spot. Then check for empties (missing numbers) or double-parked spots (duplicates).",
+        "learningObjectives": [
+            "Recognize problems involving numbers in range [1,n] as Cyclic Sort candidates",
+            "Implement the swap: while arr[i] != i+1, swap arr[i] with arr[arr[i]-1]",
+            "After sorting, find missing numbers (where arr[i] != i+1)",
+            "Find duplicates (where arr[i] was already in the correct place and you detected a repeat)"
+        ],
+        "workedExample": {
+            "title": "Find missing number in [3,0,1]",
+            "body": "n=3, expected [0,1,2]. arr=[3,0,1]. i=0: arr[0]=3, should be at index 3, but swap only for 1-indexed. For 0-indexed: arr[0]=3>n=skip? No: use arr[i]<n swap. i=0: arr[0]=3≥n=3 → skip. i=1: arr[1]=0, at idx 0≠1 → swap → [0,3,1]. i=1 again: arr[1]=3≥n → skip. i=2: arr[2]=1, at idx 1≠2 → swap → [0,1,3]. i=2: arr[2]=3≥n → skip. Scan: arr[0]=0✓, arr[1]=1✓, arr[2]=3≠2 → missing=2."
+        },
+        "visualWalkthrough": [
+            "Array [3,1,5,4,2] with n=5 (values 1-5)",
+            "i=0: arr[0]=3, correct idx=2, swap → [5,1,3,4,2]",
+            "i=0: arr[0]=5, correct idx=4, swap → [2,1,3,4,5]",
+            "i=0: arr[0]=2, correct idx=1, swap → [1,2,3,4,5]",
+            "i=0: arr[0]=1 ✓. i=1: arr[1]=2 ✓. ... All correct → no duplicates or missing"
+        ],
+        "complexityReasoning": { "body": "Each swap puts at least one element in its correct position. Total swaps ≤ n. Each index is visited at most twice (once to place, once to verify). Total: O(n). Space: O(1) — in-place swaps." },
+        "edgeCases": [
+            "Duplicate values: when arr[i] == arr[arr[i]-1] and they differ, that's the duplicate",
+            "Values starting at 0: adjust formula to arr[arr[i]] != arr[i]",
+            "Values out of range [1,n]: skip with bounds check"
+        ],
+        "revisionPrompts": [
+            "Why does Cyclic Sort work only for arrays with values in range [1,n]?",
+            "How do you find both the duplicate AND the missing number using cyclic sort?",
+            "What is the time complexity of Cyclic Sort and why is it O(n) despite the nested while loop?"
+        ],
+        "code": {
+            "javascript": "function cyclicSort(nums) {\n  let i = 0;\n  while (i < nums.length) {\n    const correct = nums[i] - 1;\n    if (nums[i] !== nums[correct]) {\n      [nums[i], nums[correct]] = [nums[correct], nums[i]];\n    } else {\n      i++;\n    }\n  }\n  return nums;\n}\nfunction findMissingNumber(nums) {\n  cyclicSort(nums);\n  for (let i = 0; i < nums.length; i++)\n    if (nums[i] !== i + 1) return i + 1;\n  return nums.length + 1;\n}",
+            "python": "def cyclic_sort(nums):\n    i = 0\n    while i < len(nums):\n        correct = nums[i] - 1\n        if nums[i] != nums[correct]:\n            nums[i], nums[correct] = nums[correct], nums[i]\n        else:\n            i += 1\n    return nums\n\ndef find_missing(nums):\n    cyclic_sort(nums)\n    for i, n in enumerate(nums):\n        if n != i + 1:\n            return i + 1\n    return len(nums) + 1",
+            "cpp": "void cyclicSort(vector<int>& nums) {\n    int i = 0;\n    while (i < (int)nums.size()) {\n        int correct = nums[i] - 1;\n        if (nums[i] != nums[correct]) swap(nums[i], nums[correct]);\n        else i++;\n    }\n}\nint findMissing(vector<int>& nums) {\n    cyclicSort(nums);\n    for (int i=0; i<(int)nums.size(); i++)\n        if (nums[i] != i+1) return i+1;\n    return nums.size()+1;\n}",
+            "java": "public void cyclicSort(int[] nums) {\n    int i = 0;\n    while (i < nums.length) {\n        int correct = nums[i] - 1;\n        if (nums[i] != nums[correct]) {\n            int tmp = nums[i]; nums[i] = nums[correct]; nums[correct] = tmp;\n        } else i++;\n    }\n}\npublic int findMissing(int[] nums) {\n    cyclicSort(nums);\n    for (int i=0; i<nums.length; i++)\n        if (nums[i] != i+1) return i+1;\n    return nums.length+1;\n}"
+        },
+        "practice": {
+            "theory": [
+                "Why does cyclic sort achieve O(n) despite seeming to have a nested loop?",
+                "How do you adapt cyclic sort to find all k missing numbers?",
+                "What is the condition that terminates the inner while loop?"
+            ],
+            "coding": "Given an array containing n distinct numbers in the range [1,n], find the one missing number in O(n) time and O(1) space.",
+            "interview": "Find All Duplicates in an Array (LeetCode 442). Array of n integers 1≤nums[i]≤n, some appear twice. Return all duplicates. Use cyclic sort pattern."
+        }
+    },
+    {
+        "id": "pattern-heap",
+        "name": "Heap Pattern (Top K)",
+        "category": "patterns",
+        "complexity": { "time": "O(n log k)", "space": "O(k)" },
+        "description": "Use a min-heap or max-heap of size k to efficiently track the top-K largest/smallest elements in a stream or array without sorting the entire collection.",
+        "beginnerExplanation": "To find the k largest elements: maintain a min-heap of size k. For each new element, add it to the heap. If the heap exceeds size k, remove the minimum (the heap's root). After processing all elements, the heap contains the k largest. The heap keeps the 'current k best' — whenever a better candidate arrives, it evicts the worst of the current k.",
+        "mentalModel": "Imagine picking the top-3 players from 100 auditions. You keep a 'roster' of the current 3 best. For each new audition, if they're better than the worst current player, they take that spot. At the end, your roster has the top-3. The heap is that roster.",
+        "learningObjectives": [
+            "Use min-heap of size k for 'k largest elements'",
+            "Use max-heap of size k for 'k smallest elements'",
+            "Apply to top-k frequent elements (heap by frequency)",
+            "Recognize variants: k closest points, k-way merge, running median"
+        ],
+        "workedExample": {
+            "title": "Find K=3 largest from [3,1,5,12,2,11]",
+            "body": "Process elements with min-heap, max size 3. Add 3:[3]. Add 1:[1,3]. Add 5:[1,3,5]. Add 12: 12>heap.min=1→remove 1, add 12→[3,5,12]. Add 2: 2<heap.min=3→skip. Add 11: 11>heap.min=3→remove 3, add 11→[5,11,12]. Result: [5,11,12]."
+        },
+        "visualWalkthrough": [
+            "Initialize min-heap (max size k=3)",
+            "Add 3: heap=[3]",
+            "Add 1: heap=[1,3]",
+            "Add 5: heap=[1,3,5] (full)",
+            "Add 12: 12>min(1)→remove 1, add 12→heap=[3,5,12]",
+            "Add 2: 2<min(3)→skip. Add 11: 11>min(3)→remove 3, add 11→heap=[5,11,12]"
+        ],
+        "complexityReasoning": { "body": "For each of n elements: heap push/pop = O(log k). Total: O(n log k). For k<<n, this beats sorting O(n log n). Space: O(k) for the heap." },
+        "edgeCases": [
+            "k > n: return all elements",
+            "k = 1: find the single maximum/minimum",
+            "Duplicate elements: heap handles naturally, may have duplicates in result"
+        ],
+        "revisionPrompts": [
+            "Why do we use a min-heap (not max-heap) to find the k largest elements?",
+            "How does the Heap pattern enable O(n log k) vs O(n log n) sorting for top-k?",
+            "How would you find the running median of a data stream using two heaps?"
+        ],
+        "code": {
+            "javascript": "// JavaScript has no built-in heap — use simple simulation\nfunction kLargest(nums, k) {\n  // Min-heap using sorted array (for clarity; use binary heap in production)\n  const heap = [];\n  const push = (x) => { heap.push(x); heap.sort((a,b) => a-b); };\n  const pop = () => heap.shift();\n  for (const n of nums) {\n    push(n);\n    if (heap.length > k) pop();\n  }\n  return heap;\n}\n// Production: use a priority queue library or implement binary heap\nfunction binaryHeapKLargest(nums, k) {\n  // Using a max-heap and returning k elements\n  nums.sort((a, b) => b - a);\n  return nums.slice(0, k);\n}",
+            "python": "import heapq\ndef k_largest(nums, k):\n    # Min-heap of size k\n    heap = []\n    for n in nums:\n        heapq.heappush(heap, n)\n        if len(heap) > k:\n            heapq.heappop(heap)  # Remove smallest\n    return heap  # Contains k largest\n\ndef k_smallest(nums, k):\n    return heapq.nsmallest(k, nums)\n\ndef k_frequent(nums, k):\n    from collections import Counter\n    freq = Counter(nums)\n    return heapq.nlargest(k, freq.keys(), key=freq.get)",
+            "cpp": "#include <queue>\nvector<int> kLargest(vector<int>& nums, int k) {\n    priority_queue<int, vector<int>, greater<int>> minHeap; // min-heap\n    for (int n : nums) {\n        minHeap.push(n);\n        if ((int)minHeap.size() > k) minHeap.pop();\n    }\n    vector<int> res;\n    while (!minHeap.empty()) { res.push_back(minHeap.top()); minHeap.pop(); }\n    return res;\n}",
+            "java": "import java.util.PriorityQueue;\npublic int[] kLargest(int[] nums, int k) {\n    PriorityQueue<Integer> minHeap = new PriorityQueue<>(); // min-heap\n    for (int n : nums) {\n        minHeap.offer(n);\n        if (minHeap.size() > k) minHeap.poll();\n    }\n    return minHeap.stream().mapToInt(Integer::intValue).toArray();\n}"
+        },
+        "practice": {
+            "theory": [
+                "Why do we use a min-heap of size k to find the k largest elements?",
+                "What is the time complexity of finding k largest from n elements using this approach?",
+                "How would you solve 'Find K Pairs with Smallest Sums' using a heap?"
+            ],
+            "coding": "Find the top k frequent elements in an array in O(n log k) time.",
+            "interview": "Design a system that, given a stream of numbers, can return the current median at any time. What data structure would you use?"
+        }
+    },
+    {
+        "id": "pattern-monotonic-queue",
+        "name": "Monotonic Queue Pattern",
+        "category": "patterns",
+        "complexity": { "time": "O(n)", "space": "O(k)" },
+        "description": "A double-ended queue (deque) that maintains elements in monotonically increasing or decreasing order, enabling O(n) sliding window minimum/maximum queries.",
+        "beginnerExplanation": "For sliding window maximum: maintain a deque that stores indices in decreasing order of their values. For each new element: remove from the back any elements smaller than it (they can never be a future max). Remove from the front any elements that are outside the window. The front always has the current window maximum. Each element is added and removed from the deque at most once: total O(n).",
+        "mentalModel": "Think of a sliding window with a 'contestant board' that tracks the best candidates. When a stronger contestant arrives, all weaker ones behind them are permanently eliminated (they'll never be needed — the strong one is both newer and better). The champion (front of deque) changes only when they exit the window.",
+        "learningObjectives": [
+            "Understand the monotonic deque invariant: elements in the deque are always in one order",
+            "Remove from the back when adding a new element (to maintain order)",
+            "Remove from the front when the front falls outside the current window",
+            "Apply to sliding window max/min, jump game, and stock problem variants"
+        ],
+        "workedExample": {
+            "title": "Sliding Window Maximum, k=3, [1,3,-1,-3,5,3,6,7]",
+            "body": "Window [1,3,-1]: deque=[1(idx2)], wait... deque=[3(idx1)]. Wait, process properly: i=0: add 1 → deque=[0]. i=1: 3>nums[0]=1 → remove 0, add 1 → deque=[1]. i=2: -1<3 → add 2 → deque=[1,2]. Window=3 → max=nums[1]=3. i=3: -3<-1 → add 3 → deque=[1,2,3]. Remove front if out: 1 not out. max=nums[1]=3. i=4: 5>all → clear deque, add 4 → deque=[4]. max=5. i=5: 3<5 → add 5 → deque=[4,5]. max=5. i=6: 6>3 → remove 5, 6>5 → remove 4, add 6 → deque=[6]. max=6. i=7: 7>6 → clear, add 7 → deque=[7]. max=7. Result: [3,3,5,5,6,7]."
+        },
+        "visualWalkthrough": [
+            "Deque stores indices, values are decreasing (front=maximum)",
+            "i=0: deque=[0] (val=1). i=1: 3>1→remove 0, deque=[1] (val=3)",
+            "i=2: -1<3→add, deque=[1,2]. Window full → output nums[1]=3",
+            "i=3: -3<-1→add, deque=[1,2,3]. 1 still in window → output nums[1]=3",
+            "i=4: 5>all→clear deque, deque=[4]. output nums[4]=5"
+        ],
+        "complexityReasoning": { "body": "Each index is pushed to and popped from the deque at most once. Total operations = 2n = O(n). Space: deque holds at most k elements at any time, O(k)." },
+        "edgeCases": [
+            "k=1: output is just the array itself",
+            "k=n: single window, output max of entire array",
+            "All same elements: deque only keeps one element"
+        ],
+        "revisionPrompts": [
+            "Why do we remove smaller elements from the back of the deque when adding a new element?",
+            "What invariant does the monotonic deque maintain at all times?",
+            "How does this differ from simply using a sorted structure like a TreeMap?"
+        ],
+        "code": {
+            "javascript": "function maxSlidingWindow(nums, k) {\n  const deque = []; // Stores indices, values decreasing\n  const result = [];\n  for (let i = 0; i < nums.length; i++) {\n    // Remove elements outside window\n    while (deque.length && deque[0] <= i - k) deque.shift();\n    // Remove smaller elements from back\n    while (deque.length && nums[deque[deque.length-1]] < nums[i]) deque.pop();\n    deque.push(i);\n    if (i >= k - 1) result.push(nums[deque[0]]);\n  }\n  return result;\n}",
+            "python": "from collections import deque\ndef max_sliding_window(nums, k):\n    dq = deque()  # Stores indices, decreasing values\n    result = []\n    for i, n in enumerate(nums):\n        # Remove out-of-window indices\n        while dq and dq[0] <= i - k:\n            dq.popleft()\n        # Remove smaller elements from back\n        while dq and nums[dq[-1]] < n:\n            dq.pop()\n        dq.append(i)\n        if i >= k - 1:\n            result.append(nums[dq[0]])\n    return result",
+            "cpp": "#include <deque>\nvector<int> maxSlidingWindow(vector<int>& nums, int k) {\n    deque<int> dq;\n    vector<int> res;\n    for (int i=0; i<(int)nums.size(); i++) {\n        while (!dq.empty() && dq.front() <= i-k) dq.pop_front();\n        while (!dq.empty() && nums[dq.back()] < nums[i]) dq.pop_back();\n        dq.push_back(i);\n        if (i >= k-1) res.push_back(nums[dq.front()]);\n    }\n    return res;\n}",
+            "java": "public int[] maxSlidingWindow(int[] nums, int k) {\n    Deque<Integer> dq = new ArrayDeque<>();\n    int[] res = new int[nums.length - k + 1];\n    for (int i=0; i<nums.length; i++) {\n        while (!dq.isEmpty() && dq.peekFirst() <= i-k) dq.pollFirst();\n        while (!dq.isEmpty() && nums[dq.peekLast()] < nums[i]) dq.pollLast();\n        dq.offerLast(i);\n        if (i >= k-1) res[i-k+1] = nums[dq.peekFirst()];\n    }\n    return res;\n}"
+        },
+        "practice": {
+            "theory": [
+                "What invariant does the monotonic deque maintain at every step?",
+                "Why is each element added and removed from the deque at most once?",
+                "How would you adapt this for sliding window minimum?"
+            ],
+            "coding": "Sliding Window Maximum (LeetCode 239): Given an array and window size k, find the maximum of each window.",
+            "interview": "Explain how a monotonic deque achieves O(n) for sliding window max while a sorted structure would give O(n log k). Walk through an example."
+        }
+    },
+    {
+        "id": "pattern-dp",
+        "name": "DP Pattern Recognition",
+        "category": "patterns",
+        "complexity": { "time": "O(n²) or O(n·m) typical", "space": "O(n) to O(n·m)" },
+        "description": "A systematic framework for identifying dynamic programming problems by recognizing overlapping subproblems and optimal substructure, then choosing between memoization (top-down) and tabulation (bottom-up).",
+        "beginnerExplanation": "DP applies when: (1) the problem asks for an optimal value (min, max, count) or asks 'is it possible?', (2) decisions at each step affect future choices, and (3) smaller subproblems repeat. Recognition signals: 'minimum number of...', 'number of ways to...', 'maximum profit...'. Once recognized, define state (what uniquely describes a subproblem), write recurrence, and choose memoization or tabulation.",
+        "mentalModel": "DP is about recognizing that you're solving the same sub-question multiple times. If you could write it as recursion, but the recursion tree has repeated nodes — that's DP. Cache the answers to avoid recomputation.",
+        "learningObjectives": [
+            "Identify DP: overlapping subproblems + optimal substructure",
+            "Define the DP state: what parameters uniquely represent a subproblem",
+            "Write the recurrence relation (transition function)",
+            "Choose memoization (top-down) vs tabulation (bottom-up) and space optimization"
+        ],
+        "workedExample": {
+            "title": "Recognize DP in Climbing Stairs",
+            "body": "Problem: n stairs, 1 or 2 steps each time. How many ways? Signal: 'how many ways' → DP. State: f(n) = ways to reach step n. Recurrence: f(n) = f(n-1) + f(n-2) (last step was 1 or 2). Base: f(1)=1, f(2)=2. Optimal substructure: ways to n depends only on n-1 and n-2. Overlapping: f(5) needs f(4) and f(3), f(4) also needs f(3)→reuse!"
+        },
+        "visualWalkthrough": [
+            "Step 1: Spot the DP signal — 'number of ways', 'minimum cost', 'maximum value'",
+            "Step 2: Define state — what variables uniquely identify a subproblem",
+            "Step 3: Write recurrence — how does f(n) relate to smaller subproblems?",
+            "Step 4: Identify base cases — simplest inputs with known answers",
+            "Step 5: Implement — memoization (top-down) or tabulation (bottom-up)"
+        ],
+        "complexityReasoning": { "body": "State space × time per state. For 1D DP with n states and O(1) per state: O(n). For 2D with n×m states: O(n×m). Space: O(n) or O(n×m), often reducible with rolling array." },
+        "edgeCases": [
+            "Empty input or n=0: define carefully (often 1 for counting, 0 for optimization)",
+            "All elements same: avoid n×n state space when possible",
+            "Large n: check if O(n) state space is feasible before coding O(n²)"
+        ],
+        "revisionPrompts": [
+            "What two properties must a problem have for DP to apply?",
+            "How do you identify the DP 'state'? Give an example with Knapsack.",
+            "When do you use memoization vs tabulation and what are the trade-offs?"
+        ],
+        "code": {
+            "javascript": "// DP Pattern: 1D tabulation (Fibonacci/Climbing Stairs)\nfunction climbStairs(n) {\n  if (n <= 2) return n;\n  let prev2 = 1, prev1 = 2;\n  for (let i = 3; i <= n; i++) {\n    [prev2, prev1] = [prev1, prev2 + prev1];\n  }\n  return prev1;\n}\n// DP Pattern: 2D tabulation (Longest Common Subsequence)\nfunction lcs(s1, s2) {\n  const m = s1.length, n = s2.length;\n  const dp = Array.from({length: m+1}, () => new Array(n+1).fill(0));\n  for (let i = 1; i <= m; i++)\n    for (let j = 1; j <= n; j++)\n      dp[i][j] = s1[i-1] === s2[j-1] ? dp[i-1][j-1]+1 : Math.max(dp[i-1][j], dp[i][j-1]);\n  return dp[m][n];\n}",
+            "python": "# Memoization (top-down)\nfrom functools import lru_cache\ndef climb_stairs(n):\n    @lru_cache(None)\n    def dp(i):\n        if i <= 1: return 1\n        return dp(i-1) + dp(i-2)\n    return dp(n)\n\n# Tabulation (bottom-up)\ndef climb_stairs_tab(n):\n    if n <= 2: return n\n    prev2, prev1 = 1, 2\n    for _ in range(3, n+1):\n        prev2, prev1 = prev1, prev1 + prev2\n    return prev1",
+            "cpp": "// Tabulation with space optimization\nint climbStairs(int n) {\n    if (n <= 2) return n;\n    int prev2 = 1, prev1 = 2;\n    for (int i = 3; i <= n; i++) {\n        int curr = prev1 + prev2;\n        prev2 = prev1;\n        prev1 = curr;\n    }\n    return prev1;\n}",
+            "java": "public int climbStairs(int n) {\n    if (n <= 2) return n;\n    int prev2 = 1, prev1 = 2;\n    for (int i = 3; i <= n; i++) {\n        int curr = prev1 + prev2;\n        prev2 = prev1;\n        prev1 = curr;\n    }\n    return prev1;\n}"
+        },
+        "practice": {
+            "theory": [
+                "What are the two necessary conditions for a problem to be solvable by DP?",
+                "Compare memoization and tabulation — when is each preferred?",
+                "How do you reduce a 2D DP table to O(n) space?"
+            ],
+            "coding": "Coin Change (LeetCode 322): Find the minimum number of coins to make amount n from coins of given denominations.",
+            "interview": "Walk through how you recognize DP in a problem, define the state, write the recurrence, and choose an implementation approach. Use 0/1 Knapsack as the example."
+        }
+    },
+    {
+        "id": "pattern-backtracking",
+        "name": "Backtracking Pattern",
+        "category": "patterns",
+        "complexity": { "time": "O(b^d) worst case", "space": "O(d)" },
+        "description": "Systematically explore all possible solutions by building candidates incrementally and abandoning (backtracking) as soon as a candidate cannot lead to a valid solution.",
+        "beginnerExplanation": "Backtracking is recursion with pruning. At each step, you try all available choices. After making a choice, recurse. If the recursion fails (constraint violated), undo the choice and try the next option. The key insight: backtrack as early as possible to avoid exploring dead-end paths. Template: choose → explore → unchoose.",
+        "mentalModel": "Solving a maze: at each junction, try left. If you hit a dead end, come back and try right. If all options from this junction are dead ends, backtrack to the previous junction. You systematically eliminate all dead ends until you find the exit (or exhaust all paths).",
+        "learningObjectives": [
+            "Understand the choose-explore-unchoose template",
+            "Recognize backtracking problems: permutations, combinations, subsets, N-queens, Sudoku",
+            "Identify pruning conditions to early-terminate dead branches",
+            "Distinguish backtracking from exhaustive brute force (backtracking prunes)"
+        ],
+        "workedExample": {
+            "title": "Generate all subsets of [1,2,3]",
+            "body": "Start: []. Choice at each step: include or skip current element. Path: []→include 1→[1]→include 2→[1,2]→include 3→[1,2,3]✓. Backtrack→skip 3→[1,2]✓. Backtrack→skip 2→[1]→include 3→[1,3]✓. Backtrack→skip 3→[1]✓. Backtrack→skip 1→include 2→[2]...etc. 8 subsets total=2^3."
+        },
+        "visualWalkthrough": [
+            "Decision tree: at each index i, choose to include nums[i] or skip",
+            "Base case: when i reaches end → add current subset to results",
+            "Each leaf of decision tree is a valid subset",
+            "No pruning needed for subsets (all leaves are valid)",
+            "For N-Queens or Sudoku: add validity check before recursing (pruning!)"
+        ],
+        "complexityReasoning": { "body": "Without pruning: b^d where b=branching factor, d=depth. With pruning, much better in practice. Space O(d) for recursion stack (path length). Result space varies: O(2^n) for subsets, O(n!) for permutations." },
+        "edgeCases": [
+            "Empty input: single result — the empty set/path",
+            "Duplicates in input: sort first and skip duplicate choices to avoid duplicate results",
+            "Constraints too tight: all branches pruned, return []"
+        ],
+        "revisionPrompts": [
+            "What is the choose-explore-unchoose pattern in backtracking?",
+            "How do you avoid duplicate results when input has duplicate elements?",
+            "How does backtracking differ from brute force? What makes it more efficient?"
+        ],
+        "code": {
+            "javascript": "// Subsets (Power Set)\nfunction subsets(nums) {\n  const result = [];\n  function backtrack(start, current) {\n    result.push([...current]); // Add current subset\n    for (let i = start; i < nums.length; i++) {\n      current.push(nums[i]);   // Choose\n      backtrack(i + 1, current); // Explore\n      current.pop();           // Unchoose\n    }\n  }\n  backtrack(0, []);\n  return result;\n}\n// Permutations\nfunction permutations(nums) {\n  const result = [];\n  function backtrack(current, remaining) {\n    if (!remaining.length) { result.push([...current]); return; }\n    for (let i = 0; i < remaining.length; i++) {\n      current.push(remaining[i]);\n      backtrack(current, [...remaining.slice(0,i), ...remaining.slice(i+1)]);\n      current.pop();\n    }\n  }\n  backtrack([], nums);\n  return result;\n}",
+            "python": "def subsets(nums):\n    result = []\n    def backtrack(start, current):\n        result.append(current[:])\n        for i in range(start, len(nums)):\n            current.append(nums[i])  # Choose\n            backtrack(i+1, current)  # Explore\n            current.pop()            # Unchoose\n    backtrack(0, [])\n    return result\n\ndef permutations(nums):\n    result = []\n    def backtrack(current, remaining):\n        if not remaining:\n            result.append(current[:])\n            return\n        for i, n in enumerate(remaining):\n            current.append(n)\n            backtrack(current, remaining[:i]+remaining[i+1:])\n            current.pop()\n    backtrack([], nums)\n    return result",
+            "cpp": "void backtrack(vector<int>& nums, int start, vector<int>& cur, vector<vector<int>>& res){\n    res.push_back(cur);\n    for(int i=start;i<(int)nums.size();i++){\n        cur.push_back(nums[i]);\n        backtrack(nums,i+1,cur,res);\n        cur.pop_back();\n    }\n}\nvector<vector<int>> subsets(vector<int>& nums){\n    vector<vector<int>> res;\n    vector<int> cur;\n    backtrack(nums,0,cur,res);\n    return res;\n}",
+            "java": "public List<List<Integer>> subsets(int[] nums) {\n    List<List<Integer>> res = new ArrayList<>();\n    backtrack(nums, 0, new ArrayList<>(), res);\n    return res;\n}\nvoid backtrack(int[] nums, int start, List<Integer> cur, List<List<Integer>> res){\n    res.add(new ArrayList<>(cur));\n    for(int i=start;i<nums.length;i++){\n        cur.add(nums[i]);\n        backtrack(nums,i+1,cur,res);\n        cur.remove(cur.size()-1);\n    }\n}"
+        },
+        "practice": {
+            "theory": [
+                "Describe the three steps of the backtracking template: choose, explore, unchoose.",
+                "How would you modify subset generation to avoid duplicates if the input has repeated numbers?",
+                "Compare backtracking to DP: when would you use each approach?"
+            ],
+            "coding": "N-Queens Problem: Place n queens on an n×n board so no two attack each other. Return all valid configurations.",
+            "interview": "Walk through solving the Word Search problem (LeetCode 79) using backtracking. Explain how you detect dead ends early."
+        }
+    },
+    {
+        "id": "brute-force-thinking",
+        "name": "Brute Force First",
+        "category": "interview-prep",
+        "complexity": { "time": "O(n²) to O(2^n) typical", "space": "O(n) typical" },
+        "description": "Start every interview problem by stating the brute force solution. This demonstrates correctness, establishes a baseline, and gives a starting point for optimization.",
+        "beginnerExplanation": "Interviewers want to see your thought process. Starting with brute force shows you understand the problem before optimizing. State it clearly: 'A brute force approach would be... with O(n²) time. Can we do better?' This builds credibility and often reveals the structure needed to optimize. Never jump straight to the optimal solution — always justify why you're optimizing away from brute force.",
+        "mentalModel": "Brute force is the 'naive translation' of the problem statement into code. If the problem says 'find two numbers that sum to target', brute force literally checks every pair. It's never wrong — just slow. Optimization is finding patterns in the brute force that let you skip redundant work.",
+        "learningObjectives": [
+            "Always state the brute force approach and its complexity before optimizing",
+            "Identify why brute force is slow (what redundant work it does)",
+            "Use brute force as a correctness validator for your optimized solution",
+            "Communicate the trade-off: 'brute force is O(n²), but we can do O(n log n) by...'"
+        ],
+        "workedExample": {
+            "title": "Two Sum: Brute Force to Optimized",
+            "body": "Problem: Find two indices with arr[i]+arr[j]=target. Brute force: two nested loops, O(n²). 'For every pair (i,j), check if they sum to target.' Insight: for each arr[i], we need target-arr[i]. Can we find that faster than O(n)? Use a HashMap! Store seen values, O(1) lookup → O(n) solution."
+        },
+        "visualWalkthrough": [
+            "Read problem → immediately think of the simplest, most obvious solution",
+            "State it: 'Brute force: try every pair → O(n²)'",
+            "Identify redundancy: 'We're re-searching for the complement every time'",
+            "Ask: 'Can we precompute or cache something to avoid re-searching?'",
+            "Optimize: 'Use a HashSet/Map for O(1) lookups → O(n) total'"
+        ],
+        "complexityReasoning": { "body": "Brute force is typically O(n²), O(n!), or O(2^n) depending on problem type. Always state this explicitly before optimizing." },
+        "edgeCases": ["Empty input: brute force should handle naturally", "n=1: trivially handled by brute force", "All same elements: verify brute force handles correctly before optimizing"],
+        "revisionPrompts": [
+            "Why should you always state the brute force before the optimal solution in an interview?",
+            "How does identifying the redundant work in brute force guide optimization?",
+            "Name a problem where the brute force is O(2^n) but DP brings it to O(n²)."
+        ],
+        "code": {
+            "javascript": "// Two Sum: Brute Force O(n²)\nfunction twoSumBrute(nums, target) {\n  for (let i = 0; i < nums.length; i++)\n    for (let j = i + 1; j < nums.length; j++)\n      if (nums[i] + nums[j] === target) return [i, j];\n  return [];\n}\n// Optimized O(n) with HashMap\nfunction twoSumOptimal(nums, target) {\n  const seen = new Map();\n  for (let i = 0; i < nums.length; i++) {\n    const complement = target - nums[i];\n    if (seen.has(complement)) return [seen.get(complement), i];\n    seen.set(nums[i], i);\n  }\n  return [];\n}",
+            "python": "# Brute force then optimize pattern\ndef two_sum_brute(nums, target):\n    for i in range(len(nums)):\n        for j in range(i+1, len(nums)):\n            if nums[i] + nums[j] == target:\n                return [i, j]\n    return []\n\ndef two_sum_optimal(nums, target):\n    seen = {}\n    for i, n in enumerate(nums):\n        complement = target - n\n        if complement in seen:\n            return [seen[complement], i]\n        seen[n] = i\n    return []",
+            "cpp": "// Brute O(n²) → Optimal O(n)\nvector<int> twoSumBrute(vector<int>& nums, int target) {\n    for(int i=0;i<(int)nums.size();i++)\n        for(int j=i+1;j<(int)nums.size();j++)\n            if(nums[i]+nums[j]==target) return {i,j};\n    return {};\n}\nvector<int> twoSumOptimal(vector<int>& nums, int target) {\n    unordered_map<int,int> seen;\n    for(int i=0;i<(int)nums.size();i++){\n        int comp=target-nums[i];\n        if(seen.count(comp)) return {seen[comp],i};\n        seen[nums[i]]=i;\n    }\n    return {};\n}",
+            "java": "// Brute O(n²) → Optimal O(n)\npublic int[] twoSumBrute(int[] nums, int target){\n    for(int i=0;i<nums.length;i++)\n        for(int j=i+1;j<nums.length;j++)\n            if(nums[i]+nums[j]==target) return new int[]{i,j};\n    return new int[]{};\n}\npublic int[] twoSumOptimal(int[] nums, int target){\n    Map<Integer,Integer> seen=new HashMap<>();\n    for(int i=0;i<nums.length;i++){\n        int comp=target-nums[i];\n        if(seen.containsKey(comp)) return new int[]{seen.get(comp),i};\n        seen.put(nums[i],i);\n    }\n    return new int[]{};\n}"
+        },
+        "practice": {
+            "theory": [
+                "Why is it important to state the brute force before the optimal solution in interviews?",
+                "How does identifying what brute force repeats guide you toward the optimal data structure?",
+                "Give an example where the brute force O(n³) can be reduced to O(n²) by precomputing something."
+            ],
+            "coding": "Three Sum: Find all unique triplets that sum to 0. State brute force O(n³), then optimize to O(n²).",
+            "interview": "You are given a problem you've never seen. Walk through your problem-solving process from brute force to optimal solution, explaining each optimization step."
+        }
+    },
+    {
+        "id": "pattern-recognition",
+        "name": "Pattern Recognition",
+        "category": "interview-prep",
+        "complexity": { "time": "O(1) — recognition step", "space": "O(1) — recognition step" },
+        "description": "Train your ability to quickly classify new interview problems into known patterns (sliding window, two pointers, DFS, DP, heap, etc.) by recognizing key signals in the problem statement.",
+        "beginnerExplanation": "Most interview problems map to one of ~15 core patterns. If you can recognize which pattern applies in 30 seconds, you immediately know the approach, data structure, and complexity. Pattern signals: 'subarray/substring' → sliding window; 'sorted array + pairs' → two pointers; 'shortest path unweighted' → BFS; 'all possibilities' → backtracking; 'optimal value with decisions' → DP.",
+        "mentalModel": "Think of interview problems like medical symptoms. A doctor who has seen 10,000 patients can diagnose most conditions in seconds by recognizing symptom patterns. Pattern recognition in algorithms works the same way — experience with enough problems lets you instantly classify new ones.",
+        "learningObjectives": [
+            "Memorize the 15 core patterns and their trigger signals",
+            "Practice 'pattern tagging': for each problem, identify the pattern before coding",
+            "Learn to combine patterns (e.g., BFS + heap for Dijkstra, DP + backtracking)",
+            "Build a mental decision tree: start with input type (array/graph/tree/string)"
+        ],
+        "workedExample": {
+            "title": "Pattern Classification Exercise",
+            "body": "'Find the length of the longest substring without repeating characters.' Signals: substring+no-repeat→sliding window. 'Given a binary tree, return all root-to-leaf paths.' Signals: tree+all paths→DFS/backtracking. 'Minimum cost to reach last cell of grid.' Signals: grid+minimum cost→DP or Dijkstra. 'K closest points to origin.' Signals: top-k→heap."
+        },
+        "visualWalkthrough": [
+            "Step 1: Read problem → identify input type (array, string, tree, graph, grid)",
+            "Step 2: Identify the goal (max/min, count, exists, all solutions)",
+            "Step 3: Match to pattern using trigger words",
+            "Step 4: Verify with a small example before coding",
+            "Step 5: State pattern → approach → complexity to interviewer"
+        ],
+        "complexityReasoning": { "body": "Pattern recognition itself is O(1). The resulting algorithm's complexity depends on the pattern applied." },
+        "edgeCases": ["Multiple patterns may apply — choose the simplest one", "Some problems combine patterns (BFS + heap)", "Novel problems: build from brute force if no pattern fits"],
+        "revisionPrompts": [
+            "What are the trigger keywords for sliding window vs two-pointer?",
+            "How do you decide between DP and backtracking for a problem asking for all solutions?",
+            "Name the pattern for: 'find all paths from source to destination in a graph'."
+        ],
+        "code": {
+            "javascript": "// Pattern Signal Reference (not runnable — conceptual mapping)\nconst patternSignals = {\n  'sliding window': ['substring', 'subarray', 'window', 'consecutive', 'longest/shortest with constraint'],\n  'two pointers':   ['sorted array', 'pairs summing to', 'palindrome check', 'container with most water'],\n  'fast slow':      ['cycle detection', 'middle of linked list', 'happy number'],\n  'merge intervals': ['overlapping intervals', 'meeting rooms', 'insert interval'],\n  'cyclic sort':    ['missing number', 'duplicate in [1,n]', 'first missing positive'],\n  'bfs':            ['shortest path', 'level order', 'minimum steps', 'unweighted graph'],\n  'dfs/backtrack':  ['all combinations', 'all paths', 'permutations', 'N-Queens'],\n  'binary search':  ['sorted array', 'search in rotated', 'find first/last occurrence'],\n  'heap top-k':     ['k largest', 'k most frequent', 'k closest', 'running median'],\n  'dp':             ['minimum/maximum', 'number of ways', 'longest subsequence', 'optimal substructure'],\n  'trie':           ['prefix matching', 'autocomplete', 'word search II'],\n  'union find':     ['connected components', 'cycle in undirected graph', 'number of islands']\n};",
+            "python": "# Pattern recognition guide\npattern_signals = {\n    'sliding_window': ['substring', 'subarray', 'window', 'longest without repeating'],\n    'two_pointers': ['sorted', 'pairs', 'palindrome', 'remove duplicates'],\n    'fast_slow': ['cycle', 'middle node', 'linked list loop'],\n    'bfs': ['shortest path', 'level order', 'minimum hops'],\n    'dfs_backtrack': ['all combinations', 'all paths', 'N-queens', 'subsets'],\n    'dp': ['maximum profit', 'minimum cost', 'number of ways', 'longest subsequence'],\n    'heap': ['top k', 'k most frequent', 'k closest', 'running median'],\n    'binary_search': ['sorted array', 'search condition', 'find boundary'],\n    'trie': ['prefix', 'autocomplete', 'word search'],\n    'union_find': ['components', 'cycle detection', 'connected']\n}",
+            "cpp": "// Pattern to algorithm mapping\nmap<string,string> patternToAlgo = {\n    {\"sliding_window\", \"Use two pointers l,r. Expand r, shrink l when constraint violated.\"},\n    {\"two_pointer\", \"Sort array, use left=0,right=n-1, move based on sum comparison.\"},\n    {\"bfs\", \"Queue, level-by-level traversal, mark visited.\"},\n    {\"dfs_backtrack\", \"Recursive, choose/explore/unchoose, prune early.\"},\n    {\"dp\", \"Define state, write recurrence, implement bottom-up or memoize.\"},\n    {\"heap_top_k\", \"PriorityQueue size k, pop min when over k.\"}\n};",
+            "java": "// Interview pattern decision tree\n// Q1: What is the input structure?\n//   Array/String → Q2\n//   Tree → DFS/BFS/DP on tree\n//   Graph → BFS/DFS/Dijkstra/Union-Find\n// Q2: What does the problem ask for?\n//   Optimal value + choices → DP\n//   All solutions → Backtracking\n//   Subarray/substring → Sliding Window / Two Pointer\n//   Top-K → Heap\n//   Shortest path unweighted → BFS\n//   Shortest path weighted → Dijkstra\n//   Connectivity → Union-Find"
+        },
+        "practice": {
+            "theory": [
+                "What are the trigger keywords for identifying a Sliding Window problem?",
+                "How do you distinguish between a DP problem and a Backtracking problem?",
+                "Name the pattern for: 'Given intervals, find the minimum number of conference rooms required.'"
+            ],
+            "coding": "For each of these problems, state the pattern before writing code: (1) Longest Substring Without Repeating Characters, (2) Course Schedule, (3) Maximum Profit in Stock Trading.",
+            "interview": "In 60 seconds, classify these problems into patterns: Two Sum, N-Queens, Merge K Sorted Lists, Longest Palindromic Substring, Clone Graph."
+        }
+    },
+    {
+        "id": "optimization-strategies",
+        "name": "Optimization Strategies",
+        "category": "interview-prep",
+        "complexity": { "time": "varies", "space": "varies" },
+        "description": "A systematic toolkit of techniques for improving time and space complexity: precomputation, sorting, hashing, two pointers, divide and conquer, and more.",
+        "beginnerExplanation": "After stating brute force, interviewers expect you to optimize. Common strategies: (1) Precompute repeated work (prefix sums, hash maps). (2) Sort to enable binary search or two pointers. (3) Shrink state space with DP. (4) Use monotonic structures (stack/queue) for O(n) window queries. (5) Avoid inner loops by finding the mathematical relationship. Each strategy targets a specific type of redundancy.",
+        "mentalModel": "Optimization is about identifying what the brute force computes repeatedly and finding a way to compute it once. Ask: 'What does the inner loop do that I could pre-calculate?' or 'Is there an order to process elements that makes later checks trivial?'",
+        "learningObjectives": [
+            "Recognize precomputation opportunities (prefix sums, frequency maps, sorted order)",
+            "Understand how sorting changes the search problem",
+            "Apply two pointers after sorting to avoid O(n²) pair enumeration",
+            "Use monotonic stack/queue for O(n) 'next greater/smaller' problems"
+        ],
+        "workedExample": {
+            "title": "Optimize Subarray Sum = K",
+            "body": "Brute O(n²): try every subarray. Optimization: prefix sum + hash map. Store prefix sum frequencies. For each index r, we want prefix[r]-prefix[l]=K → prefix[l]=prefix[r]-K. Look up prefix[r]-K in hash map: O(1)! Total: O(n). The inner loop (finding prefix[l]) is replaced by a hash map lookup."
+        },
+        "visualWalkthrough": [
+            "Brute force: two nested loops checking all subarrays → O(n²)",
+            "Insight: subarray sum = prefix[r] - prefix[l]. We want this = K",
+            "So: we need prefix[l] = prefix[r] - K",
+            "Precompute: maintain HashMap of prefix sum frequencies",
+            "Result: single pass, O(n) time, O(n) space"
+        ],
+        "complexityReasoning": { "body": "Optimization strategies typically improve O(n²) → O(n log n) (via sorting) or O(n²) → O(n) (via hashing/precomputation). Space often trades from O(1) to O(n)." },
+        "edgeCases": ["Negative numbers: prefix sum approach still works for sum=K", "Sorting destroys index info: save indices before sorting", "Hash collisions: use size-aware moduli or known good hash functions"],
+        "revisionPrompts": [
+            "Name three categories of optimizations and which problem types they apply to.",
+            "When does sorting enable a two-pointer approach that eliminates one loop?",
+            "How does precomputing prefix sums turn O(n²) range sum into O(1)?"
+        ],
+        "code": {
+            "javascript": "// Strategy 1: Precompute with hash map\n// Subarray sum equals K\nfunction subarraySum(nums, k) {\n  const prefixFreq = new Map([[0, 1]]);\n  let prefix = 0, count = 0;\n  for (const n of nums) {\n    prefix += n;\n    count += (prefixFreq.get(prefix - k) || 0);\n    prefixFreq.set(prefix, (prefixFreq.get(prefix) || 0) + 1);\n  }\n  return count;\n}\n// Strategy 2: Sort then two pointers\nfunction twoSumSorted(nums, target) {\n  nums.sort((a,b) => a-b);\n  let lo = 0, hi = nums.length - 1;\n  while (lo < hi) {\n    const sum = nums[lo] + nums[hi];\n    if (sum === target) return [lo, hi];\n    sum < target ? lo++ : hi--;\n  }\n  return [];\n}",
+            "python": "# Strategy 1: Precompute (prefix sums + hash map)\nfrom collections import defaultdict\ndef subarray_sum(nums, k):\n    prefix_freq = defaultdict(int)\n    prefix_freq[0] = 1\n    prefix = count = 0\n    for n in nums:\n        prefix += n\n        count += prefix_freq[prefix - k]\n        prefix_freq[prefix] += 1\n    return count\n\n# Strategy 2: Sort + two pointers\ndef two_sum_sorted(nums, target):\n    nums.sort()\n    lo, hi = 0, len(nums)-1\n    while lo < hi:\n        s = nums[lo] + nums[hi]\n        if s == target: return [lo, hi]\n        elif s < target: lo += 1\n        else: hi -= 1\n    return []",
+            "cpp": "// Optimization strategies\nint subarraySum(vector<int>& nums, int k) {\n    unordered_map<int,int> freq{{0,1}};\n    int prefix=0, count=0;\n    for(int n: nums){\n        prefix+=n;\n        if(freq.count(prefix-k)) count+=freq[prefix-k];\n        freq[prefix]++;\n    }\n    return count;\n}",
+            "java": "public int subarraySum(int[] nums, int k) {\n    Map<Integer,Integer> freq = new HashMap<>();\n    freq.put(0,1);\n    int prefix=0, count=0;\n    for(int n: nums){\n        prefix+=n;\n        count+=freq.getOrDefault(prefix-k,0);\n        freq.merge(prefix,1,Integer::sum);\n    }\n    return count;\n}"
+        },
+        "practice": {
+            "theory": [
+                "Name four optimization strategies and the types of problems they solve.",
+                "How does sorting enable O(n) two-pointer solutions for pair-finding problems?",
+                "When would you trade O(1) space for O(n) space to improve time complexity?"
+            ],
+            "coding": "Subarray Sum Equals K (LeetCode 560): Count subarrays with sum K. Start with O(n²) brute force then optimize to O(n).",
+            "interview": "Your brute force is O(n²). Walk through identifying the redundant computation and systematically deriving the O(n) solution using one of the optimization strategies."
+        }
+    },
+    {
+        "id": "dry-run-technique",
+        "name": "Dry Run Technique",
+        "category": "interview-prep",
+        "complexity": { "time": "O(n) to trace", "space": "O(1) — mental/paper" },
+        "description": "Manually trace your code on a small, carefully chosen test case before submitting or running. Catches logical errors, off-by-ones, and incorrect base cases.",
+        "beginnerExplanation": "A dry run is manual code execution. Write your variable values on paper (or whiteboard) and step through your code line by line, updating values as the code would. This catches: off-by-one errors (should it be < or <=?), wrong array indices, missed edge cases, and infinite loops. Choose a test case small enough to trace but non-trivial (n=3 or 4, not n=0 or n=1).",
+        "mentalModel": "You are the CPU. Go through your code instruction by instruction, computing exact values. Don't assume — verify. If you think 'the loop should stop at i=5', trace it: what is i after each iteration? Does it actually stop at 5 or 6?",
+        "learningObjectives": [
+            "Choose appropriate test cases: small, non-trivial, with an edge case",
+            "Trace variable values step-by-step — don't skip or assume",
+            "Identify off-by-one errors by checking boundary conditions explicitly",
+            "Verify the algorithm terminates and produces correct output before submitting"
+        ],
+        "workedExample": {
+            "title": "Dry run binary search on [1,3,5,7,9], target=7",
+            "body": "lo=0, hi=4. Step1: mid=(0+4)/2=2, arr[2]=5<7 → lo=3. Step2: mid=(3+4)/2=3, arr[3]=7==7 → return 3. Check: arr[3]=7 ✓. Also dry run edge: target=9: mid=2→lo=3, mid=3→lo=4, mid=(4+4)/2=4, arr[4]=9==9 → return 4 ✓. And target=6: mid=2→lo=3, mid=3→hi=2, lo>hi → return -1 ✓."
+        },
+        "visualWalkthrough": [
+            "Write out your test case input",
+            "Initialize all variables with their starting values",
+            "Execute each line of code manually, updating variables",
+            "Pay extra attention to loop conditions and termination",
+            "Verify the output against expected result"
+        ],
+        "complexityReasoning": { "body": "Dry run takes O(n) steps for an O(n) algorithm on a test case of size n. For interview, use n=3 to 5 to keep it quick but meaningful." },
+        "edgeCases": ["Test on n=0 (empty) and n=1 (single element) explicitly", "Test on a case that hits all branches of your if-else", "Test on sorted, reverse-sorted, and random order inputs for sorting problems"],
+        "revisionPrompts": [
+            "What is the purpose of a dry run and what types of bugs does it catch?",
+            "Why should your dry-run test case be small but non-trivial?",
+            "Name three types of bugs that dry runs commonly catch."
+        ],
+        "code": {
+            "javascript": "// Binary search — let's dry run this\nfunction binarySearch(arr, target) {\n  let lo = 0, hi = arr.length - 1;\n  while (lo <= hi) {         // Dry run: lo=0, hi=4\n    const mid = (lo + hi) >> 1; // mid=2\n    if (arr[mid] === target) return mid;\n    if (arr[mid] < target) lo = mid + 1; // 5<7: lo=3\n    else hi = mid - 1;       // Step2: mid=3, arr[3]=7==7 → return 3\n  }\n  return -1;\n}\n// Dry run trace for arr=[1,3,5,7,9], target=7:\n// Step1: lo=0,hi=4,mid=2,arr[2]=5<7 → lo=3\n// Step2: lo=3,hi=4,mid=3,arr[3]=7==7 → return 3 ✓",
+            "python": "def binary_search(arr, target):\n    lo, hi = 0, len(arr) - 1\n    # Dry run: arr=[1,3,5,7,9], target=7\n    # lo=0, hi=4\n    while lo <= hi:\n        mid = (lo + hi) // 2   # Step1: mid=2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target: # 5<7: lo=3\n            lo = mid + 1\n        else:\n            hi = mid - 1\n        # Step2: mid=3, arr[3]=7 → return 3 ✓\n    return -1",
+            "cpp": "int binarySearch(vector<int>& arr, int target) {\n    int lo=0, hi=arr.size()-1;\n    // Dry run on paper: initialize lo,hi, trace mid each iteration\n    while(lo<=hi){\n        int mid=lo+(hi-lo)/2; // Avoids overflow vs (lo+hi)/2\n        if(arr[mid]==target) return mid;\n        if(arr[mid]<target) lo=mid+1;\n        else hi=mid-1;\n    }\n    return -1;\n}",
+            "java": "public int binarySearch(int[] arr, int target) {\n    int lo = 0, hi = arr.length - 1;\n    // Always dry run with 1 found case + 1 not-found case\n    while (lo <= hi) {\n        int mid = lo + (hi - lo) / 2;\n        if (arr[mid] == target) return mid;\n        if (arr[mid] < target) lo = mid + 1;\n        else hi = mid - 1;\n    }\n    return -1;\n}"
+        },
+        "practice": {
+            "theory": [
+                "What kinds of bugs does a dry run catch that code review might miss?",
+                "How do you choose a good dry-run test case?",
+                "Why is it important to trace a 'not found' case as well as a 'found' case for binary search?"
+            ],
+            "coding": "Write a merge sort implementation, then dry-run it on [4,2,7,1] showing all recursive calls and merge steps.",
+            "interview": "You've written a two-pointer solution for 3Sum. Your interviewer asks you to trace through it with input [-1,0,1,2,-1,-4]. Walk through the dry run step by step."
+        }
+    },
+    {
+        "id": "edge-case-analysis",
+        "name": "Edge Cases",
+        "category": "interview-prep",
+        "complexity": { "time": "O(1) — analysis step", "space": "O(1) — analysis step" },
+        "description": "Systematically identify and handle boundary conditions that could cause incorrect results or runtime errors: empty inputs, single elements, duplicates, extremes, and overflow.",
+        "beginnerExplanation": "Edge cases are inputs that test the boundaries of your algorithm. They're common interview catches. For every problem, ask: What if input is empty? What if n=1? What if all elements are the same? What if values are at Integer.MAX_VALUE? What if the answer is 0? Handling edge cases shows maturity and production-readiness.",
+        "mentalModel": "Think of your algorithm as a bridge. Normal inputs are cars driving across. Edge cases are the stress tests: no cars (empty), a single bicycle (n=1), maximum weight (overflow), all cars in one lane (all same value). If the bridge handles all stress tests, it's safe.",
+        "learningObjectives": [
+            "Always test: empty input, single element, n=2, all same values, sorted/reverse-sorted input",
+            "Watch for integer overflow in Java/C++: use long or overflow-safe arithmetic",
+            "Handle null/None inputs explicitly in tree and linked list problems",
+            "Check divisibility and zero denominators in mathematical problems"
+        ],
+        "workedExample": {
+            "title": "Edge cases for Binary Search",
+            "body": "Normal: [1,3,5,7,9], target=5 → found at idx 2. Edge cases: (1) Empty []: lo=0>hi=-1 → return -1 immediately ✓. (2) Single [5], target=5: mid=0, arr[0]=5 → return 0 ✓. (3) All same [3,3,3], target=3: finds one (not all) — is that the required behavior? Clarify! (4) Target not in array: terminates with lo>hi → return -1 ✓."
+        },
+        "visualWalkthrough": [
+            "List systematic edge cases: empty, n=1, n=2, all same, sorted, reverse sorted",
+            "For each: trace your algorithm manually",
+            "Check: does it handle null inputs? (tree/linked list problems)",
+            "Check: can any operation overflow? (sum of large numbers, indices)",
+            "Check: does your loop terminate in all cases?"
+        ],
+        "complexityReasoning": { "body": "Edge case analysis is O(1) — it's a thinking exercise. But it prevents bugs that would fail O(n) or more of test cases in competitive programming or production." },
+        "edgeCases": ["This topic IS about edge cases — the irony!", "The edge case of 'no edge cases': trivial problems (sorting n=0 or n=1)"],
+        "revisionPrompts": [
+            "List 5 universal edge cases that apply to almost every array problem.",
+            "How do you check for integer overflow in Java/C++?",
+            "What edge cases are specific to tree problems vs array problems?"
+        ],
+        "code": {
+            "javascript": "// Edge case checklist in code\nfunction robustDivide(a, b) {\n  if (b === 0) throw new Error('Division by zero');\n  return a / b;\n}\nfunction robustBinarySearch(arr, target) {\n  if (!arr || arr.length === 0) return -1; // Empty input\n  if (arr.length === 1) return arr[0] === target ? 0 : -1; // Single element\n  let lo = 0, hi = arr.length - 1;\n  while (lo <= hi) {\n    const mid = lo + ((hi - lo) >> 1); // Overflow-safe\n    if (arr[mid] === target) return mid;\n    arr[mid] < target ? lo = mid + 1 : hi = mid - 1;\n  }\n  return -1;\n}",
+            "python": "# Common edge cases to check\ndef robust_search(arr, target):\n    # Edge case: empty\n    if not arr: return -1\n    # Edge case: single element  \n    if len(arr) == 1: return 0 if arr[0] == target else -1\n    # Main logic\n    lo, hi = 0, len(arr) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2  # No overflow in Python\n        if arr[mid] == target: return mid\n        elif arr[mid] < target: lo = mid + 1\n        else: hi = mid - 1\n    return -1\n\n# Tree edge case\ndef tree_height(root):\n    if root is None: return 0  # Empty tree\n    return 1 + max(tree_height(root.left), tree_height(root.right))",
+            "cpp": "int binarySearch(vector<int>& arr, int target) {\n    if (arr.empty()) return -1; // Edge: empty\n    int lo=0, hi=(int)arr.size()-1;\n    while(lo<=hi){\n        int mid = lo + (hi-lo)/2; // Overflow-safe!\n        if(arr[mid]==target) return mid;\n        if(arr[mid]<target) lo=mid+1;\n        else hi=mid-1;\n    }\n    return -1;\n}",
+            "java": "public int binarySearch(int[] arr, int target) {\n    if (arr == null || arr.length == 0) return -1; // Null + empty\n    int lo = 0, hi = arr.length - 1;\n    while (lo <= hi) {\n        int mid = lo + (hi - lo) / 2; // Overflow-safe (not (lo+hi)/2!)\n        if (arr[mid] == target) return mid;\n        if (arr[mid] < target) lo = mid + 1;\n        else hi = mid - 1;\n    }\n    return -1;\n}"
+        },
+        "practice": {
+            "theory": [
+                "List 5 universal edge cases for array-based interview problems.",
+                "Why is mid = lo + (hi-lo)/2 safer than mid = (lo+hi)/2 in Java/C++?",
+                "What edge cases are most common in tree problems?"
+            ],
+            "coding": "Write a function to find the maximum sum subarray. List all edge cases you'd test and verify your solution handles each.",
+            "interview": "After presenting your solution, your interviewer says 'What about edge cases?' Walk through your systematic edge case checklist for this problem."
+        }
+    },
+    {
+        "id": "interview-complexity-analysis",
+        "name": "Complexity Analysis in Interviews",
+        "category": "interview-prep",
+        "complexity": { "time": "O(1) — analysis step", "space": "O(1) — analysis step" },
+        "description": "Accurately analyze and clearly communicate time and space complexity during interviews, including deriving it live from your solution and explaining the reasoning.",
+        "beginnerExplanation": "Stating complexity is not enough — you must derive it and explain it. 'It's O(n log n) because the sort dominates.' 'Each element is pushed to and popped from the stack once, so it's O(n).' 'The recursion depth is O(log n) and we do O(n) work per level, so O(n log n) total.' Show the work, not just the answer.",
+        "mentalModel": "Complexity analysis is like measuring ingredients in cooking. You don't just say 'add some flour' — you measure precisely. Saying 'it's fast' isn't enough; saying 'it's O(n log n) because we sort once and scan once' is precise and shows understanding.",
+        "learningObjectives": [
+            "Derive time complexity by counting loop iterations, recursion depth, and work per call",
+            "Identify the dominant term after addition/multiplication of complexities",
+            "Derive space complexity including recursion stack depth",
+            "Apply Master Theorem for divide-and-conquer recurrences"
+        ],
+        "workedExample": {
+            "title": "Analyze merge sort complexity",
+            "body": "T(n) = 2T(n/2) + O(n). By Master Theorem (a=2, b=2, f(n)=n): log_2(2)=1, n^1=n=f(n) → Case 2 → O(n log n). Alternatively: log_2(n) levels, O(n) merge per level → O(n log n). Space: O(n) for temporary arrays + O(log n) recursion stack = O(n)."
+        },
+        "visualWalkthrough": [
+            "Step 1: Identify the loop structure or recursion pattern",
+            "Step 2: Count operations per 'unit' (per element, per level, per call)",
+            "Step 3: Multiply: (number of units) × (operations per unit)",
+            "Step 4: Drop constants and lower-order terms",
+            "Step 5: State both time AND space complexity with justification"
+        ],
+        "complexityReasoning": { "body": "Always analyze: (1) Time = ∑ operations across all iterations/calls. (2) Space = max memory alive at any point (usually: data structures + recursion stack depth)." },
+        "edgeCases": ["Amortized analysis: dynamic array resize is O(1) amortized", "Worst vs average: QuickSort O(n²) worst but O(n log n) average", "Auxiliary space vs total space"],
+        "revisionPrompts": [
+            "How do you derive space complexity for a recursive function?",
+            "What is amortized complexity and when does it differ from worst-case?",
+            "Using Master Theorem, what is T(n) = 4T(n/2) + O(n)?"
+        ],
+        "code": {
+            "javascript": "// Complexity analysis examples with explanations\n// O(n log n): nested but halving\nfunction mergeSort(arr) {\n  // Recursion depth: log n levels\n  // Each level: O(n) total work across all merge calls\n  // Total: O(n log n)\n  if (arr.length <= 1) return arr;\n  const mid = arr.length >> 1;\n  const left = mergeSort(arr.slice(0, mid));\n  const right = mergeSort(arr.slice(mid));\n  return merge(left, right); // O(n) merge\n}\n// O(n) single pass with O(1) space\nfunction maxSubarray(arr) {\n  // One loop: O(n) iterations, O(1) each → O(n)\n  // Space: O(1) — just 2 variables\n  let maxSoFar = arr[0], maxEndingHere = arr[0];\n  for (let i = 1; i < arr.length; i++) {\n    maxEndingHere = Math.max(arr[i], maxEndingHere + arr[i]);\n    maxSoFar = Math.max(maxSoFar, maxEndingHere);\n  }\n  return maxSoFar;\n}",
+            "python": "# Template for complexity analysis\n# Time: count iterations × work per iteration\n# Space: count max memory live at any point\n\ndef merge_sort(arr):\n    # Time: O(n log n) — log n levels, O(n) per level\n    # Space: O(n) auxiliary + O(log n) call stack = O(n)\n    if len(arr) <= 1: return arr\n    mid = len(arr) // 2\n    left = merge_sort(arr[:mid])\n    right = merge_sort(arr[mid:])\n    return merge(left, right)\n\ndef bfs(graph, start):\n    # Time: O(V + E) — visit each node + edge once\n    # Space: O(V) — visited set + queue\n    visited = set([start])\n    queue = [start]\n    while queue:\n        node = queue.pop(0)\n        for neighbor in graph[node]:\n            if neighbor not in visited:\n                visited.add(neighbor)\n                queue.append(neighbor)",
+            "cpp": "// Complexity notation guide\n// T(n) = 2T(n/2) + O(n) → O(n log n) [Master Theorem Case 2]\n// T(n) = T(n-1) + O(1) → O(n) [linear recursion]\n// T(n) = 2T(n-1) + O(1) → O(2^n) [exponential — needs memoization!]\nvoid complexityExamples() {\n    // O(n): single loop\n    // O(n²): nested loops\n    // O(n log n): sort or divide-and-conquer with merge\n    // O(log n): halving per step (binary search)\n    // O(1): fixed number of operations\n}",
+            "java": "// Space complexity specifics in Java:\n// - Recursion stack: O(depth)\n// - Memoization table: O(states)\n// - New arrays/lists: O(size)\n// Example: DFS on tree\n// Time: O(n) — visit each node once\n// Space: O(h) where h=height — recursion stack\n// For balanced tree: O(log n), worst (skewed): O(n)"
+        },
+        "practice": {
+            "theory": [
+                "Derive the time complexity of merge sort using the recursion tree method.",
+                "What is the space complexity of DFS on a binary tree with height h?",
+                "Using Master Theorem, solve T(n) = 3T(n/3) + O(n)."
+            ],
+            "coding": "Write QuickSort. Analyze best, average, and worst case time complexity, and explain why worst case occurs.",
+            "interview": "After presenting your O(n log n) solution, the interviewer asks 'Can you do better?' Walk through why O(n log n) might be a lower bound for this problem, or if O(n) is possible."
+        }
+    },
+    {
+        "id": "communication-skills",
+        "name": "Communication Skills",
+        "category": "interview-prep",
+        "complexity": { "time": "O(1) — skill, not algorithm", "space": "O(1)" },
+        "description": "Structure your verbal communication during coding interviews: clarifying the problem, thinking aloud, explaining your approach, and discussing trade-offs.",
+        "beginnerExplanation": "Top tech companies evaluate not just your code but how you think. 'Silent coders' often fail even with correct solutions. Say what you're thinking: 'I'm considering using a hash map to reduce lookup time from O(n) to O(1).' Ask clarifying questions: 'Can elements be negative? Is the array sorted? What should I return if no answer exists?' This shows collaborative problem-solving skills.",
+        "mentalModel": "Treat the interview like pair programming. Your interviewer is your pair. You wouldn't code silently in pair programming — you'd explain your thinking, ask questions, and discuss alternatives. Do the same in an interview.",
+        "learningObjectives": [
+            "Start by clarifying inputs, outputs, constraints, and edge cases",
+            "Verbalize your thinking before coding: state the approach and complexity",
+            "Explain what each part of your code does as you write it",
+            "After coding, summarize complexity and proactively mention limitations or improvements"
+        ],
+        "workedExample": {
+            "title": "Communication Template for an Interview Problem",
+            "body": "1. Restate: 'So I need to find the maximum sum subarray — correct?' 2. Clarify: 'Can all elements be negative? What's the expected output in that case?' 3. Approach: 'My brute force would be O(n²). I can optimize using Kadane's algorithm to O(n) because...' 4. Code with narration: 'maxEndingHere tracks the max sum subarray ending at current index...' 5. Verify: 'Let me dry run on [−2,1,−3,4,−1,2,1,−5,4]. Expected output: 6.' 6. Complexity: 'Time O(n), Space O(1).'"
+        },
+        "visualWalkthrough": [
+            "Phase 1 (2 min): Clarify problem, constraints, edge cases",
+            "Phase 2 (3 min): State brute force, then optimal approach with reasoning",
+            "Phase 3 (15 min): Code while narrating each decision",
+            "Phase 4 (3 min): Dry run on example, state complexity",
+            "Phase 5 (2 min): Discuss edge cases and potential improvements"
+        ],
+        "complexityReasoning": { "body": "Communication skills don't have algorithmic complexity but they heavily influence interview outcomes. Studies show interviewers rate clear communicators ~20-30% higher even with equivalent code quality." },
+        "edgeCases": ["Clarify before coding, not after discovering an issue mid-implementation", "If stuck, say so: 'I'm not sure about the optimal approach yet — let me think through brute force first'"],
+        "revisionPrompts": [
+            "What five questions should you always clarify before starting to code?",
+            "How do you narrate your code as you write it without being annoying?",
+            "What do you say when you're stuck on a problem in an interview?"
+        ],
+        "code": {
+            "javascript": "// Communication framework — not code, but verbal template:\n// 1. CLARIFY: 'Can the array be empty? Are there duplicates? What to return if not found?'\n// 2. APPROACH: 'I'll use [pattern] because [reason]. Time: O(?), Space: O(?)'\n// 3. CODE NARRATION:\nfunction example(nums, target) {\n  // 'I'll use a hash map to store values we've seen'\n  const seen = new Map();\n  for (let i = 0; i < nums.length; i++) {\n    // 'For each element, I calculate its complement'\n    const complement = target - nums[i];\n    // 'If complement is already in the map, we found the pair'\n    if (seen.has(complement)) return [seen.get(complement), i];\n    // 'Otherwise, store current value and index for future lookups'\n    seen.set(nums[i], i);\n  }\n  return [];\n  // 4. VERIFY: 'Let me dry run on nums=[2,7,11,15], target=9...'\n  // 5. COMPLEXITY: 'Time O(n), Space O(n) for the hash map'\n}",
+            "python": "# Communication checklist before coding:\n# [ ] Restated the problem correctly?\n# [ ] Clarified input format and constraints?\n# [ ] Handled edge cases (empty, single, negatives, overflow)?\n# [ ] Stated brute force and its complexity?\n# [ ] Explained optimization and why it works?\n# [ ] Coded with narration?\n# [ ] Dry run on at least one example?\n# [ ] Stated final time and space complexity?\n# [ ] Asked if interviewer has questions?\n\ndef communicate_while_coding(arr, target):\n    # 'I'll initialize two pointers after sorting'\n    arr.sort()  # 'Sort costs O(n log n) which will dominate'\n    left, right = 0, len(arr) - 1  # 'Both start at extremes'\n    while left < right:\n        s = arr[left] + arr[right]\n        if s == target: return True  # 'Found a pair'\n        elif s < target: left += 1  # 'Too small, need larger'\n        else: right -= 1            # 'Too large, need smaller'\n    return False",
+            "cpp": "// Interview communication: narrate as you write\n// Before coding: explain your approach out loud\n// During coding: comment key decisions\n// After coding: dry run + state complexity\nvoid communicationTemplate() {\n    // Step 1: Clarify constraints\n    // Step 2: State approach: 'I'll use a stack because...'\n    // Step 3: Code with narration\n    // Step 4: Dry run: 'Let me trace through input [3,1,4,1,5]...'\n    // Step 5: 'Time complexity is O(n), space is O(n) for the stack.'\n    // Step 6: 'Edge cases: empty array returns X, single element returns Y.'\n}",
+            "java": "// Communication is a skill, not code\n// Key phrases to memorize:\n// When clarifying: 'Just to confirm, the input is...and I should return...'\n// When approaching: 'My first thought is brute force O(n²), but I can optimize to...'\n// When coding: 'Here I'm creating a HashMap to store...'\n// When verifying: 'Let me trace through this with a small example...'\n// When done: 'The time complexity is O(n log n) due to sorting. Space is O(1).'\n// When stuck: 'I know the brute force approach. Let me think about what information I'm recomputing...'"
+        },
+        "practice": {
+            "theory": [
+                "What are the 5 phases of communicating through an interview problem?",
+                "What clarifying questions should you always ask before coding?",
+                "How do you handle being stuck without appearing incompetent?"
+            ],
+            "coding": "Solve LeetCode 3 (Longest Substring Without Repeating Characters) out loud — record yourself and listen back. Did you clarify, explain your approach, narrate your code, dry run, and state complexity?",
+            "interview": "Mock interview: someone asks you to implement a LRU Cache. Walk through the full 5-phase communication framework from clarification to complexity analysis."
+        }
+    },
+    {
+        "id": "mock-interviews",
+        "name": "Mock Interview Strategy",
+        "category": "interview-prep",
+        "complexity": { "time": "O(practice)", "space": "O(memory)" },
+        "description": "How to set up, run, and extract maximum learning from mock interviews to simulate real interview pressure and identify gaps in your preparation.",
+        "beginnerExplanation": "Mock interviews are the single highest-ROI activity in interview preparation. They simulate real pressure, reveal unknown weaknesses, and train you to code while speaking. One mock interview is worth reading 10 more Leetcode solutions. How to do them effectively: time yourself strictly (20-25 min per problem), explain out loud throughout, have a partner give feedback on communication not just correctness, and debrief immediately after.",
+        "mentalModel": "Athletes train by simulating the actual game conditions — sprinters time themselves, tennis players practice match play. Coding interviews are the same: solving Leetcode silently is training dribbling alone; mock interviews are practice matches.",
+        "learningObjectives": [
+            "Use timed practice: 20-25 minutes per medium problem, 35-45 for hard",
+            "Practice speaking while coding — don't code silently",
+            "Use platforms like Pramp, Interviewing.io, or peer mock interviews",
+            "Debrief after each mock: what pattern did I miss? What edge case did I forget? Was my communication clear?"
+        ],
+        "workedExample": {
+            "title": "Mock Interview Debrief Template",
+            "body": "Problem: Longest Palindromic Substring. My approach: Expand around center O(n²). Optimal: Manacher O(n). What I missed: didn't ask about input constraints (could n be 0?). Communication gap: silent while expanding, should have narrated. Time: took 28 min (too long). Next action: practice 3 more palindrome problems, work on narrating expand-around-center pattern."
+        },
+        "visualWalkthrough": [
+            "Week 1: Solve 30 easy problems, identify 5 core patterns you know well",
+            "Week 2-3: Solve 50 medium problems (2-3 per day), pattern-tag each",
+            "Week 4: Start mock interviews (2 per week minimum)",
+            "Week 5-6: 4+ mock interviews per week, focus on communication",
+            "Final week: Review hard problems, system design if needed, mental prep"
+        ],
+        "complexityReasoning": { "body": "Mock interview prep is O(n) in the number of problems practiced. Effectiveness is O(quality × quantity). Mocks provide the quality multiplier that solo practice cannot." },
+        "edgeCases": ["Too few mocks: not enough pressure simulation", "Too many mocks without review: reinforces bad habits", "Only easy problems: builds false confidence"],
+        "revisionPrompts": [
+            "What makes a mock interview more effective than solo Leetcode practice?",
+            "Name 3 things to debrief on after every mock interview.",
+            "How would you structure a 6-week interview preparation plan?"
+        ],
+        "code": {
+            "javascript": "// Mock interview framework — mental checklist:\nconst mockInterviewChecklist = {\n  before: [\n    'Set timer (25 min for medium, 40 for hard)',\n    'Open blank editor (no autocomplete hints)',\n    'Have interviewer ready (peer, Pramp, or yourself recorded)'\n  ],\n  during: [\n    'Clarify problem (2 min): constraints, edge cases, examples',\n    'State brute force (1 min): approach + complexity',\n    'Optimize (3 min): explain the better approach before coding',\n    'Code with narration (15-20 min)',\n    'Dry run (3 min): trace through an example',\n    'State complexity (1 min)'\n  ],\n  after: [\n    'Did I correctly identify the pattern?',\n    'Did I handle all edge cases?',\n    'Was my communication clear throughout?',\n    'What would I do differently?',\n    'What pattern should I practice more?'\n  ]\n};",
+            "python": "# 6-week study plan template\nweekly_plan = {\n    'week_1': 'Easy problems: arrays, strings, hash maps. Goal: 30 problems. Pattern: brute force → optimize.',\n    'week_2': 'Medium: trees, linked lists, sorting. Introduce patterns (sliding window, two pointer).',\n    'week_3': 'Medium: graphs (BFS/DFS), backtracking, DP intro. 2 mock interviews.',\n    'week_4': 'Medium/Hard: advanced DP, heaps, tries. 4 mock interviews per week.',\n    'week_5': 'Hard problems. 4+ mocks. Focus on communication, not just correctness.',\n    'week_6': 'Review weak areas. System design if applicable. Mental preparation.',\n    'daily_routine': [\n        '2-3 new Leetcode problems (timed)',\n        '1 previously failed problem (review)',\n        '15 min pattern review',\n        '1 mock interview (min 2/week)'\n    ]\n}",
+            "cpp": "// Platforms for mock interviews:\n// 1. Pramp (free, peer-to-peer)\n// 2. Interviewing.io (paid, with real interviewers)\n// 3. LeetCode Mock Assessment (timed, no hints)\n// 4. Peer group: rotate who interviews who\n// \n// Key metrics to track per mock:\n// - Time to first correct brute force\n// - Time to optimal solution\n// - Were edge cases caught?\n// - Was complexity analysis correct?\n// - Communication score (1-5)\n// \n// Aim to improve each metric weekly",
+            "java": "// Resources for interview prep:\n// Problems: LeetCode (Blind 75, NeetCode 150, Grind 75)\n// Patterns: 'Grokking the Coding Interview' (Educative.io)\n// Mock: Pramp.com, Interviewing.io, peers\n// System Design: 'System Design Interview' by Alex Xu\n// Behavioral: STAR method for each past project\n// \n// Mock interview scoring rubric:\n// 1. Problem Understanding (0-3)\n// 2. Communication (0-3)\n// 3. Correctness (0-3)\n// 4. Complexity Analysis (0-2)\n// 5. Edge Cases (0-2)\n// 6. Code Quality (0-2)\n// Total: 15 points"
+        },
+        "practice": {
+            "theory": [
+                "Why are mock interviews more effective than solo Leetcode practice for interview preparation?",
+                "What should you debrief on immediately after a mock interview?",
+                "How do you structure a 6-week preparation plan for FAANG interviews?"
+            ],
+            "coding": "Complete a timed mock interview (25 minutes) on LeetCode with the timer running. After time is up, debrief using the 5-question checklist.",
+            "interview": "Your interviewer gives you this problem: 'Given a matrix of 0s and 1s, find the size of the largest island (connected group of 1s).' Walk through the full interview communication framework — from clarification to final complexity analysis."
+        }
+    },
+    {
+        "id": "rabin-karp",
+        "name": "Rabin-Karp",
+        "category": "advanced",
+        "complexity": { "time": "O(n + m) average, O(nm) worst", "space": "O(1)" },
+        "description": "A string search algorithm using rolling hash to find a pattern in text in O(n+m) average time. Computes the hash of the pattern once, then rolls the hash across the text by subtracting the outgoing character and adding the incoming one.",
+        "beginnerExplanation": "Instead of comparing each character when the window slides, Rabin-Karp computes a number (hash) representing the current window. When hashes match, it verifies character-by-character. The rolling hash update is O(1) — just subtract the old left character and add the new right character — making the amortized cost nearly linear.",
+        "mentalModel": "Think of a window of glass sliding across a wall of tiles. Instead of reading each tile letter in the window, you have a running score that changes as the window moves. Only when the score matches the target do you actually read the tiles.",
+        "learningObjectives": [
+            "Understand polynomial rolling hash and why it enables O(1) window updates",
+            "Compute the initial hash for a pattern in O(m)",
+            "Roll the hash across the text in O(1) per step",
+            "Handle hash collisions with character-by-character verification"
+        ],
+        "workedExample": {
+            "title": "Find 'abc' in 'xabcyz'",
+            "body": "BASE=31, MOD=1e9+7. Hash('abc')=97+98*31+99*961=... Compute initial window hash for 'xab'. Slide: subtract 'x'*BASE^2, add 'c'. When hash matches, verify character by character. Found at index 1!"
+        },
+        "visualWalkthrough": [
+            "Compute hash(pattern) in O(m)",
+            "Compute hash of first m characters of text",
+            "Compare hashes: if match, verify character by character",
+            "Roll hash: subtract contribution of leftmost char, add rightmost char",
+            "Repeat until end of text — average O(1) per step"
+        ],
+        "complexityReasoning": { "body": "Average O(n+m): hash computation is O(m), each window slide is O(1), and hash collisions are rare. Worst case O(nm) if every window causes a false hash match (very unlikely with good hash functions). Space O(1) as rolling hash uses only constant variables." },
+        "edgeCases": [
+            "Pattern longer than text: return immediately",
+            "Multiple occurrences: keep searching after first match",
+            "Hash collision: always verify by character comparison when hashes match",
+            "Single character pattern: simplifies to linear scan"
+        ],
+        "revisionPrompts": [
+            "How do you compute the rolling hash update in O(1)?",
+            "What is a 'spurious hit' and how does Rabin-Karp handle it?",
+            "When would you prefer Rabin-Karp over KMP?"
+        ],
+        "code": {
+            "javascript": "function rabinKarp(text, pattern) {\n  const BASE = 31, MOD = 1e9 + 7;\n  const n = text.length, m = pattern.length;\n  if (m > n) return [];\n\n  // Compute pattern hash\n  let patHash = 0, power = 1;\n  for (let i = 0; i < m; i++) {\n    patHash = (patHash + (pattern.charCodeAt(i) - 96) * power) % MOD;\n    if (i < m - 1) power = (power * BASE) % MOD;\n  }\n\n  // Compute first window hash\n  let windowHash = 0, p = 1;\n  for (let i = 0; i < m; i++) {\n    windowHash = (windowHash + (text.charCodeAt(i) - 96) * p) % MOD;\n    if (i < m - 1) p = (p * BASE) % MOD;\n  }\n\n  const result = [];\n  for (let i = 0; i <= n - m; i++) {\n    if (windowHash === patHash && text.slice(i, i + m) === pattern) {\n      result.push(i);\n    }\n    if (i < n - m) {\n      windowHash = (windowHash - (text.charCodeAt(i) - 96) + MOD) % MOD;\n      windowHash = (windowHash * BASE + (text.charCodeAt(i + m) - 96)) % MOD;\n    }\n  }\n  return result;\n}",
+            "python": "def rabin_karp(text, pattern):\n    BASE, MOD = 31, 10**9 + 7\n    n, m = len(text), len(pattern)\n    if m > n:\n        return []\n\n    pat_hash = 0\n    power = 1\n    for i, c in enumerate(pattern):\n        pat_hash = (pat_hash + (ord(c) - 96) * power) % MOD\n        if i < m - 1:\n            power = (power * BASE) % MOD\n\n    window_hash = 0\n    p = 1\n    for i, c in enumerate(text[:m]):\n        window_hash = (window_hash + (ord(c) - 96) * p) % MOD\n        if i < m - 1:\n            p = (p * BASE) % MOD\n\n    result = []\n    for i in range(n - m + 1):\n        if window_hash == pat_hash and text[i:i+m] == pattern:\n            result.append(i)\n        if i < n - m:\n            window_hash = (window_hash - (ord(text[i]) - 96) + MOD) % MOD\n            window_hash = (window_hash * BASE + (ord(text[i+m]) - 96)) % MOD\n    return result",
+            "cpp": "vector<int> rabinKarp(string text, string pattern) {\n    const long long BASE = 31, MOD = 1e9 + 7;\n    int n = text.size(), m = pattern.size();\n    if (m > n) return {};\n    long long patHash = 0, windowHash = 0, power = 1;\n    for (int i = 0; i < m; i++) {\n        patHash = (patHash + (pattern[i] - 'a' + 1) * power) % MOD;\n        windowHash = (windowHash + (text[i] - 'a' + 1) * power) % MOD;\n        if (i < m - 1) power = (power * BASE) % MOD;\n    }\n    vector<int> result;\n    for (int i = 0; i <= n - m; i++) {\n        if (windowHash == patHash && text.substr(i, m) == pattern)\n            result.push_back(i);\n        if (i < n - m) {\n            windowHash = (windowHash - (text[i] - 'a' + 1) + MOD) % MOD;\n            windowHash = (windowHash * BASE + (text[i+m] - 'a' + 1)) % MOD;\n        }\n    }\n    return result;\n}",
+            "java": "public List<Integer> rabinKarp(String text, String pattern) {\n    final long BASE = 31, MOD = (long)1e9 + 7;\n    int n = text.length(), m = pattern.length();\n    if (m > n) return new ArrayList<>();\n    long patHash = 0, winHash = 0, power = 1;\n    for (int i = 0; i < m; i++) {\n        patHash = (patHash + (pattern.charAt(i) - 'a' + 1) * power) % MOD;\n        winHash = (winHash + (text.charAt(i) - 'a' + 1) * power) % MOD;\n        if (i < m - 1) power = (power * BASE) % MOD;\n    }\n    List<Integer> res = new ArrayList<>();\n    for (int i = 0; i <= n - m; i++) {\n        if (winHash == patHash && text.substring(i, i+m).equals(pattern)) res.add(i);\n        if (i < n - m) {\n            winHash = (winHash - (text.charAt(i) - 'a' + 1) + MOD) % MOD;\n            winHash = (winHash * BASE + (text.charAt(i+m) - 'a' + 1)) % MOD;\n        }\n    }\n    return res;\n}"
+        },
+        "practice": {
+            "theory": [
+                "What is a 'spurious hit' in Rabin-Karp and how do you handle it?",
+                "How would you extend Rabin-Karp to search for multiple patterns simultaneously?",
+                "Why does Rabin-Karp have O(nm) worst case? When does this occur?"
+            ],
+            "coding": "Implement Rabin-Karp to find all occurrences of a pattern in a text. Extend it to search for any one of K patterns simultaneously.",
+            "interview": "Compare Rabin-Karp with KMP: when would you prefer each? What is the 2D extension of Rabin-Karp and what problems does it solve?"
+        }
+    }
+]

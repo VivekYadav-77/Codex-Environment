@@ -237,19 +237,19 @@
     "icon": "Cpu",
     "tier": "advanced",
     "topics": [
-      { "id": "sliding-window", "title": "Sliding Window", "description": "Maintain a window over data and expand/shrink it to answer range queries efficiently.", "type": "pattern", "algorithmId": "sliding-window" },
-      { "id": "two-pointer", "title": "Two Pointer", "description": "Use two indices moving toward each other or in the same direction to avoid nested loops.", "type": "pattern", "algorithmId": "two-pointers" },
-      { "id": "advanced-prefix-sum", "title": "Prefix Sum (Advanced)", "description": "Extend prefix sums to 2D grids, XOR prefix sums, and modular arithmetic problems.", "type": "pattern", "algorithmId": "prefix-sum" },
-      { "id": "sweep-line", "title": "Sweep Line", "description": "Scan from left to right processing events — used in interval union, skyline, and area queries.", "type": "pattern", "algorithmId": null },
-      { "id": "meet-in-the-middle", "title": "Meet in the Middle", "description": "Split a problem into two halves, enumerate both, then combine — O(2^(n/2)) instead of O(2^n).", "type": "algorithm", "algorithmId": null },
-      { "id": "segment-tree", "title": "Segment Tree", "description": "Range queries (min, max, sum) and point updates in O(log n) on a static array.", "type": "algorithm", "algorithmId": "segment-tree" },
-      { "id": "fenwick-tree", "title": "Fenwick Tree (BIT)", "description": "Simpler O(log n) prefix sums and point updates with a beautiful binary trick.", "type": "algorithm", "algorithmId": "fenwick-tree" },
-      { "id": "lazy-propagation", "title": "Lazy Propagation", "description": "Extend segment trees to support O(log n) range updates by deferring updates.", "type": "algorithm", "algorithmId": null },
-      { "id": "kmp-algorithm", "title": "KMP String Search", "description": "Knuth-Morris-Pratt: find a pattern in text in O(n+m) using a failure function.", "type": "algorithm", "algorithmId": "kmp" },
-      { "id": "rabin-karp", "title": "Rabin-Karp", "description": "Rolling hash for O(n+m) average string search — extensible to multiple patterns.", "type": "algorithm", "algorithmId": null },
-      { "id": "z-algorithm", "title": "Z-Algorithm", "description": "Compute Z-array in O(n) for powerful string matching and pattern finding.", "type": "algorithm", "algorithmId": null },
-      { "id": "manacher-algorithm", "title": "Manacher's Algorithm", "description": "Find all palindromic substrings in O(n) — the champion of palindrome problems.", "type": "algorithm", "algorithmId": null },
-      { "id": "suffix-array", "title": "Suffix Array", "description": "Sort all suffixes of a string and use LCP array for powerful string operations.", "type": "algorithm", "algorithmId": null }
+      { "id": "sliding-window", "title": "Sliding Window", "description": "Maintain a window over data and expand/shrink it to answer range queries efficiently.", "type": "pattern", "algorithmId": "sliding-window", "category": "arrays" },
+      { "id": "two-pointer", "title": "Two Pointer", "description": "Use two indices moving toward each other or in the same direction to avoid nested loops.", "type": "pattern", "algorithmId": "two-pointers", "category": "sorting" },
+      { "id": "advanced-prefix-sum", "title": "Prefix Sum (Advanced)", "description": "Extend prefix sums to 2D grids, XOR prefix sums, and modular arithmetic problems.", "type": "pattern", "algorithmId": "prefix-sum", "category": "arrays" },
+      { "id": "sweep-line", "title": "Sweep Line", "description": "Scan from left to right processing events — used in interval union, skyline, and area queries.", "type": "pattern", "algorithmId": "sweep-line", "category": "advanced" },
+      { "id": "meet-in-the-middle", "title": "Meet in the Middle", "description": "Split a problem into two halves, enumerate both, then combine — O(2^(n/2)) instead of O(2^n).", "type": "algorithm", "algorithmId": "meet-in-the-middle", "category": "advanced" },
+      { "id": "segment-tree", "title": "Segment Tree", "description": "Range queries (min, max, sum) and point updates in O(log n) on a static array.", "type": "algorithm", "algorithmId": "segment-tree", "category": "advanced" },
+      { "id": "fenwick-tree", "title": "Fenwick Tree (BIT)", "description": "Simpler O(log n) prefix sums and point updates with a beautiful binary trick.", "type": "algorithm", "algorithmId": "fenwick-tree", "category": "advanced" },
+      { "id": "lazy-propagation", "title": "Lazy Propagation", "description": "Extend segment trees to support O(log n) range updates by deferring updates.", "type": "algorithm", "algorithmId": "lazy-propagation", "category": "advanced" },
+      { "id": "kmp-algorithm", "title": "KMP String Search", "description": "Knuth-Morris-Pratt: find a pattern in text in O(n+m) using a failure function.", "type": "algorithm", "algorithmId": "kmp", "category": "strings" },
+      { "id": "rabin-karp", "title": "Rabin-Karp", "description": "Rolling hash for O(n+m) average string search — extensible to multiple patterns.", "type": "algorithm", "algorithmId": "rabin-karp", "category": "advanced" },
+      { "id": "z-algorithm", "title": "Z-Algorithm", "description": "Compute Z-array in O(n) for powerful string matching and pattern finding.", "type": "algorithm", "algorithmId": "z-algorithm", "category": "advanced" },
+      { "id": "manacher-algorithm", "title": "Manacher's Algorithm", "description": "Find all palindromic substrings in O(n) — the champion of palindrome problems.", "type": "algorithm", "algorithmId": "manacher", "category": "advanced" },
+      { "id": "suffix-array", "title": "Suffix Array", "description": "Sort all suffixes of a string and use LCP array for powerful string operations.", "type": "algorithm", "algorithmId": "suffix-array", "category": "advanced" }
     ]
   },
   {
@@ -260,13 +260,13 @@
     "icon": "Box",
     "tier": "advanced",
     "topics": [
-      { "id": "interval-tree", "title": "Interval Tree", "description": "Query all intervals overlapping a point or range in O(log n + k).", "type": "concept", "algorithmId": null },
-      { "id": "order-statistic-tree", "title": "Order Statistic Tree", "description": "Augmented BST supporting rank and select queries in O(log n).", "type": "concept", "algorithmId": null },
-      { "id": "bloom-filter", "title": "Bloom Filter", "description": "Space-efficient probabilistic structure for set membership — used in databases and CDNs.", "type": "concept", "algorithmId": null },
-      { "id": "skip-list", "title": "Skip List", "description": "Probabilistic layered linked list supporting O(log n) search — an alternative to balanced BSTs.", "type": "concept", "algorithmId": null },
-      { "id": "lsm-tree", "title": "LSM Tree", "description": "Log-Structured Merge-Tree — optimized for write-heavy workloads, used in LevelDB and Cassandra.", "type": "concept", "algorithmId": null },
-      { "id": "quad-tree", "title": "Quad Tree", "description": "Partition 2D space recursively — used in spatial indexing and collision detection.", "type": "concept", "algorithmId": null },
-      { "id": "kd-tree", "title": "K-D Tree", "description": "Binary tree for k-dimensional points enabling nearest-neighbor search in O(log n).", "type": "concept", "algorithmId": null }
+      { "id": "interval-tree", "title": "Interval Tree", "description": "Query all intervals overlapping a point or range in O(log n + k).", "type": "concept", "algorithmId": "interval-tree", "category": "advanced-structures" },
+      { "id": "order-statistic-tree", "title": "Order Statistic Tree", "description": "Augmented BST supporting rank and select queries in O(log n).", "type": "concept", "algorithmId": "order-statistic-tree", "category": "advanced-structures" },
+      { "id": "bloom-filter", "title": "Bloom Filter", "description": "Space-efficient probabilistic structure for set membership — used in databases and CDNs.", "type": "concept", "algorithmId": "bloom-filter", "category": "advanced-structures" },
+      { "id": "skip-list", "title": "Skip List", "description": "Probabilistic layered linked list supporting O(log n) search — an alternative to balanced BSTs.", "type": "concept", "algorithmId": "skip-list", "category": "advanced-structures" },
+      { "id": "lsm-tree", "title": "LSM Tree", "description": "Log-Structured Merge-Tree — optimized for write-heavy workloads, used in LevelDB and Cassandra.", "type": "concept", "algorithmId": "lsm-tree", "category": "advanced-structures" },
+      { "id": "quad-tree", "title": "Quad Tree", "description": "Partition 2D space recursively — used in spatial indexing and collision detection.", "type": "concept", "algorithmId": "quad-tree", "category": "advanced-structures" },
+      { "id": "kd-tree", "title": "K-D Tree", "description": "Binary tree for k-dimensional points enabling nearest-neighbor search in O(log n).", "type": "concept", "algorithmId": "kd-tree", "category": "advanced-structures" }
     ]
   },
   {
@@ -277,23 +277,23 @@
     "icon": "Target",
     "tier": "expert",
     "topics": [
-      { "id": "pattern-two-pointer", "title": "Two Pointer Pattern", "description": "Recognize when two indices can replace O(n²) nested loops.", "type": "pattern", "algorithmId": "two-pointers" },
-      { "id": "pattern-sliding-window", "title": "Sliding Window Pattern", "description": "Identify when a window of variable or fixed size eliminates brute force.", "type": "pattern", "algorithmId": "sliding-window" },
-      { "id": "pattern-fast-slow", "title": "Fast & Slow Pointer Pattern", "description": "Detect cycles, find midpoints, and more using two pointers at different speeds.", "type": "pattern", "algorithmId": null },
-      { "id": "pattern-merge-interval", "title": "Merge Interval Pattern", "description": "Collapse, insert, or intersect intervals by sorting and scanning once.", "type": "pattern", "algorithmId": null },
-      { "id": "pattern-cyclic-sort", "title": "Cyclic Sort Pattern", "description": "Place elements at their correct index in O(n) — powerful for 1-to-n problems.", "type": "pattern", "algorithmId": null },
-      { "id": "pattern-binary-search", "title": "Binary Search Pattern", "description": "Apply binary search beyond sorted arrays: on answer, on rotation, on conditions.", "type": "pattern", "algorithmId": "binary-search" },
-      { "id": "pattern-dfs", "title": "DFS Pattern", "description": "Template for tree/graph DFS, path tracking, and backtracking problems.", "type": "pattern", "algorithmId": "dfs" },
-      { "id": "pattern-bfs", "title": "BFS Pattern", "description": "Template for level-order traversal, shortest unweighted path, and multi-source spread.", "type": "pattern", "algorithmId": "bfs" },
-      { "id": "pattern-topological", "title": "Topological Sort Pattern", "description": "Identify dependency-ordering problems solvable by Kahn's algorithm or DFS.", "type": "pattern", "algorithmId": "topological-sort" },
-      { "id": "pattern-heap", "title": "Heap Pattern (Top K)", "description": "Use heaps for streaming top-K, kth largest, and running median problems.", "type": "pattern", "algorithmId": null },
-      { "id": "pattern-prefix-sum", "title": "Prefix Sum Pattern", "description": "Identify subarray sum problems solvable in O(n) using prefix sums and hashmaps.", "type": "pattern", "algorithmId": "prefix-sum" },
-      { "id": "pattern-monotonic-stack", "title": "Monotonic Stack Pattern", "description": "Recognize NGE, span, and histogram-style problems that need a monotonic stack.", "type": "pattern", "algorithmId": "monotonic-stack" },
-      { "id": "pattern-monotonic-queue", "title": "Monotonic Queue Pattern", "description": "Sliding window min/max in O(n) using a deque.", "type": "pattern", "algorithmId": null },
-      { "id": "pattern-dp", "title": "DP Pattern Recognition", "description": "Identify overlapping subproblems and optimal substructure to choose the right DP approach.", "type": "pattern", "algorithmId": null },
-      { "id": "pattern-backtracking", "title": "Backtracking Pattern", "description": "Template for exhaustive search with constraint pruning.", "type": "pattern", "algorithmId": null },
-      { "id": "pattern-trie", "title": "Trie Pattern", "description": "Recognize prefix-matching, autocomplete, and XOR-max problems requiring a trie.", "type": "pattern", "algorithmId": "trie" },
-      { "id": "pattern-union-find", "title": "Union-Find Pattern", "description": "Detect connectivity, cycles, and component merging with DSU.", "type": "pattern", "algorithmId": "union-find" }
+      { "id": "pattern-two-pointer", "title": "Two Pointer Pattern", "description": "Recognize when two indices can replace O(n²) nested loops.", "type": "pattern", "algorithmId": "two-pointers", "category": "sorting" },
+      { "id": "pattern-sliding-window", "title": "Sliding Window Pattern", "description": "Identify when a window of variable or fixed size eliminates brute force.", "type": "pattern", "algorithmId": "sliding-window", "category": "arrays" },
+      { "id": "pattern-fast-slow", "title": "Fast & Slow Pointer Pattern", "description": "Detect cycles, find midpoints, and more using two pointers at different speeds.", "type": "pattern", "algorithmId": "pattern-fast-slow", "category": "patterns" },
+      { "id": "pattern-merge-interval", "title": "Merge Interval Pattern", "description": "Collapse, insert, or intersect intervals by sorting and scanning once.", "type": "pattern", "algorithmId": "pattern-merge-interval", "category": "patterns" },
+      { "id": "pattern-cyclic-sort", "title": "Cyclic Sort Pattern", "description": "Place elements at their correct index in O(n) — powerful for 1-to-n problems.", "type": "pattern", "algorithmId": "pattern-cyclic-sort", "category": "patterns" },
+      { "id": "pattern-binary-search", "title": "Binary Search Pattern", "description": "Apply binary search beyond sorted arrays: on answer, on rotation, on conditions.", "type": "pattern", "algorithmId": "binary-search", "category": "searching" },
+      { "id": "pattern-dfs", "title": "DFS Pattern", "description": "Template for tree/graph DFS, path tracking, and backtracking problems.", "type": "pattern", "algorithmId": "dfs", "category": "graphs" },
+      { "id": "pattern-bfs", "title": "BFS Pattern", "description": "Template for level-order traversal, shortest unweighted path, and multi-source spread.", "type": "pattern", "algorithmId": "bfs", "category": "graphs" },
+      { "id": "pattern-topological", "title": "Topological Sort Pattern", "description": "Identify dependency-ordering problems solvable by Kahn's algorithm or DFS.", "type": "pattern", "algorithmId": "topological-sort", "category": "graphs" },
+      { "id": "pattern-heap", "title": "Heap Pattern (Top K)", "description": "Use heaps for streaming top-K, kth largest, and running median problems.", "type": "pattern", "algorithmId": "pattern-heap", "category": "patterns" },
+      { "id": "pattern-prefix-sum", "title": "Prefix Sum Pattern", "description": "Identify subarray sum problems solvable in O(n) using prefix sums and hashmaps.", "type": "pattern", "algorithmId": "prefix-sum", "category": "arrays" },
+      { "id": "pattern-monotonic-stack", "title": "Monotonic Stack Pattern", "description": "Recognize NGE, span, and histogram-style problems that need a monotonic stack.", "type": "pattern", "algorithmId": "monotonic-stack", "category": "stacks" },
+      { "id": "pattern-monotonic-queue", "title": "Monotonic Queue Pattern", "description": "Sliding window min/max in O(n) using a deque.", "type": "pattern", "algorithmId": "pattern-monotonic-queue", "category": "patterns" },
+      { "id": "pattern-dp", "title": "DP Pattern Recognition", "description": "Identify overlapping subproblems and optimal substructure to choose the right DP approach.", "type": "pattern", "algorithmId": "pattern-dp", "category": "patterns" },
+      { "id": "pattern-backtracking", "title": "Backtracking Pattern", "description": "Template for exhaustive search with constraint pruning.", "type": "pattern", "algorithmId": "pattern-backtracking", "category": "patterns" },
+      { "id": "pattern-trie", "title": "Trie Pattern", "description": "Recognize prefix-matching, autocomplete, and XOR-max problems requiring a trie.", "type": "pattern", "algorithmId": "trie", "category": "tries" },
+      { "id": "pattern-union-find", "title": "Union-Find Pattern", "description": "Detect connectivity, cycles, and component merging with DSU.", "type": "pattern", "algorithmId": "union-find", "category": "graphs" }
     ]
   },
   {
@@ -304,14 +304,14 @@
     "icon": "Briefcase",
     "tier": "expert",
     "topics": [
-      { "id": "brute-force-thinking", "title": "Brute Force First", "description": "Always start with the brute force — it proves correctness and gives you something to optimize.", "type": "concept", "algorithmId": null },
-      { "id": "pattern-recognition", "title": "Pattern Recognition", "description": "Train your eye to classify new problems into the 17 meta-patterns within seconds.", "type": "concept", "algorithmId": null },
-      { "id": "optimization-strategies", "title": "Optimization Strategies", "description": "Techniques to move from O(n²) to O(n log n) to O(n) — the interviewer's favorite journey.", "type": "concept", "algorithmId": null },
-      { "id": "dry-run-technique", "title": "Dry Run Technique", "description": "Trace through your code on small examples to catch bugs before you run it.", "type": "concept", "algorithmId": null },
-      { "id": "edge-case-analysis", "title": "Edge Cases", "description": "Systematically enumerate empty inputs, single elements, duplicates, and extremes.", "type": "concept", "algorithmId": null },
-      { "id": "interview-complexity-analysis", "title": "Complexity Analysis in Interviews", "description": "Explain time and space complexity clearly and derive it live for your solution.", "type": "concept", "algorithmId": null },
-      { "id": "communication-skills", "title": "Communication Skills", "description": "Structure your thinking out loud — interviewers evaluate process, not just answers.", "type": "concept", "algorithmId": null },
-      { "id": "mock-interviews", "title": "Mock Interview Strategy", "description": "How to practice mock interviews effectively to simulate real pressure.", "type": "concept", "algorithmId": null }
+      { "id": "brute-force-thinking", "title": "Brute Force First", "description": "Always start with the brute force — it proves correctness and gives you something to optimize.", "type": "concept", "algorithmId": "brute-force-thinking", "category": "interview-prep" },
+      { "id": "pattern-recognition", "title": "Pattern Recognition", "description": "Train your eye to classify new problems into the 17 meta-patterns within seconds.", "type": "concept", "algorithmId": "pattern-recognition", "category": "interview-prep" },
+      { "id": "optimization-strategies", "title": "Optimization Strategies", "description": "Techniques to move from O(n²) to O(n log n) to O(n) — the interviewer's favorite journey.", "type": "concept", "algorithmId": "optimization-strategies", "category": "interview-prep" },
+      { "id": "dry-run-technique", "title": "Dry Run Technique", "description": "Trace through your code on small examples to catch bugs before you run it.", "type": "concept", "algorithmId": "dry-run-technique", "category": "interview-prep" },
+      { "id": "edge-case-analysis", "title": "Edge Cases", "description": "Systematically enumerate empty inputs, single elements, duplicates, and extremes.", "type": "concept", "algorithmId": "edge-case-analysis", "category": "interview-prep" },
+      { "id": "interview-complexity-analysis", "title": "Complexity Analysis in Interviews", "description": "Explain time and space complexity clearly and derive it live for your solution.", "type": "concept", "algorithmId": "interview-complexity-analysis", "category": "interview-prep" },
+      { "id": "communication-skills", "title": "Communication Skills", "description": "Structure your thinking out loud — interviewers evaluate process, not just answers.", "type": "concept", "algorithmId": "communication-skills", "category": "interview-prep" },
+      { "id": "mock-interviews", "title": "Mock Interview Strategy", "description": "How to practice mock interviews effectively to simulate real pressure.", "type": "concept", "algorithmId": "mock-interviews", "category": "interview-prep" }
     ]
   }
 ]
