@@ -4168,7 +4168,752 @@ const trieGenerators = {
 }
 
 // Combine all step generators
+
+// Step generators for Phase 2-4 topics (sorting, searching, arrays, strings, stacks, queues, linked lists, trees, tries)
+const newGenerators = {
+    'counting-sort': (arr) => {
+        const steps = []
+        const array = [...arr]
+        const max = Math.max(...array)
+        const count = new Array(max + 1).fill(0)
+        for (const x of array) count[x]++
+        steps.push({ array: [...count.slice(0, 8)], comparing: [array[0]], swapping: [], sorted: [], message: `Counting Sort: count array of size ${Math.min(max + 1, 8)} built`, line: 1 })
+        for (let i = 1; i <= max; i++) {
+            count[i] += count[i - 1]
+            if (i < 8) steps.push({ array: [...count.slice(0, 8)], comparing: [i], swapping: [], sorted: [], message: `Prefix sum: count[${i}] = ${count[i]}`, line: 2 })
+        }
+        const output = new Array(array.length)
+        for (let i = array.length - 1; i >= 0; i--) {
+            output[--count[array[i]]] = array[i]
+            steps.push({ array: [...output.map(v => v || 0)], comparing: [i], swapping: [], sorted: [], message: `Placing ${array[i]} at position ${count[array[i]]}`, line: 3 })
+        }
+        steps.push({ array: [...output], comparing: [], swapping: [], sorted: output.map((_, i) => i), message: 'Counting Sort complete! O(n+k)', line: 4 })
+        return steps
+    },
+    'radix-sort': (arr) => {
+        const steps = []
+        const array = [...arr]
+        const max = Math.max(...array)
+        steps.push({ array: [...array], comparing: [], swapping: [], sorted: [], message: `Radix Sort: processing digit by digit. Max = ${max}`, line: 1 })
+        for (let exp = 1; Math.floor(max / exp) > 0; exp *= 10) {
+            const digitName = exp === 1 ? 'units' : exp === 10 ? 'tens' : 'hundreds'
+            const count = new Array(10).fill(0)
+            for (const x of array) count[Math.floor(x / exp) % 10]++
+            for (let i = 1; i < 10; i++) count[i] += count[i - 1]
+            const output = new Array(array.length)
+            for (let i = array.length - 1; i >= 0; i--) {
+                const d = Math.floor(array[i] / exp) % 10
+                output[--count[d]] = array[i]
+            }
+            for (let i = 0; i < array.length; i++) array[i] = output[i]
+            steps.push({ array: [...array], comparing: [], swapping: [], sorted: [], message: `After sorting by ${digitName} digit: [${array.join(', ')}]`, line: 2 })
+        }
+        steps.push({ array: [...array], comparing: [], swapping: [], sorted: array.map((_, i) => i), message: 'Radix Sort complete! O(d*(n+k))', line: 3 })
+        return steps
+    },
+    'bucket-sort': (arr) => {
+        const steps = []
+        const array = [...arr]
+        const n = array.length
+        const min = Math.min(...array), max = Math.max(...array)
+        const buckets = Array.from({ length: n }, () => [])
+        steps.push({ array: [...array], comparing: [], swapping: [], sorted: [], message: `Bucket Sort: distributing ${n} elements into ${n} buckets. Range: [${min}, ${max}]`, line: 1 })
+        for (const x of array) {
+            const idx = Math.min(Math.floor((x - min) / (max - min + 1) * n), n - 1)
+            buckets[idx].push(x)
+        }
+        const flatBuckets = buckets.flat()
+        steps.push({ array: flatBuckets, comparing: [], swapping: [], sorted: [], message: `After distribution. Non-empty buckets: ${buckets.filter(b => b.length).length}`, line: 2 })
+        for (let i = 0; i < n; i++) buckets[i].sort((a, b) => a - b)
+        const sorted = buckets.flat()
+        steps.push({ array: sorted, comparing: [], swapping: [], sorted: sorted.map((_, i) => i), message: 'Bucket Sort complete! Buckets sorted and concatenated.', line: 3 })
+        return steps
+    },
+    'tim-sort': (arr) => {
+        const steps = []
+        const array = [...arr]
+        const MIN_RUN = 2
+        steps.push({ array: [...array], comparing: [], swapping: [], sorted: [], message: 'Tim Sort: divide into runs, sort with insertion sort, merge runs', line: 1 })
+        for (let i = 0; i < array.length; i += MIN_RUN) {
+            const end = Math.min(i + MIN_RUN - 1, array.length - 1)
+            for (let j = i + 1; j <= end; j++) {
+                const key = array[j]; let k = j - 1
+                while (k >= i && array[k] > key) { array[k + 1] = array[k]; k-- }
+                array[k + 1] = key
+            }
+            steps.push({ array: [...array], comparing: [i, end], swapping: [], sorted: [], message: `Run [${i}-${end}] insertion-sorted: [${array.slice(i, end + 1).join(', ')}]`, line: 2 })
+        }
+        const finalSorted = [...array].sort((a, b) => a - b)
+        steps.push({ array: finalSorted, comparing: [], swapping: [], sorted: finalSorted.map((_, i) => i), message: 'Tim Sort complete! O(n log n) worst, O(n) best for sorted data.', line: 4 })
+        return steps
+    },
+    'lower-bound': (arr) => {
+        const steps = []
+        const array = [...arr].sort((a, b) => a - b)
+        const target = array[Math.floor(array.length / 2)]
+        steps.push({ array: [...array], comparing: [], swapping: [], sorted: [], message: `Lower Bound: find first index where value >= ${target}. Array must be sorted.`, line: 1 })
+        let lo = 0, hi = array.length
+        while (lo < hi) {
+            const mid = (lo + hi) >> 1
+            if (array[mid] < target) {
+                steps.push({ array: [...array], comparing: [mid], swapping: [], sorted: array.slice(0, lo).map((_, i) => i), message: `arr[${mid}]=${array[mid]} < ${target} → lo = ${mid + 1}`, line: 2 })
+                lo = mid + 1
+            } else {
+                steps.push({ array: [...array], comparing: [mid], swapping: [], sorted: [], message: `arr[${mid}]=${array[mid]} >= ${target} → hi = ${mid}`, line: 3 })
+                hi = mid
+            }
+        }
+        steps.push({ array: [...array], comparing: [lo], swapping: [], sorted: [lo], message: `Lower bound = index ${lo}. arr[${lo}] = ${array[lo] ?? 'end'}`, line: 4 })
+        return steps
+    },
+    'upper-bound': (arr) => {
+        const steps = []
+        const array = [...arr].sort((a, b) => a - b)
+        const target = array[Math.floor(array.length / 2)]
+        steps.push({ array: [...array], comparing: [], swapping: [], sorted: [], message: `Upper Bound: find first index where value > ${target}`, line: 1 })
+        let lo = 0, hi = array.length
+        while (lo < hi) {
+            const mid = (lo + hi) >> 1
+            if (array[mid] <= target) {
+                steps.push({ array: [...array], comparing: [mid], swapping: [], sorted: [], message: `arr[${mid}]=${array[mid]} <= ${target} → lo = ${mid + 1}`, line: 2 })
+                lo = mid + 1
+            } else {
+                steps.push({ array: [...array], comparing: [mid], swapping: [], sorted: [], message: `arr[${mid}]=${array[mid]} > ${target} → hi = ${mid}`, line: 3 })
+                hi = mid
+            }
+        }
+        steps.push({ array: [...array], comparing: [lo], swapping: [], sorted: [lo], message: `Upper bound = index ${lo}. Count of ${target}: ${lo - array.filter(x => x < target).length}`, line: 4 })
+        return steps
+    },
+    'binary-search-on-answer': (arr) => {
+        const steps = []
+        const piles = arr.slice(0, 5).map(x => (x % 10) + 1)
+        const h = piles.length * 3
+        steps.push({ array: [...piles], comparing: [], swapping: [], sorted: [], message: `Binary Search on Answer: Koko eating bananas. Piles: [${piles}]. Hours: ${h}`, line: 1 })
+        let lo = 1, hi = Math.max(...piles)
+        while (lo < hi) {
+            const mid = (lo + hi) >> 1
+            const hours = piles.reduce((s, p) => s + Math.ceil(p / mid), 0)
+            steps.push({ array: [...piles], comparing: [Math.floor(mid / 2)], swapping: [], sorted: [], message: `Speed ${mid}: needs ${hours} hrs (limit ${h}). ${hours <= h ? 'Feasible → try smaller' : 'Too slow → faster'}`, line: 2 })
+            if (hours <= h) hi = mid
+            else lo = mid + 1
+        }
+        steps.push({ array: [...piles], comparing: [], swapping: [], sorted: piles.map((_, i) => i), message: `Minimum eating speed = ${lo} bananas/hour`, line: 3 })
+        return steps
+    },
+    'ternary-search': (arr) => {
+        const steps = []
+        const mountain = arr.slice(0, 8).map((_, i) => Math.max(0, 50 - Math.abs(i - 4) * 12))
+        steps.push({ array: [...mountain], comparing: [], swapping: [], sorted: [], message: `Ternary Search on unimodal array: [${mountain}]. Finding peak.`, line: 1 })
+        let lo = 0, hi = mountain.length - 1
+        while (hi - lo > 2) {
+            const m1 = lo + Math.floor((hi - lo) / 3)
+            const m2 = hi - Math.floor((hi - lo) / 3)
+            steps.push({ array: [...mountain], comparing: [m1, m2], swapping: [], sorted: [], message: `m1=${m1}(v=${mountain[m1]}), m2=${m2}(v=${mountain[m2]}). ${mountain[m1] < mountain[m2] ? 'Elim left third' : 'Elim right third'}`, line: 2 })
+            if (mountain[m1] < mountain[m2]) lo = m1 + 1
+            else hi = m2 - 1
+        }
+        const peak = lo + mountain.slice(lo, hi + 1).indexOf(Math.max(...mountain.slice(lo, hi + 1)))
+        steps.push({ array: [...mountain], comparing: [peak], swapping: [], sorted: [peak], message: `Peak at index ${peak}, value ${mountain[peak]}!`, line: 3 })
+        return steps
+    },
+    'string-basics': () => {
+        const steps = []
+        const s = 'hello'
+        steps.push({ array: s.split('').map((_, i) => i), comparing: [], swapping: [], sorted: [], message: `String Basics: '${s}'. Immutable sequence of characters.`, line: 1 })
+        for (let i = 0; i < s.length; i++) {
+            steps.push({ array: s.split('').map((_, j) => j), comparing: [i], swapping: [], sorted: [], message: `s[${i}] = '${s[i]}' (ASCII: ${s.charCodeAt(i)}). O(1) access.`, line: 2 })
+        }
+        steps.push({ array: s.split('').map((_, i) => i), comparing: [], swapping: [], sorted: s.split('').map((_, i) => i), message: `Strings immutable in JS/Python/Java. Use char array for O(1) mutation.`, line: 3 })
+        return steps
+    },
+    'character-encoding': () => {
+        const steps = []
+        const chars = ['A', 'z', '0', 'a', '!']
+        steps.push({ array: chars.map((_, i) => i), comparing: [], swapping: [], sorted: [], message: `Character Encoding: ASCII maps chars to 0-127. Unicode extends to 1M+.`, line: 1 })
+        for (const ch of chars) {
+            const code = ch.charCodeAt(0)
+            const type = ch >= 'A' && ch <= 'Z' ? 'uppercase' : ch >= 'a' && ch <= 'z' ? 'lowercase' : ch >= '0' && ch <= '9' ? 'digit' : 'other'
+            steps.push({ array: chars.map((_, i) => i), comparing: [chars.indexOf(ch)], swapping: [], sorted: [], message: `'${ch}' → ASCII ${code} (${type}). 'a'-'z'=97-122, 'A'-'Z'=65-90, '0'-'9'=48-57`, line: 2 })
+        }
+        const freq = new Array(5).fill(0)
+        'abcaab'.split('').forEach(c => { if (c.charCodeAt(0) - 97 < 5) freq[c.charCodeAt(0) - 97]++ })
+        steps.push({ array: freq, comparing: [0, 1, 2], swapping: [], sorted: [], message: `Freq array: freq[c-'a']++. 'abcaab' → a:3, b:2, c:1. O(1) space!`, line: 3 })
+        return steps
+    },
+    'string-matching': () => {
+        const steps = []
+        const text = 'AABAACAADAAB'.split('')
+        const pattern = 'AABA'.split('')
+        const n = text.length, m = pattern.length
+        const matches = []
+        steps.push({ array: text.map((_, i) => i), comparing: [], swapping: [], sorted: [], message: `String Matching (Naive): find '${pattern.join('')}' in '${text.join('')}'. O(nm).`, line: 1 })
+        for (let i = 0; i <= n - m; i++) {
+            let j = 0
+            while (j < m && text[i + j] === pattern[j]) j++
+            if (j === m) {
+                matches.push(i)
+                steps.push({ array: text.map((_, k) => k), comparing: Array.from({ length: m }, (_, k) => i + k), swapping: [], sorted: matches.flatMap(s => Array.from({ length: m }, (_, k) => s + k)), message: `MATCH at index ${i}!`, line: 2 })
+            } else {
+                steps.push({ array: text.map((_, k) => k), comparing: [i, i + j], swapping: [], sorted: [], message: `No match at ${i}: mismatch at [${i + j}]`, line: 3 })
+            }
+        }
+        steps.push({ array: text.map((_, i) => i), comparing: [], swapping: [], sorted: matches.flatMap(s => Array.from({ length: m }, (_, k) => s + k)), message: `Found ${matches.length} match(es) at [${matches}]. KMP is O(n+m).`, line: 4 })
+        return steps
+    },
+    'palindrome-check': () => {
+        const steps = []
+        const s = 'racecar'
+        steps.push({ array: s.split('').map((_, i) => i), comparing: [], swapping: [], sorted: [], message: `Palindrome Check: '${s}'. Two pointers from both ends.`, line: 1 })
+        let l = 0, r = s.length - 1, isPalin = true
+        while (l < r) {
+            steps.push({ array: s.split('').map((_, i) => i), comparing: [l, r], swapping: [], sorted: [], message: `s[${l}]='${s[l]}' vs s[${r}]='${s[r]}': ${s[l] === s[r] ? 'match → move inward' : 'MISMATCH!'}`, line: 2 })
+            if (s[l] !== s[r]) { isPalin = false; break }
+            l++; r--
+        }
+        steps.push({ array: s.split('').map((_, i) => i), comparing: [], swapping: [], sorted: isPalin ? s.split('').map((_, i) => i) : [], message: `'${s}' is ${isPalin ? '✓ a palindrome' : '✗ NOT a palindrome'}! O(n) time, O(1) space.`, line: 3 })
+        return steps
+    },
+    'frequency-count': (arr) => {
+        const steps = []
+        const array = arr.slice(0, 8)
+        const freq = {}
+        steps.push({ array: [...array], comparing: [], swapping: [], sorted: [], message: `Frequency Count: [${array}]. Count occurrences with hashmap.`, line: 1 })
+        for (let i = 0; i < array.length; i++) {
+            freq[array[i]] = (freq[array[i]] || 0) + 1
+            steps.push({ array: [...array], comparing: [i], swapping: [], sorted: [], message: `freq[${array[i]}] = ${freq[array[i]]}. Map: {${Object.entries(freq).map(([k, v]) => `${k}:${v}`).join(', ')}}`, line: 2 })
+        }
+        const maxFreq = Math.max(...Object.values(freq))
+        const mode = Object.keys(freq).find(k => freq[k] === maxFreq)
+        steps.push({ array: [...array], comparing: [], swapping: [], sorted: array.map((x, i) => +x === +mode ? i : -1).filter(i => i >= 0), message: `Mode = ${mode} (×${maxFreq}). O(n) build, O(1) lookup!`, line: 3 })
+        return steps
+    },
+    'rolling-hash': () => {
+        const steps = []
+        const s = 'abcdeabc'
+        const patLen = 3
+        const BASE = 31, MOD = 1e9 + 7
+        steps.push({ array: s.split('').map((_, i) => i), comparing: [], swapping: [], sorted: [], message: `Rolling Hash: O(1) per window slide for window size ${patLen}.`, line: 1 })
+        let hash = 0, power = 1
+        for (let i = 0; i < patLen; i++) {
+            hash = (hash + (s.charCodeAt(i) - 96) * power) % MOD
+            if (i < patLen - 1) power = power * BASE % MOD
+        }
+        steps.push({ array: s.split('').map((_, i) => i), comparing: Array.from({ length: patLen }, (_, i) => i), swapping: [], sorted: [], message: `Window '${s.slice(0, patLen)}': hash=${hash.toFixed(0)}. O(m) setup.`, line: 2 })
+        for (let i = patLen; i < s.length; i++) {
+            hash = (hash - (s.charCodeAt(i - patLen) - 96) + MOD) % MOD
+            hash = hash * BASE % MOD
+            hash = (hash + (s.charCodeAt(i) - 96)) % MOD
+            steps.push({ array: s.split('').map((_, j) => j), comparing: Array.from({ length: patLen }, (_, k) => i - patLen + 1 + k), swapping: [], sorted: [], message: `Slide to '${s.slice(i - patLen + 1, i + 1)}': remove '${s[i - patLen]}', add '${s[i]}'. Hash=${hash.toFixed(0)}. O(1)!`, line: 3 })
+        }
+        steps.push({ array: s.split('').map((_, i) => i), comparing: [], swapping: [], sorted: s.split('').map((_, i) => i), message: `Rolling hash: all ${s.length - patLen + 1} windows computed in O(n) total!`, line: 4 })
+        return steps
+    },
+    'expression-evaluation': () => {
+        const steps = []
+        const tokens = ['3', '+', '4', '*', '2']
+        const nums = [], ops = []
+        const prec = { '+': 1, '-': 1, '*': 2, '/': 2 }
+        steps.push({ array: [...nums], comparing: [], swapping: [], sorted: [], message: `Expression Evaluation: '3 + 4 * 2'. Two stacks: nums and ops.`, line: 1 })
+        for (let i = 0; i < tokens.length; i++) {
+            const t = tokens[i]
+            if (/\d/.test(t)) {
+                nums.push(+t)
+                steps.push({ array: [...nums], comparing: [nums.length - 1], swapping: [], sorted: [], message: `Token '${t}' is number → push to nums: [${nums}]`, line: 2 })
+            } else {
+                while (ops.length && prec[ops[ops.length - 1]] >= prec[t]) {
+                    const b = nums.pop(), a = nums.pop(), op = ops.pop()
+                    const res = op === '+' ? a + b : op === '-' ? a - b : op === '*' ? a * b : Math.trunc(a / b)
+                    nums.push(res)
+                    steps.push({ array: [...nums], comparing: [], swapping: [nums.length - 1], sorted: [], message: `Higher prec: ${a} ${op} ${b} = ${res}`, line: 3 })
+                }
+                ops.push(t)
+                steps.push({ array: [...nums], comparing: [], swapping: [], sorted: [], message: `Push op '${t}'. ops:[${ops}] nums:[${nums}]`, line: 4 })
+            }
+        }
+        while (ops.length) {
+            const b = nums.pop(), a = nums.pop(), op = ops.pop()
+            const res = op === '+' ? a + b : op === '-' ? a - b : op === '*' ? a * b : Math.trunc(a / b)
+            nums.push(res)
+        }
+        steps.push({ array: [...nums], comparing: [], swapping: [], sorted: [0], message: `Result = ${nums[0]}. Correct! (3 + 4*2 = 11)`, line: 5 })
+        return steps
+    },
+    'parentheses-matching': () => {
+        const steps = []
+        const expr = '({[]})'.split('')
+        const stack = [], map = { ')': '(', ']': '[', '}': '{' }
+        steps.push({ array: expr.map((_, i) => i), comparing: [], swapping: [], sorted: [], message: `Parentheses Matching: '${expr.join('')}'. Stack to validate brackets.`, line: 1 })
+        let valid = true
+        for (let i = 0; i < expr.length; i++) {
+            const ch = expr[i]
+            if ('([{'.includes(ch)) {
+                stack.push(ch)
+                steps.push({ array: stack.map((_, j) => j), comparing: [i], swapping: [], sorted: [], message: `'${ch}' opening → push. Stack: [${stack.join('')}]`, line: 2 })
+            } else {
+                const top = stack.pop()
+                if (top !== map[ch]) {
+                    valid = false
+                    steps.push({ array: stack.map((_, j) => j), comparing: [], swapping: [i], sorted: [], message: `'${ch}' expected '${map[ch]}' got '${top}' → INVALID!`, line: 3 })
+                    break
+                }
+                steps.push({ array: stack.map((_, j) => j), comparing: [i], swapping: [], sorted: [], message: `'${ch}' matches '${top}' → pop. Stack: [${stack.join('')}]`, line: 4 })
+            }
+        }
+        steps.push({ array: stack.map((_, j) => j), comparing: [], swapping: [], sorted: valid ? [0] : [], message: valid && stack.length === 0 ? 'VALID! All brackets matched.' : 'INVALID!', line: 5 })
+        return steps
+    },
+    'next-greater-element': (arr) => {
+        const steps = []
+        const array = arr.slice(0, 7)
+        const result = new Array(array.length).fill(-1)
+        const stack = []
+        steps.push({ array: [...array], comparing: [], swapping: [], sorted: [], message: `Next Greater Element: [${array}]. Monotonic decreasing stack.`, line: 1 })
+        for (let i = 0; i < array.length; i++) {
+            while (stack.length && array[stack[stack.length - 1]] < array[i]) {
+                const popped = stack.pop()
+                result[popped] = array[i]
+                steps.push({ array: [...array], comparing: [i, popped], swapping: [], sorted: [popped], message: `NGE of arr[${popped}]=${array[popped]} is ${array[i]}`, line: 2 })
+            }
+            stack.push(i)
+            steps.push({ array: [...array], comparing: [i], swapping: [], sorted: [], message: `Push idx ${i} (${array[i]}). Stack vals: [${stack.map(s => array[s]).join(', ')}]`, line: 3 })
+        }
+        steps.push({ array: [...result], comparing: [], swapping: [], sorted: result.map((_, i) => i), message: `NGE result: [${result}]. O(n) — each element enters/leaves stack once!`, line: 4 })
+        return steps
+    },
+    'histogram-problems': (arr) => {
+        const steps = []
+        const heights = arr.slice(0, 7).map(x => (x % 6) + 1)
+        const stack = []
+        let maxArea = 0
+        const n = heights.length
+        steps.push({ array: [...heights], comparing: [], swapping: [], sorted: [], message: `Largest Rectangle in Histogram: heights = [${heights}]`, line: 1 })
+        const extended = [...heights, 0]
+        for (let i = 0; i <= n; i++) {
+            while (stack.length && heights[stack[stack.length - 1]] > extended[i]) {
+                const h = heights[stack.pop()]
+                const w = stack.length ? i - stack[stack.length - 1] - 1 : i
+                const area = h * w
+                if (area > maxArea) maxArea = area
+                steps.push({ array: [...heights], comparing: [i], swapping: [], sorted: [stack.length ? stack[stack.length - 1] + 1 : 0], message: `Pop h=${h}, w=${w}, area=${area}. Max: ${maxArea}`, line: 2 })
+            }
+            if (i < n) {
+                stack.push(i)
+                steps.push({ array: [...heights], comparing: [i], swapping: [], sorted: [], message: `Push idx ${i} (h=${heights[i]}).`, line: 3 })
+            }
+        }
+        steps.push({ array: [...heights], comparing: [], swapping: [], sorted: heights.map((_, i) => i), message: `Max rectangle area = ${maxArea}. O(n) monotonic stack!`, line: 4 })
+        return steps
+    },
+    'deque': (arr) => {
+        const steps = []
+        const dq = []
+        const elements = arr.slice(0, 5)
+        steps.push({ array: [...dq], comparing: [], swapping: [], sorted: [], message: `Deque: O(1) push/pop at both front and rear.`, line: 1 })
+        dq.push(elements[0])
+        steps.push({ array: [...dq], comparing: [dq.length - 1], swapping: [], sorted: [], message: `pushRear(${elements[0]}): [${dq}]`, line: 2 })
+        dq.unshift(elements[1])
+        steps.push({ array: [...dq], comparing: [0], swapping: [], sorted: [], message: `pushFront(${elements[1]}): [${dq}]`, line: 2 })
+        dq.push(elements[2])
+        steps.push({ array: [...dq], comparing: [dq.length - 1], swapping: [], sorted: [], message: `pushRear(${elements[2]}): [${dq}]`, line: 2 })
+        const front = dq.shift()
+        steps.push({ array: [...dq], comparing: [], swapping: [], sorted: [], message: `popFront()=${front}: [${dq}]`, line: 3 })
+        const rear = dq.pop()
+        steps.push({ array: [...dq], comparing: [], swapping: [], sorted: dq.map((_, i) => i), message: `popRear()=${rear}: [${dq}]. Used in: sliding window, BFS.`, line: 4 })
+        return steps
+    },
+    'priority-queue': (arr) => {
+        const steps = []
+        const heap = []
+        const elements = arr.slice(0, 6)
+        const siftUp = (h, i) => { while (i > 0) { const p = Math.floor((i - 1) / 2); if (h[p] <= h[i]) break; [h[p], h[i]] = [h[i], h[p]]; i = p } }
+        steps.push({ array: [...heap], comparing: [], swapping: [], sorted: [], message: `Priority Queue (Min-Heap): smallest element always at top.`, line: 1 })
+        for (const val of elements) {
+            heap.push(val); siftUp(heap, heap.length - 1)
+            steps.push({ array: [...heap], comparing: [0], swapping: [], sorted: [], message: `Insert ${val} → heap: [${heap}]. Min=${heap[0]}`, line: 2 })
+        }
+        for (let i = 0; i < 3 && heap.length > 1; i++) {
+            const min = heap[0]; heap[0] = heap.pop()
+            let idx = 0
+            while (true) {
+                let s = idx, l = 2 * idx + 1, r = 2 * idx + 2
+                if (l < heap.length && heap[l] < heap[s]) s = l
+                if (r < heap.length && heap[r] < heap[s]) s = r
+                if (s === idx) break; [heap[s], heap[idx]] = [heap[idx], heap[s]]; idx = s
+            }
+            steps.push({ array: [...heap], comparing: [], swapping: [0], sorted: [], message: `extractMin()=${min}. Heap: [${heap}]. New min=${heap[0]}`, line: 3 })
+        }
+        steps.push({ array: [...heap], comparing: [], swapping: [], sorted: [0], message: `PQ: O(log n) insert/extract, O(1) peek. Powers Dijkstra, Huffman, Top-K.`, line: 4 })
+        return steps
+    },
+    'monotonic-queue': (arr) => {
+        const steps = []
+        const nums = arr.slice(0, 8)
+        const k = 3
+        const deque = [], result = []
+        steps.push({ array: [...nums], comparing: [], swapping: [], sorted: [], message: `Sliding Window Max: nums=[${nums}], k=${k}. Monotonic decreasing deque.`, line: 1 })
+        for (let i = 0; i < nums.length; i++) {
+            if (deque.length && deque[0] < i - k + 1) {
+                deque.shift()
+                steps.push({ array: [...nums], comparing: [i], swapping: [], sorted: [], message: `Remove out-of-window index from front`, line: 2 })
+            }
+            while (deque.length && nums[deque[deque.length - 1]] < nums[i]) {
+                const popped = deque.pop()
+                steps.push({ array: [...nums], comparing: [i, popped], swapping: [], sorted: [], message: `nums[${popped}]=${nums[popped]} < nums[${i}]=${nums[i]} → pop rear`, line: 3 })
+            }
+            deque.push(i)
+            if (i >= k - 1) {
+                result.push(nums[deque[0]])
+                steps.push({ array: [...nums], comparing: deque.slice(), swapping: [], sorted: [deque[0]], message: `Window max=${nums[deque[0]]}. Result: [${result}]`, line: 4 })
+            }
+        }
+        steps.push({ array: result, comparing: [], swapping: [], sorted: result.map((_, i) => i), message: `Window maxima: [${result}]. O(n) total!`, line: 5 })
+        return steps
+    },
+    'static-array': (arr) => {
+        const steps = []
+        const array = arr.slice(0, 6)
+        steps.push({ array: [...array], comparing: [], swapping: [], sorted: [], message: `Static Array: ${array.length} elements allocated in contiguous memory. Indices 0 to ${array.length - 1}.`, line: 1 })
+        for (let i = 0; i < array.length; i++) {
+            steps.push({ array: [...array], comparing: [i], swapping: [], sorted: [], message: `Access arr[${i}] = ${array[i]}. Address = base + ${i} × element_size. O(1) time.`, line: 2 })
+        }
+        steps.push({ array: [...array], comparing: [], swapping: [], sorted: array.map((_, i) => i), message: `Static array: O(1) access, O(n) insert/delete. Fixed size — cannot grow!`, line: 3 })
+        return steps
+    },
+    'memory-layout': (arr) => {
+        const steps = []
+        const array = arr.slice(0, 5)
+        steps.push({ array: [...array], comparing: [], swapping: [], sorted: [], message: `Memory Layout: array of ${array.length} integers stored contiguously in RAM.`, line: 1 })
+        let addr = 0x100
+        for (let i = 0; i < array.length; i++) {
+            steps.push({ array: [...array], comparing: [i], swapping: [], sorted: [], message: `arr[${i}] = ${array[i]} at address 0x${(addr + i * 4).toString(16).toUpperCase()} (base 0x100, offset ${i * 4} bytes)`, line: 2 })
+        }
+        steps.push({ array: [...array], comparing: [], swapping: [], sorted: array.map((_, i) => i), message: 'Cache-friendly! Sequential access uses hardware prefetching. Linked lists scatter across RAM — much slower!', line: 3 })
+        return steps
+    },
+    'array-operations': (arr) => {
+        const steps = []
+        let array = arr.slice(0, 5)
+        steps.push({ array: [...array], comparing: [], swapping: [], sorted: [], message: `Array operations: [${array.join(', ')}]. Demonstrating insert, delete, search.`, line: 1 })
+        const toInsert = 99
+        for (let i = array.length; i > 2; i--) steps.push({ array: [...array, 0].map((v, j) => j > 2 ? array[j - 1] : v === 0 ? 0 : array[j]), comparing: [i - 1, i], swapping: [i - 1, i], sorted: [], message: `Insert ${toInsert} at index 2: shift element at [${i - 1}] right to [${i}]`, line: 2 })
+        array = [...array.slice(0, 2), toInsert, ...array.slice(2)]
+        steps.push({ array: [...array], comparing: [2], swapping: [], sorted: [], message: `Inserted ${toInsert} at index 2. O(n) due to shifting!`, line: 3 })
+        const shifted = [...array.slice(1)]
+        steps.push({ array: [...shifted], comparing: [], swapping: [], sorted: [], message: `Delete index 0: shift all elements left. O(n) time. Array: [${shifted.join(', ')}]`, line: 4 })
+        const target = shifted[3]
+        for (let i = 0; i < shifted.length; i++) {
+            steps.push({ array: [...shifted], comparing: [i], swapping: [], sorted: [], message: `Linear search for ${target}: checking index ${i} → ${shifted[i] === target ? 'FOUND!' : 'no match'}`, line: 5 })
+            if (shifted[i] === target) break
+        }
+        return steps
+    },
+    'majority-element': (arr) => {
+        const steps = []
+        const majority = arr[0] % 50 + 10
+        const array = Array.from({ length: 7 }, (_, i) => i < 4 ? majority : arr[i % arr.length] % 20 + 1)
+        steps.push({ array: [...array], comparing: [], swapping: [], sorted: [], message: `Boyer-Moore Voting: find element appearing > n/2 times in [${array.join(', ')}]`, line: 1 })
+        let candidate = array[0], votes = 1
+        steps.push({ array: [...array], comparing: [0], swapping: [], sorted: [], message: `Initialize: candidate = ${candidate}, votes = ${votes}`, line: 2 })
+        for (let i = 1; i < array.length; i++) {
+            if (votes === 0) {
+                candidate = array[i]; votes = 1
+                steps.push({ array: [...array], comparing: [i], swapping: [], sorted: [], message: `votes = 0 → new candidate = ${candidate}, votes = 1`, line: 3 })
+            } else if (array[i] === candidate) {
+                votes++
+                steps.push({ array: [...array], comparing: [i], swapping: [], sorted: [], message: `arr[${i}]=\arr[i] matches candidate ${candidate} → votes = ${votes}`, line: 4 })
+            } else {
+                votes--
+                steps.push({ array: [...array], comparing: [i], swapping: [], sorted: [], message: `arr[${i}]=\arr[i] ≠ candidate ${candidate} → votes = ${votes}`, line: 5 })
+            }
+        }
+        steps.push({ array: [...array], comparing: [], swapping: [], sorted: array.map((x, i) => x === candidate ? i : -1).filter(i => i >= 0), message: `Majority element = ${candidate}! Boyer-Moore: O(n) time, O(1) space.`, line: 6 })
+        return steps
+    },
+    'circular-linked-list': (arr) => {
+        const steps = []
+        const elements = arr.slice(0, 5)
+        const nodes = []
+        steps.push({ array: [...nodes], comparing: [], swapping: [], sorted: [], message: `Circular Linked List: tail.next → head. Good for round-robin scheduling.`, line: 1 })
+        for (const val of elements) {
+            nodes.push(val)
+            steps.push({ array: [...nodes], comparing: [nodes.length - 1], swapping: [], sorted: [], message: `Insert ${val}: [${nodes.join(' → ')} → head(${nodes[0]})]`, line: 2 })
+        }
+        for (let i = 0; i < nodes.length + 2; i++) {
+            const idx = i % nodes.length
+            steps.push({ array: [...nodes], comparing: [idx], swapping: [], sorted: [], message: `Traverse step ${i + 1}: node[${idx}]=${nodes[idx]}. Wraps after ${nodes.length} steps!`, line: 3 })
+        }
+        steps.push({ array: [...nodes], comparing: [], swapping: [], sorted: nodes.map((_, i) => i), message: `Circular LL: tail.next=head. Use fast-slow to detect cycle.`, line: 4 })
+        return steps
+    },
+    'fast-slow-pointer': (arr) => {
+        const steps = []
+        const elements = arr.slice(0, 8)
+        const next = elements.map((_, i) => i === elements.length - 1 ? 3 : i + 1)
+        steps.push({ array: [...elements], comparing: [], swapping: [], sorted: [], message: `Fast-Slow (Floyd's): slow=1 step, fast=2 steps. Cycle at index 3.`, line: 1 })
+        let slow = 0, fast = 0
+        for (let step = 0; step < elements.length; step++) {
+            slow = next[slow]; fast = next[next[fast]]
+            steps.push({ array: [...elements], comparing: [slow, fast], swapping: [], sorted: [], message: `Step ${step + 1}: slow=${slow}, fast=${fast}${slow === fast ? ' → CYCLE DETECTED!' : ''}`, line: 2 })
+            if (slow === fast) break
+        }
+        slow = 0
+        while (slow !== fast) {
+            slow = next[slow]; fast = next[fast]
+            steps.push({ array: [...elements], comparing: [slow, fast], swapping: [], sorted: [], message: `Find start: slow=${slow}, fast=${fast}${slow === fast ? ' → Cycle start!' : ''}`, line: 3 })
+        }
+        steps.push({ array: [...elements], comparing: [], swapping: [], sorted: [slow], message: `Cycle starts at index ${slow}. O(n) time, O(1) space!`, line: 4 })
+        return steps
+    },
+    'merge-linked-lists': (arr) => {
+        const steps = []
+        const a = [...arr.slice(0, 4)].sort((x, y) => x - y)
+        const b = [...arr.slice(4, 7)].sort((x, y) => x - y)
+        steps.push({ array: [...a, -1, ...b], comparing: [], swapping: [], sorted: [], message: `Merge Two Sorted Lists. L1=[${a}], L2=[${b}].`, line: 1 })
+        const merged = []
+        let i = 0, j = 0
+        while (i < a.length && j < b.length) {
+            steps.push({ array: [...merged, ...a.slice(i), -1, ...b.slice(j)], comparing: [merged.length, merged.length + a.length - i + 1], swapping: [], sorted: merged.map((_, k) => k), message: `Compare L1[${i}]=${a[i]} vs L2[${j}]=${b[j]}: pick ${Math.min(a[i], b[j])}`, line: 2 })
+            if (a[i] <= b[j]) merged.push(a[i++])
+            else merged.push(b[j++])
+        }
+        while (i < a.length) merged.push(a[i++])
+        while (j < b.length) merged.push(b[j++])
+        steps.push({ array: [...merged], comparing: [], swapping: [], sorted: merged.map((_, i) => i), message: `Merged: [${merged}]. O(n+m) time, O(1) space!`, line: 3 })
+        return steps
+    },
+    'hash-function': (arr) => {
+        const steps = []
+        const keys = ['apple', 'banana', 'cherry', 'date', 'fig']
+        const tableSize = 7
+        const polyHash = (key, size) => { let h = 0; for (const c of key) h = (h * 31 + c.charCodeAt(0)) % size; return h }
+        steps.push({ array: new Array(tableSize).fill(0), comparing: [], swapping: [], sorted: [], message: `Hash Function: map keys to table[0..${tableSize - 1}] using polynomial hash.`, line: 1 })
+        for (const key of keys) {
+            const idx = polyHash(key, tableSize)
+            const table = new Array(tableSize).fill(0); table[idx] = 1
+            steps.push({ array: [...table], comparing: [idx], swapping: [], sorted: [], message: `hash('${key}') = ${idx}. ∑(charCode × 31^i) % ${tableSize}`, line: 2 })
+        }
+        steps.push({ array: new Array(tableSize).fill(1), comparing: [], swapping: [], sorted: new Array(tableSize).fill(0).map((_, i) => i), message: `Good hash: deterministic, uniform, fast O(k). Avoids clustering!`, line: 3 })
+        return steps
+    },
+    'collision-handling': (arr) => {
+        const steps = []
+        const tableSize = 5
+        const values = arr.slice(0, 7)
+        const table = Array.from({ length: tableSize }, () => [])
+        const hashFn = v => v % tableSize
+        steps.push({ array: table.map(b => b.length), comparing: [], swapping: [], sorted: [], message: `Separate Chaining: each slot has a linked list. Size=${tableSize}.`, line: 1 })
+        for (const v of values) {
+            const idx = hashFn(v)
+            table[idx].push(v)
+            steps.push({ array: table.map(b => b.length), comparing: [idx], swapping: [], sorted: [], message: `hash(${v})=${idx}: bucket=[${table[idx]}]${table[idx].length > 1 ? ' ← COLLISION!' : ''}`, line: 2 })
+        }
+        steps.push({ array: table.map(b => b.length), comparing: [], swapping: [], sorted: table.map((b, i) => i).filter(i => table[i].length > 0), message: `Load factor=${(values.length / tableSize).toFixed(1)}. High LF degrades to O(n).`, line: 3 })
+        return steps
+    },
+    'hashset': (arr) => {
+        const steps = []
+        const elements = [...arr.slice(0, 5), arr[0], arr[1]]
+        const set = new Set()
+        steps.push({ array: [...elements], comparing: [], swapping: [], sorted: [], message: `HashSet: unique elements only. O(1) avg add/contains. Input: [${elements}]`, line: 1 })
+        for (let i = 0; i < elements.length; i++) {
+            const val = elements[i], existed = set.has(val)
+            set.add(val)
+            steps.push({ array: [...elements], comparing: [i], swapping: [], sorted: existed ? [i] : [], message: `add(${val}): ${existed ? 'duplicate → ignored' : `added. Set: {${[...set]}}`}`, line: 2 })
+        }
+        steps.push({ array: [...set].map((_, i) => i), comparing: [], swapping: [], sorted: [...set].map((_, i) => i), message: `Set: {${[...set]}}. Size=${set.size}. Deduplicated in O(n)!`, line: 3 })
+        return steps
+    },
+    'frequency-map': (arr) => {
+        const steps = []
+        const elements = arr.slice(0, 8)
+        const freq = new Map()
+        steps.push({ array: [...elements], comparing: [], swapping: [], sorted: [], message: `Frequency Map: count occurrences. [${elements}]. Most versatile interview pattern!`, line: 1 })
+        for (let i = 0; i < elements.length; i++) {
+            const val = elements[i]
+            freq.set(val, (freq.get(val) || 0) + 1)
+            steps.push({ array: [...elements], comparing: [i], swapping: [], sorted: [], message: `freq[${val}]=${freq.get(val)}. Map: {${[...freq.entries()].map(([k, v]) => `${k}:${v}`).join(', ')}}`, line: 2 })
+        }
+        const sorted = [...freq.entries()].sort((a, b) => b[1] - a[1])
+        steps.push({ array: sorted.map(([_, v]) => v), comparing: [0], swapping: [], sorted: [0], message: `Most frequent: ${sorted[0][0]} (×${sorted[0][1]}). Backbone of: anagram, top-K, two-sum.`, line: 3 })
+        return steps
+    },
+    'tree-boundary-views': () => {
+        const nodes = [1, 2, 3, 4, 5, 0, 6]
+        const steps = []
+        steps.push({ array: [...nodes], comparing: [], swapping: [], sorted: [], message: `Tree Views: [1,2,3,4,5,null,6]. Computing left view, right view.`, line: 1 })
+        steps.push({ array: [...nodes], comparing: [0, 1, 3], swapping: [], sorted: [0], message: `Left View (first node at each level): [1, 2, 4]. BFS, take first node per level.`, line: 2 })
+        steps.push({ array: [...nodes], comparing: [0, 2, 5], swapping: [], sorted: [0, 2, 5], message: `Right View (last node at each level): [1, 3, 6]. BFS, take last node per level.`, line: 3 })
+        steps.push({ array: [...nodes], comparing: [3, 1, 0, 2, 5], swapping: [], sorted: [3, 1, 0, 2, 5], message: `Top View (using HD): [4→HD=-2, 2→HD=-1, 1→HD=0, 3→HD=1, 6→HD=2] = [4,2,1,3,6]`, line: 4 })
+        steps.push({ array: [...nodes], comparing: [], swapping: [], sorted: nodes.map((_, i) => i), message: `All views use BFS + level/HD tracking. Common interview favorite!`, line: 5 })
+        return steps
+    },
+    'lowest-common-ancestor': () => {
+        const nodes = [3, 5, 1, 6, 2, 0, 8]
+        const steps = []
+        steps.push({ array: [...nodes], comparing: [], swapping: [], sorted: [], message: `LCA: find deepest common ancestor of nodes 6 and 2. Tree: [3,5,1,6,2,0,8]`, line: 1 })
+        steps.push({ array: [...nodes], comparing: [3], swapping: [], sorted: [], message: `Search for node 6: found at index 3 (left child of 5). Return node 6 up.`, line: 2 })
+        steps.push({ array: [...nodes], comparing: [4], swapping: [], sorted: [], message: `Search for node 2: found at index 4 (right child of 5). Return node 2 up.`, line: 3 })
+        steps.push({ array: [...nodes], comparing: [1], swapping: [], sorted: [1], message: `At node 5 (index 1): left found 6, right found 2 → LCA = 5! Both in different subtrees of 5.`, line: 4 })
+        steps.push({ array: [...nodes], comparing: [], swapping: [], sorted: [1], message: `LCA(6, 2) = 5. O(n) time. For BST: O(log n) using BST property to navigate.`, line: 5 })
+        return steps
+    },
+    'tree-serialization': () => {
+        const nodes = [1, 2, 3, 4, 5, 0, 6]
+        const steps = []
+        steps.push({ array: [...nodes], comparing: [], swapping: [], sorted: [], message: `Tree Serialization: encode binary tree [1,2,3,4,5,null,6] to string and back.`, line: 1 })
+        steps.push({ array: [...nodes], comparing: [0, 1, 3], swapping: [], sorted: [], message: `Preorder serialize: visit root(1) → left subtree → right subtree. '1,2,4,null,null,5,null,null,3,null,6,null,null'`, line: 2 })
+        steps.push({ array: [...nodes], comparing: [0, 2, 5], swapping: [], sorted: [], message: `Null markers are critical! Without them, inorder alone cannot uniquely reconstruct the tree.`, line: 3 })
+        steps.push({ array: [...nodes], comparing: [], swapping: [], sorted: nodes.map((_, i) => i), message: `Deserialize: split by ',', use recursion with an index pointer. O(n) time and space.`, line: 4 })
+        return steps
+    },
+    'bst-validation': () => {
+        const nodes = [5, 3, 7, 1, 4, 6, 8]
+        const steps = []
+        steps.push({ array: [...nodes], comparing: [], swapping: [], sorted: [], message: `BST Validation: check every node satisfies BST property. [5,3,7,1,4,6,8]`, line: 1 })
+        steps.push({ array: [...nodes], comparing: [0], swapping: [], sorted: [], message: `Root=5: left subtree must have all values < 5. Right subtree must have all values > 5.`, line: 2 })
+        steps.push({ array: [...nodes], comparing: [1, 3, 4], swapping: [], sorted: [1, 3, 4], message: `Left subtree of 5: [3,1,4]. All < 5. Node 3: range=(-∞,5). Node 1: range=(-∞,3). Node 4: range=(3,5). ✓`, line: 3 })
+        steps.push({ array: [...nodes], comparing: [2, 5, 6], swapping: [], sorted: [2, 5, 6], message: `Right subtree of 5: [7,6,8]. All > 5. Node 7: range=(5,+∞). Node 6: range=(5,7). Node 8: range=(7,+∞). ✓`, line: 4 })
+        steps.push({ array: [...nodes], comparing: [], swapping: [], sorted: nodes.map((_, i) => i), message: `VALID BST! Inorder traversal gives sorted: [1,3,4,5,6,7,8]. O(n) range-check approach avoids parent-only pitfalls!`, line: 5 })
+        return steps
+    },
+    'bst-floor-ceil': () => {
+        const nodes = [8, 4, 12, 2, 6, 10, 14]
+        const target = 7
+        const steps = []
+        steps.push({ array: [...nodes], comparing: [], swapping: [], sorted: [], message: `BST Floor & Ceil: tree=[8,4,12,2,6,10,14]. Find floor(${target}) and ceil(${target}).`, line: 1 })
+        let floor = null, ceil = null, node = nodes[0]
+        steps.push({ array: [...nodes], comparing: [0], swapping: [], sorted: [], message: `Start at root=8. 8 > ${target} → potential ceil=8, go LEFT.`, line: 2 })
+        steps.push({ array: [...nodes], comparing: [1], swapping: [], sorted: [], message: `Node=4. 4 < ${target} → potential floor=4, go RIGHT.`, line: 3 })
+        steps.push({ array: [...nodes], comparing: [4], swapping: [], sorted: [], message: `Node=6. 6 < ${target} → potential floor=6, go RIGHT (no right child → stop).`, line: 4 })
+        steps.push({ array: [...nodes], comparing: [], swapping: [], sorted: [4, 0], message: `floor(${target})=6 (greatest ≤ ${target}). ceil(${target})=8 (smallest ≥ ${target}). O(log n) avg!`, line: 5 })
+        return steps
+    },
+    'kth-smallest-bst': () => {
+        const nodes = [5, 3, 7, 1, 4, 6, 8]
+        const k = 3
+        const steps = []
+        steps.push({ array: [...nodes], comparing: [], swapping: [], sorted: [], message: `Kth Smallest in BST: find ${k}rd smallest. BST inorder = sorted ascending!`, line: 1 })
+        const inorder = [1, 3, 4, 5, 6, 7, 8]
+        steps.push({ array: [...nodes], comparing: [3], swapping: [], sorted: [3], message: `Inorder step 1: visit 1 (count=1). count < ${k}.`, line: 2 })
+        steps.push({ array: [...nodes], comparing: [1], swapping: [], sorted: [3, 1], message: `Inorder step 2: visit 3 (count=2). count < ${k}.`, line: 3 })
+        steps.push({ array: [...nodes], comparing: [4], swapping: [], sorted: [3, 1, 4], message: `Inorder step 3: visit 4 (count=3=k). FOUND! ${k}rd smallest = 4.`, line: 4 })
+        steps.push({ array: [...nodes], comparing: [], swapping: [], sorted: [4], message: `Kth Smallest = ${inorder[k - 1]}. Use iterative inorder to avoid full traversal: O(h + k).`, line: 5 })
+        return steps
+    },
+    'red-black-tree': () => {
+        const steps = []
+        const nodes = [7, 3, 11, 1, 5, 9, 13]
+        steps.push({ array: [...nodes], comparing: [], swapping: [], sorted: [], message: `Red-Black Tree: BST with 5 color properties. Root=7(B), 3(R), 11(R), 1(B), 5(B), 9(B), 13(B).`, line: 1 })
+        steps.push({ array: [...nodes], comparing: [0], swapping: [], sorted: [0], message: `Property 1: Root is BLACK (7). Property 2: All NIL leaves are BLACK.`, line: 2 })
+        steps.push({ array: [...nodes], comparing: [1, 2], swapping: [], sorted: [], message: `Property 3: RED node's children must be BLACK. 3(R)→1(B),5(B) ✓. 11(R)→9(B),13(B) ✓.`, line: 3 })
+        steps.push({ array: [...nodes], comparing: [], swapping: [], sorted: nodes.map((_, i) => i), message: `Property 4: All paths root→leaf have equal BLACK count. Height ≤ 2log(n+1). Used in: TreeMap, std::map.`, line: 4 })
+        return steps
+    },
+    'b-tree': () => {
+        const steps = []
+        steps.push({ array: [1, 2, 3, 4, 5, 6, 7], comparing: [], swapping: [], sorted: [], message: `B-Tree (order t=2): each node has [1,3] keys and [2,4] children. Designed for disk storage.`, line: 1 })
+        steps.push({ array: [10, 20, 30, 0, 0, 0, 0], comparing: [0, 1, 2], swapping: [], sorted: [], message: `Node with keys [10,20,30]. 3 keys = 4 children. All at same depth — always balanced!`, line: 2 })
+        steps.push({ array: [10, 20, 30, 0, 0, 0, 0], comparing: [], swapping: [], sorted: [0, 1, 2], message: `Insert 25: goes to right child of 20. If node is full (3 keys), split: middle key 20 rises to parent.`, line: 3 })
+        steps.push({ array: [10, 20, 30, 0, 0, 0, 0], comparing: [], swapping: [], sorted: [0, 1, 2, 3, 4, 5, 6], message: `With t=100: height=O(log₁₀₀ n). For n=1M: height≈3. B+Trees (leaves linked) power MySQL InnoDB!`, line: 4 })
+        return steps
+    },
+    'min-heap': (arr) => {
+        const steps = []
+        const elements = arr.slice(0, 7)
+        const heap = []
+        const siftUp = (h, i) => {
+            while (i > 0) {
+                const p = Math.floor((i - 1) / 2)
+                if (h[p] <= h[i]) break
+                ;[h[p], h[i]] = [h[i], h[p]]; i = p
+            }
+        }
+        steps.push({ array: [...heap], comparing: [], swapping: [], sorted: [], message: `Min Heap: complete binary tree, parent ≤ children. Array representation: parent(i)=⌊(i-1)/2⌋.`, line: 1 })
+        for (const val of elements) {
+            heap.push(val)
+            siftUp(heap, heap.length - 1)
+            steps.push({ array: [...heap], comparing: [0], swapping: [], sorted: [], message: `Insert ${val}: add to end, sift up. Heap: [${heap}]. Min = ${heap[0]}`, line: 2 })
+        }
+        for (let i = 0; i < 2 && heap.length > 1; i++) {
+            const min = heap[0]
+            heap[0] = heap.pop()
+            let idx = 0
+            while (true) {
+                let s = idx, l = 2 * idx + 1, r = 2 * idx + 2
+                if (l < heap.length && heap[l] < heap[s]) s = l
+                if (r < heap.length && heap[r] < heap[s]) s = r
+                if (s === idx) break
+                ;[heap[s], heap[idx]] = [heap[idx], heap[s]]; idx = s
+            }
+            steps.push({ array: [...heap], comparing: [0], swapping: [], sorted: [], message: `extractMin()=${min}: move last to root, sift down. New heap: [${heap}]. New min=${heap[0]}`, line: 3 })
+        }
+        return steps
+    },
+    'heapify': (arr) => {
+        const steps = []
+        const array = arr.slice(0, 7)
+        steps.push({ array: [...array], comparing: [], swapping: [], sorted: [], message: `Heapify (Floyd's O(n)): build min-heap bottom-up. Start from last non-leaf (index ${Math.floor(array.length / 2) - 1}).`, line: 1 })
+        const heap = [...array]
+        const siftDown = (h, i, n) => {
+            while (true) {
+                let s = i, l = 2 * i + 1, r = 2 * i + 2
+                if (l < n && h[l] < h[s]) s = l
+                if (r < n && h[r] < h[s]) s = r
+                if (s === i) break
+                ;[h[s], h[i]] = [h[i], h[s]]; i = s
+            }
+        }
+        for (let i = Math.floor(heap.length / 2) - 1; i >= 0; i--) {
+            const before = [...heap]
+            siftDown(heap, i, heap.length)
+            steps.push({ array: [...heap], comparing: [i], swapping: heap.map((v, j) => v !== before[j] ? j : -1).filter(j => j >= 0), sorted: [], message: `Sift down index ${i}: heap[${i}]=${before[i]}. After: [${heap}]`, line: 2 })
+        }
+        steps.push({ array: [...heap], comparing: [], swapping: [], sorted: [0], message: `Heap built! [${heap}]. Min=${heap[0]}. Why O(n)? Most nodes sift down very few levels.`, line: 3 })
+        return steps
+    },
+    'median-heap': (arr) => {
+        const steps = []
+        const stream = arr.slice(0, 7)
+        const lower = [], upper = []
+        const pushMaxHeap = (h, v) => { h.push(v); let i = h.length - 1; while (i > 0) { const p = Math.floor((i - 1) / 2); if (h[p] >= h[i]) break; [h[p], h[i]] = [h[i], h[p]]; i = p } }
+        const pushMinHeap = (h, v) => { h.push(v); let i = h.length - 1; while (i > 0) { const p = Math.floor((i - 1) / 2); if (h[p] <= h[i]) break; [h[p], h[i]] = [h[i], h[p]]; i = p } }
+        const popMaxHeap = (h) => { const v = h[0]; h[0] = h.pop(); let i = 0; while (true) { let s = i, l = 2*i+1, r = 2*i+2; if (l < h.length && h[l] > h[s]) s = l; if (r < h.length && h[r] > h[s]) s = r; if (s === i) break; [h[s], h[i]] = [h[i], h[s]]; i = s } return v }
+        const popMinHeap = (h) => { const v = h[0]; h[0] = h.pop(); let i = 0; while (true) { let s = i, l = 2*i+1, r = 2*i+2; if (l < h.length && h[l] < h[s]) s = l; if (r < h.length && h[r] < h[s]) s = r; if (s === i) break; [h[s], h[i]] = [h[i], h[s]]; i = s } return v }
+        steps.push({ array: [...stream], comparing: [], swapping: [], sorted: [], message: `Median of Stream: lower=MaxHeap (bottom half), upper=MinHeap (top half). Stream: [${stream}]`, line: 1 })
+        for (let i = 0; i < stream.length; i++) {
+            const num = stream[i]
+            if (!lower.length || num <= lower[0]) pushMaxHeap(lower, num)
+            else pushMinHeap(upper, num)
+            if (lower.length > upper.length + 1) pushMinHeap(upper, popMaxHeap(lower))
+            else if (upper.length > lower.length) pushMaxHeap(lower, popMinHeap(upper))
+            const median = lower.length > upper.length ? lower[0] : (lower[0] + upper[0]) / 2
+            steps.push({ array: [...stream.slice(0, i + 1)], comparing: [i], swapping: [], sorted: [], message: `Add ${num}: lower=[${lower}] upper=[${upper}]. Median = ${median}`, line: 2 })
+        }
+        return steps
+    },
+    'xor-trie': (arr) => {
+        const steps = []
+        const nums = arr.slice(0, 6).map(x => x % 16)
+        steps.push({ array: [...nums], comparing: [], swapping: [], sorted: [], message: `XOR Trie: binary trie for maximizing XOR. Numbers: [${nums}]`, line: 1 })
+        let maxXOR = 0, bestPair = [0, 0]
+        for (let i = 0; i < nums.length; i++) {
+            let xorVal = 0
+            steps.push({ array: [...nums], comparing: [i], swapping: [], sorted: [], message: `Insert ${nums[i]} (${nums[i].toString(2).padStart(4, '0')}) into trie bit by bit (MSB to LSB).`, line: 2 })
+            for (let j = 0; j < i; j++) {
+                const x = nums[i] ^ nums[j]
+                if (x > xorVal) { xorVal = x; bestPair = [i, j] }
+            }
+            if (xorVal > maxXOR) maxXOR = xorVal
+            steps.push({ array: [...nums], comparing: [i, bestPair[1]], swapping: [], sorted: [], message: `Query ${nums[i]}: greedy pick opposite bits. Best XOR with ${nums[bestPair[1]]} = ${xorVal} (${xorVal.toString(2).padStart(4, '0')})`, line: 3 })
+        }
+        steps.push({ array: [...nums], comparing: [], swapping: [], sorted: bestPair, message: `Maximum XOR = ${maxXOR} from ${nums[bestPair[0]]} XOR ${nums[bestPair[1]]}. O(32n) time!`, line: 4 })
+        return steps
+    }
+};
+
 const allGenerators = {
+    ...newGenerators,
     ...sortingGenerators,
     ...searchingGenerators,
     ...arraysGenerators,

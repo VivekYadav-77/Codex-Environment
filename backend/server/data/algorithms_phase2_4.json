@@ -1,0 +1,838 @@
+[
+  {
+    "id": "static-array",
+    "name": "Static Array",
+    "category": "arrays",
+    "complexity": { "time": "O(1) access, O(n) insert/delete", "space": "O(n)" },
+    "description": "A fixed-size contiguous block of memory where each element is accessible in O(1) time by its index. The size is determined at allocation time and cannot change.",
+    "operations": ["access", "traverse", "search", "initialize"],
+    "code": {
+      "javascript": "// Declare a static-size array\nconst arr = new Array(5).fill(0);\n\n// Access in O(1)\nconsole.log(arr[2]); // 0\n\n// Assign value\narr[0] = 42;\narr[4] = 99;\n\n// Traverse O(n)\nfor (let i = 0; i < arr.length; i++) {\n  console.log(i, arr[i]);\n}",
+      "python": "# Static-size array (Python list of fixed size)\narr = [0] * 5\n\n# Access O(1)\nprint(arr[2])  # 0\n\n# Assign\narr[0] = 42\narr[4] = 99\n\n# Traverse O(n)\nfor i, val in enumerate(arr):\n    print(i, val)",
+      "java": "int[] arr = new int[5]; // fixed-size\narr[0] = 42;\narr[4] = 99;\nSystem.out.println(arr[2]); // 0\nfor (int i = 0; i < arr.length; i++) {\n    System.out.println(i + \" \" + arr[i]);\n}",
+      "cpp": "#include <array>\nstd::array<int, 5> arr{};   // fixed-size\narr[0] = 42;\narr[4] = 99;\nstd::cout << arr[2]; // 0\nfor (int i = 0; i < arr.size(); i++) {\n    std::cout << i << \" \" << arr[i] << \"\\n\";\n}"
+    },
+    "practice": {
+      "theory": ["Why does a static array offer O(1) random access?", "What happens when you access index out of bounds?"],
+      "coding": "Implement a function to find the second maximum element in a static array without sorting.",
+      "interview": "Explain the difference between stack-allocated arrays and heap-allocated arrays."
+    }
+  },
+  {
+    "id": "memory-layout",
+    "name": "Memory Layout",
+    "category": "arrays",
+    "complexity": { "time": "O(1) access", "space": "O(n)" },
+    "description": "Arrays are stored in contiguous memory locations. If the base address is 1000 and each integer is 4 bytes, index i is at address 1000 + i*4. This cache-friendly layout is why array traversal is faster than linked-list traversal.",
+    "operations": ["address-calculation", "cache-access", "stride-traversal"],
+    "code": {
+      "javascript": "// Memory layout illustration\nconst arr = [10, 20, 30, 40, 50];\n// index  0   1   2   3   4\n// addr   0x100 0x104 0x108 0x10C 0x110 (4 bytes each)\n\n// address(i) = base + i * element_size\nfunction addressOf(base, index, elementSize) {\n  return base + index * elementSize;\n}\nconsole.log(addressOf(0x100, 2, 4)); // 0x108 = 264",
+      "python": "import ctypes\narr = (ctypes.c_int * 5)(10, 20, 30, 40, 50)\nbase = ctypes.addressof(arr)\nfor i in range(5):\n    addr = base + i * ctypes.sizeof(ctypes.c_int)\n    print(f'arr[{i}] = {arr[i]}, address = 0x{addr:X}')",
+      "java": "// Java arrays are objects on heap, indices map to contiguous memory\nint[] arr = {10, 20, 30, 40, 50};\n// JVM manages layout; conceptually: base + i * 4\nfor (int i = 0; i < arr.length; i++) {\n    System.out.println(\"arr[\" + i + \"] = \" + arr[i]);\n}",
+      "cpp": "#include <iostream>\nint arr[] = {10, 20, 30, 40, 50};\nfor (int i = 0; i < 5; i++) {\n    std::cout << \"arr[\" << i << \"] at &\" << (void*)&arr[i] << \" = \" << arr[i] << \"\\n\";\n}"
+    },
+    "practice": {
+      "theory": ["How does cache locality affect performance when traversing arrays vs linked lists?", "What is the difference between row-major and column-major memory layout?"],
+      "coding": "Implement a 2D matrix and demonstrate how row-major traversal is faster than column-major.",
+      "interview": "Why is iterating over a 2D array row-by-row faster than column-by-column in most languages?"
+    }
+  },
+  {
+    "id": "array-operations",
+    "name": "Array Operations",
+    "category": "arrays",
+    "complexity": { "time": "O(1) access, O(n) insert/delete", "space": "O(1)" },
+    "description": "Core array operations — indexing (O(1)), insertion (O(n) shift), deletion (O(n) shift), and search (O(n) unsorted, O(log n) sorted). Understanding these tradeoffs is fundamental to algorithm design.",
+    "operations": ["read", "write", "insert", "delete", "search"],
+    "code": {
+      "javascript": "function insertAt(arr, index, value) {\n  for (let i = arr.length; i > index; i--) arr[i] = arr[i-1];\n  arr[index] = value;\n  return arr;\n}\n\nfunction deleteAt(arr, index) {\n  for (let i = index; i < arr.length - 1; i++) arr[i] = arr[i+1];\n  arr.pop();\n  return arr;\n}\n\nconst arr = [1, 2, 4, 5];\ninsertAt(arr, 2, 3);  // [1, 2, 3, 4, 5]\ndeleteAt(arr, 0);     // [2, 3, 4, 5]",
+      "python": "def insert_at(arr, index, value):\n    arr.append(None)\n    for i in range(len(arr)-1, index, -1):\n        arr[i] = arr[i-1]\n    arr[index] = value\n    return arr\n\ndef delete_at(arr, index):\n    for i in range(index, len(arr)-1):\n        arr[i] = arr[i+1]\n    arr.pop()\n    return arr",
+      "java": "int[] insertAt(int[] arr, int index, int value) {\n    int[] newArr = new int[arr.length + 1];\n    for (int i = 0; i < index; i++) newArr[i] = arr[i];\n    newArr[index] = value;\n    for (int i = index; i < arr.length; i++) newArr[i+1] = arr[i];\n    return newArr;\n}",
+      "cpp": "void insertAt(std::vector<int>& arr, int index, int value) {\n    arr.insert(arr.begin() + index, value);\n}\nvoid deleteAt(std::vector<int>& arr, int index) {\n    arr.erase(arr.begin() + index);\n}"
+    },
+    "practice": {
+      "theory": ["Why does inserting at index 0 take O(n) time?", "How can you achieve O(1) deletion if order doesn't matter?"],
+      "coding": "Rotate an array k positions to the right in O(n) time and O(1) space.",
+      "interview": "Describe an O(1) deletion trick by swapping with the last element."
+    }
+  },
+  {
+    "id": "majority-element",
+    "name": "Majority Element",
+    "category": "arrays",
+    "complexity": { "time": "O(n)", "space": "O(1)" },
+    "description": "Find the element that appears more than n/2 times in an array. Boyer-Moore Voting Algorithm achieves this in O(n) time and O(1) space by tracking a candidate and its vote count.",
+    "operations": ["vote", "cancel", "verify"],
+    "code": {
+      "javascript": "function majorityElement(nums) {\n  let candidate = nums[0], votes = 1;\n  for (let i = 1; i < nums.length; i++) {\n    if (votes === 0) { candidate = nums[i]; votes = 1; }\n    else if (nums[i] === candidate) votes++;\n    else votes--;\n  }\n  return candidate; // guaranteed to be majority\n}",
+      "python": "def majority_element(nums):\n    candidate, votes = nums[0], 1\n    for n in nums[1:]:\n        if votes == 0:\n            candidate, votes = n, 1\n        elif n == candidate:\n            votes += 1\n        else:\n            votes -= 1\n    return candidate",
+      "java": "int majorityElement(int[] nums) {\n    int candidate = nums[0], votes = 1;\n    for (int i = 1; i < nums.length; i++) {\n        if (votes == 0) { candidate = nums[i]; votes = 1; }\n        else if (nums[i] == candidate) votes++;\n        else votes--;\n    }\n    return candidate;\n}",
+      "cpp": "int majorityElement(vector<int>& nums) {\n    int candidate = nums[0], votes = 1;\n    for (int i = 1; i < nums.size(); i++) {\n        if (votes == 0) { candidate = nums[i]; votes = 1; }\n        else if (nums[i] == candidate) votes++;\n        else votes--;\n    }\n    return candidate;\n}"
+    },
+    "practice": {
+      "theory": ["Why does Boyer-Moore work even if no majority exists?", "How would you modify it to find elements appearing > n/3 times?"],
+      "coding": "Find all elements appearing more than n/3 times in O(n) time and O(1) space.",
+      "interview": "Prove that the Boyer-Moore candidate is always the majority element if one exists."
+    }
+  },
+  {
+    "id": "string-basics",
+    "name": "String Basics",
+    "category": "strings",
+    "complexity": { "time": "O(n)", "space": "O(n)" },
+    "description": "Strings are sequences of characters stored contiguously in memory. In most languages, strings are immutable — any modification creates a new string. Understanding how strings work in memory is critical for optimizing string-heavy algorithms.",
+    "operations": ["access", "slice", "concat", "compare", "iterate"],
+    "code": {
+      "javascript": "const s = 'hello';\nconsole.log(s[0]);           // 'h' — O(1) access\nconsole.log(s.length);       // 5\nconsole.log(s.toUpperCase()); // 'HELLO' — creates new string\nconsole.log(s.slice(1, 3));   // 'el' — O(k) where k is slice length\n\n// Efficient string building\nconst parts = ['h', 'e', 'l', 'l', 'o'];\nconst result = parts.join(''); // O(n) — better than repeated +=",
+      "python": "s = 'hello'\nprint(s[0])          # 'h'\nprint(len(s))        # 5\nprint(s.upper())     # 'HELLO'\nprint(s[1:3])        # 'el'\n\n# Use list for mutability\nchars = list(s)\nchars[0] = 'j'\nprint(''.join(chars))  # 'jello'",
+      "java": "String s = \"hello\";\nSystem.out.println(s.charAt(0));     // 'h'\nSystem.out.println(s.length());      // 5\nSystem.out.println(s.toUpperCase()); // HELLO\nSystem.out.println(s.substring(1,3)); // el\n// Use StringBuilder for mutation\nStringBuilder sb = new StringBuilder(s);\nsb.setCharAt(0, 'j');\nSystem.out.println(sb.toString()); // jello",
+      "cpp": "#include <string>\nstd::string s = \"hello\";\nstd::cout << s[0] << std::endl;  // h\nstd::cout << s.length() << std::endl;  // 5\ns[0] = 'j';  // C++ strings ARE mutable\nstd::cout << s << std::endl;  // jello"
+    },
+    "practice": {
+      "theory": ["Why are strings immutable in Java and Python?", "What is the time complexity of string concatenation using += in a loop?"],
+      "coding": "Reverse a string in-place (or using a character array) without using built-in reverse.",
+      "interview": "Explain the difference between a String and a StringBuilder in Java, and when to use each."
+    }
+  },
+  {
+    "id": "character-encoding",
+    "name": "Character Encoding",
+    "category": "strings",
+    "complexity": { "time": "O(1)", "space": "O(1)" },
+    "description": "Character encoding maps characters to numeric codes. ASCII covers 128 characters (0-127). Unicode extends this to over 1 million code points. UTF-8 is variable-length (1-4 bytes per character) and backward-compatible with ASCII. Understanding encoding is critical for string comparison and internationalization.",
+    "operations": ["char-to-code", "code-to-char", "encode", "decode"],
+    "code": {
+      "javascript": "// ASCII / Unicode code points\nconst ch = 'A';\nconsole.log(ch.charCodeAt(0));        // 65\nconsole.log(String.fromCharCode(65)); // 'A'\n\n// Check if lowercase letter\nconst isLower = (c) => c >= 'a' && c <= 'z';\n// Check if digit\nconst isDigit = (c) => c >= '0' && c <= '9';\n\n// Frequency array for lowercase ASCII\nconst freq = new Array(26).fill(0);\n'abcaab'.split('').forEach(c => freq[c.charCodeAt(0) - 97]++);\nconsole.log(freq.slice(0, 3)); // [3, 1, 1]",
+      "python": "ch = 'A'\nprint(ord(ch))     # 65\nprint(chr(65))     # 'A'\n\n# Frequency array trick\nfreq = [0] * 26\nfor c in 'abcaab':\n    freq[ord(c) - ord('a')] += 1\nprint(freq[:3])  # [3, 1, 1]",
+      "java": "char ch = 'A';\nSystem.out.println((int) ch);            // 65\nSystem.out.println((char) 65);           // A\n\nint[] freq = new int[26];\nfor (char c : \"abcaab\".toCharArray()) freq[c - 'a']++;\nSystem.out.println(Arrays.toString(Arrays.copyOf(freq, 3)));",
+      "cpp": "#include <iostream>\nchar ch = 'A';\nstd::cout << (int)ch << std::endl;  // 65\nstd::cout << (char)65 << std::endl; // A\n\nint freq[26] = {0};\nfor (char c : std::string(\"abcaab\")) freq[c - 'a']++;\nstd::cout << freq[0] << \" \" << freq[1] << \" \" << freq[2] << std::endl;"
+    },
+    "practice": {
+      "theory": ["What is the ASCII value range for uppercase letters, lowercase letters, and digits?", "Why does UTF-8 use variable-length encoding?"],
+      "coding": "Count the frequency of each character in a string using an integer array instead of a hashmap.",
+      "interview": "How would you design a function to check if two strings are anagrams using character encoding?"
+    }
+  },
+  {
+    "id": "string-matching",
+    "name": "String Matching (Naive)",
+    "category": "strings",
+    "complexity": { "time": "O(nm) naive, O(n+m) KMP", "space": "O(1) naive, O(m) KMP" },
+    "description": "String matching finds all occurrences of a pattern P in text T. Naive approach: slide pattern over text, check character by character — O(nm). Advanced: KMP uses a failure function to avoid redundant comparisons — O(n+m).",
+    "operations": ["slide", "compare", "match", "advance"],
+    "code": {
+      "javascript": "// Naive O(nm) string matching\nfunction naiveSearch(text, pattern) {\n  const n = text.length, m = pattern.length;\n  const matches = [];\n  for (let i = 0; i <= n - m; i++) {\n    let j = 0;\n    while (j < m && text[i + j] === pattern[j]) j++;\n    if (j === m) matches.push(i);\n  }\n  return matches;\n}\nconsole.log(naiveSearch('abababc', 'aba')); // [0, 2]",
+      "python": "def naive_search(text, pattern):\n    n, m = len(text), len(pattern)\n    matches = []\n    for i in range(n - m + 1):\n        if text[i:i+m] == pattern:\n            matches.append(i)\n    return matches\n\nprint(naive_search('abababc', 'aba'))  # [0, 2]",
+      "java": "List<Integer> naiveSearch(String text, String pattern) {\n    int n = text.length(), m = pattern.length();\n    List<Integer> matches = new ArrayList<>();\n    for (int i = 0; i <= n - m; i++) {\n        if (text.substring(i, i + m).equals(pattern)) matches.add(i);\n    }\n    return matches;\n}",
+      "cpp": "vector<int> naiveSearch(string text, string pattern) {\n    int n = text.size(), m = pattern.size();\n    vector<int> matches;\n    for (int i = 0; i <= n - m; i++) {\n        if (text.substr(i, m) == pattern) matches.push_back(i);\n    }\n    return matches;\n}"
+    },
+    "practice": {
+      "theory": ["Why does the naive algorithm have O(nm) worst-case complexity?", "When does the naive algorithm perform as well as KMP?"],
+      "coding": "Implement the KMP failure function and use it to find all pattern occurrences in O(n+m).",
+      "interview": "Explain why the Z-algorithm can also solve string matching in O(n+m)."
+    }
+  },
+  {
+    "id": "palindrome-check",
+    "name": "Palindrome Check",
+    "category": "strings",
+    "complexity": { "time": "O(n)", "space": "O(1)" },
+    "description": "A palindrome reads the same forwards and backwards (e.g. 'racecar'). Two-pointer approach: check characters from both ends moving inward — O(n) time, O(1) space. Hashing approach checks substrings in O(1) after O(n) preprocessing.",
+    "operations": ["two-pointer-check", "expand-around-center", "hash-compare"],
+    "code": {
+      "javascript": "// Basic palindrome check O(n)\nfunction isPalindrome(s) {\n  let l = 0, r = s.length - 1;\n  while (l < r) {\n    if (s[l] !== s[r]) return false;\n    l++; r--;\n  }\n  return true;\n}\n\n// Longest palindromic substring — expand from center\nfunction longestPalindrome(s) {\n  let start = 0, maxLen = 1;\n  function expand(l, r) {\n    while (l >= 0 && r < s.length && s[l] === s[r]) { l--; r++; }\n    if (r - l - 1 > maxLen) { maxLen = r - l - 1; start = l + 1; }\n  }\n  for (let i = 0; i < s.length; i++) { expand(i, i); expand(i, i+1); }\n  return s.slice(start, start + maxLen);\n}",
+      "python": "def is_palindrome(s):\n    l, r = 0, len(s) - 1\n    while l < r:\n        if s[l] != s[r]: return False\n        l += 1; r -= 1\n    return True\n\ndef longest_palindrome(s):\n    start, max_len = 0, 1\n    def expand(l, r):\n        nonlocal start, max_len\n        while l >= 0 and r < len(s) and s[l] == s[r]:\n            l -= 1; r += 1\n        if r - l - 1 > max_len:\n            max_len = r - l - 1; start = l + 1\n    for i in range(len(s)):\n        expand(i, i); expand(i, i+1)\n    return s[start:start+max_len]",
+      "java": "boolean isPalindrome(String s) {\n    int l = 0, r = s.length() - 1;\n    while (l < r) {\n        if (s.charAt(l) != s.charAt(r)) return false;\n        l++; r--;\n    }\n    return true;\n}",
+      "cpp": "bool isPalindrome(string s) {\n    int l = 0, r = s.size() - 1;\n    while (l < r) {\n        if (s[l] != s[r]) return false;\n        l++; r--;\n    }\n    return true;\n}"
+    },
+    "practice": {
+      "theory": ["How does expanding from the center differ from the two-pointer approach?", "Why does Manacher's algorithm find all palindromes in O(n)?"],
+      "coding": "Count the number of palindromic substrings in a string in O(n^2).",
+      "interview": "Is 'A man, a plan, a canal: Panama' a palindrome? How would you handle non-alphanumeric chars?"
+    }
+  },
+  {
+    "id": "frequency-count",
+    "name": "Frequency Count",
+    "category": "hashing",
+    "complexity": { "time": "O(n)", "space": "O(k) where k = distinct elements" },
+    "description": "Count occurrences of each element in O(n) by using a hash map. This is the foundation of many interview problems — anagram detection, majority elements, top-k frequent items, and more.",
+    "operations": ["count", "lookup", "aggregate"],
+    "code": {
+      "javascript": "function frequencyCount(arr) {\n  const freq = {};\n  for (const x of arr) freq[x] = (freq[x] || 0) + 1;\n  return freq;\n}\n\n// Using Map for non-string keys\nfunction freqMap(arr) {\n  const map = new Map();\n  for (const x of arr) map.set(x, (map.get(x) || 0) + 1);\n  return map;\n}\n\nconst result = frequencyCount([1, 2, 2, 3, 3, 3]);\nconsole.log(result); // {1: 1, 2: 2, 3: 3}",
+      "python": "from collections import Counter\n\narr = [1, 2, 2, 3, 3, 3]\nfreq = Counter(arr)\nprint(freq)  # Counter({3: 3, 2: 2, 1: 1})\nprint(freq[3])  # 3\nprint(freq.most_common(2))  # [(3, 3), (2, 2)]",
+      "java": "Map<Integer, Integer> frequencyCount(int[] arr) {\n    Map<Integer, Integer> freq = new HashMap<>();\n    for (int x : arr) freq.merge(x, 1, Integer::sum);\n    return freq;\n}",
+      "cpp": "unordered_map<int,int> frequencyCount(vector<int>& arr) {\n    unordered_map<int,int> freq;\n    for (int x : arr) freq[x]++;\n    return freq;\n}"
+    },
+    "practice": {
+      "theory": ["What is the time complexity of building a frequency map?", "When would you use an array of size 26 instead of a hashmap for character counting?"],
+      "coding": "Find the first non-repeating character in a string in O(n) using frequency counting.",
+      "interview": "How does frequency counting help solve the 'Top K Frequent Elements' problem?"
+    }
+  },
+  {
+    "id": "rolling-hash",
+    "name": "Rolling Hash",
+    "category": "strings",
+    "complexity": { "time": "O(n) after O(m) preprocessing", "space": "O(1)" },
+    "description": "Rolling hash allows computing the hash of the next substring in O(1) by removing the contribution of the leftmost character and adding the new rightmost character. Used in Rabin-Karp string matching and duplicate substring detection.",
+    "operations": ["hash-window", "slide-right", "remove-left", "add-right"],
+    "code": {
+      "javascript": "function rollingHash(s, patLen) {\n  const BASE = 31, MOD = 1e9 + 7;\n  let hash = 0, power = 1;\n  const results = [];\n\n  // Build initial window hash\n  for (let i = 0; i < patLen; i++) {\n    hash = (hash + (s.charCodeAt(i) - 96) * power) % MOD;\n    if (i < patLen - 1) power = power * BASE % MOD;\n  }\n  results.push([0, hash]);\n\n  // Slide window\n  for (let i = patLen; i < s.length; i++) {\n    hash = (hash - (s.charCodeAt(i - patLen) - 96) + MOD) % MOD;\n    hash = hash * BASE % MOD;\n    hash = (hash + (s.charCodeAt(i) - 96)) % MOD;\n    results.push([i - patLen + 1, hash]);\n  }\n  return results;\n}",
+      "python": "def rolling_hash(s, pat_len, base=31, mod=10**9+7):\n    hashes = []\n    h, power = 0, 1\n    for i in range(pat_len):\n        h = (h + (ord(s[i]) - 96) * power) % mod\n        if i < pat_len - 1: power = power * base % mod\n    hashes.append((0, h))\n    for i in range(pat_len, len(s)):\n        h = (h - (ord(s[i-pat_len]) - 96) + mod) % mod\n        h = h * base % mod\n        h = (h + (ord(s[i]) - 96)) % mod\n        hashes.append((i - pat_len + 1, h))\n    return hashes",
+      "java": "// Rolling hash for window of size k\nlong rollingHash(String s, int k, long base, long mod) {\n    long hash = 0, power = 1;\n    for (int i = 0; i < k; i++) {\n        hash = (hash + (s.charAt(i) - 'a' + 1) * power) % mod;\n        if (i < k-1) power = power * base % mod;\n    }\n    return hash;\n}",
+      "cpp": "long long rollingHash(string& s, int k, long long base=31, long long mod=1e9+7) {\n    long long hash = 0, power = 1;\n    for (int i = 0; i < k; i++) {\n        hash = (hash + (s[i]-'a'+1) * power) % mod;\n        if (i < k-1) power = power * base % mod;\n    }\n    return hash;\n}"
+    },
+    "practice": {
+      "theory": ["How does rolling hash achieve O(1) window update?", "What are hash collisions and how does double hashing reduce them?"],
+      "coding": "Use rolling hash to find the longest duplicate substring in O(n log n) (binary search + rolling hash).",
+      "interview": "Explain why we need a large prime modulus when computing rolling hashes."
+    }
+  },
+  {
+    "id": "circular-linked-list",
+    "name": "Circular Linked List",
+    "category": "linked-lists",
+    "complexity": { "time": "O(n) traverse, O(1) insert at head/tail", "space": "O(n)" },
+    "description": "A linked list where the last node's next pointer points back to the head, forming a cycle. Useful for round-robin scheduling, circular buffers, and problems where you need to cycle through elements repeatedly.",
+    "operations": ["insert", "traverse", "detect-tail", "circular-check"],
+    "code": {
+      "javascript": "class Node {\n  constructor(val) { this.val = val; this.next = null; }\n}\n\nfunction buildCircular(values) {\n  if (!values.length) return null;\n  const head = new Node(values[0]);\n  let curr = head;\n  for (let i = 1; i < values.length; i++) {\n    curr.next = new Node(values[i]);\n    curr = curr.next;\n  }\n  curr.next = head; // make it circular\n  return head;\n}\n\nfunction traverse(head, limit = 10) {\n  let curr = head, count = 0;\n  while (curr && count < limit) {\n    console.log(curr.val);\n    curr = curr.next;\n    count++;\n  }\n}",
+      "python": "class Node:\n    def __init__(self, val):\n        self.val = val\n        self.next = None\n\ndef build_circular(values):\n    if not values: return None\n    head = Node(values[0])\n    curr = head\n    for v in values[1:]:\n        curr.next = Node(v)\n        curr = curr.next\n    curr.next = head  # circular!\n    return head\n\ndef traverse(head, limit=10):\n    curr, count = head, 0\n    while curr and count < limit:\n        print(curr.val)\n        curr = curr.next\n        count += 1",
+      "java": "class Node { int val; Node next; Node(int v) { val = v; } }\nNode buildCircular(int[] vals) {\n    Node head = new Node(vals[0]), curr = head;\n    for (int i = 1; i < vals.length; i++) { curr.next = new Node(vals[i]); curr = curr.next; }\n    curr.next = head;\n    return head;\n}",
+      "cpp": "struct Node { int val; Node* next; Node(int v) : val(v), next(nullptr) {} };\nNode* buildCircular(vector<int>& vals) {\n    Node* head = new Node(vals[0]);\n    Node* curr = head;\n    for (int i = 1; i < vals.size(); i++) { curr->next = new Node(vals[i]); curr = curr->next; }\n    curr->next = head;\n    return head;\n}"
+    },
+    "practice": {
+      "theory": ["How do you detect if a linked list is circular in O(n) time?", "What is the difference between a circular singly linked list and a circular doubly linked list?"],
+      "coding": "Insert a node into a sorted circular linked list.",
+      "interview": "How is a circular linked list used in a round-robin CPU scheduler?"
+    }
+  },
+  {
+    "id": "fast-slow-pointer",
+    "name": "Fast Slow Pointer (Floyd's Cycle Detection)",
+    "category": "linked-lists",
+    "complexity": { "time": "O(n)", "space": "O(1)" },
+    "description": "Use two pointers — slow (moves 1 step) and fast (moves 2 steps). If a cycle exists, they will meet. The meeting point can be used to find the cycle start. Also used to find the middle of a linked list.",
+    "operations": ["advance-slow", "advance-fast", "detect-meeting", "find-cycle-start"],
+    "code": {
+      "javascript": "function hasCycle(head) {\n  let slow = head, fast = head;\n  while (fast && fast.next) {\n    slow = slow.next;\n    fast = fast.next.next;\n    if (slow === fast) return true;\n  }\n  return false;\n}\n\nfunction findCycleStart(head) {\n  let slow = head, fast = head;\n  while (fast && fast.next) {\n    slow = slow.next;\n    fast = fast.next.next;\n    if (slow === fast) break;\n  }\n  if (!fast || !fast.next) return null; // no cycle\n  slow = head;\n  while (slow !== fast) { slow = slow.next; fast = fast.next; }\n  return slow;\n}\n\nfunction findMiddle(head) {\n  let slow = head, fast = head;\n  while (fast && fast.next) { slow = slow.next; fast = fast.next.next; }\n  return slow;\n}",
+      "python": "def has_cycle(head):\n    slow = fast = head\n    while fast and fast.next:\n        slow = slow.next\n        fast = fast.next.next\n        if slow is fast: return True\n    return False\n\ndef find_cycle_start(head):\n    slow = fast = head\n    while fast and fast.next:\n        slow = slow.next\n        fast = fast.next.next\n        if slow is fast: break\n    else: return None\n    slow = head\n    while slow is not fast:\n        slow = slow.next\n        fast = fast.next\n    return slow",
+      "java": "boolean hasCycle(ListNode head) {\n    ListNode slow = head, fast = head;\n    while (fast != null && fast.next != null) {\n        slow = slow.next;\n        fast = fast.next.next;\n        if (slow == fast) return true;\n    }\n    return false;\n}",
+      "cpp": "bool hasCycle(ListNode* head) {\n    ListNode* slow = head, *fast = head;\n    while (fast && fast->next) {\n        slow = slow->next;\n        fast = fast->next->next;\n        if (slow == fast) return true;\n    }\n    return false;\n}"
+    },
+    "practice": {
+      "theory": ["Why does the slow and fast pointer always meet if a cycle exists?", "How do you find the length of a cycle after detecting it?"],
+      "coding": "Find the node where the cycle begins (not just if a cycle exists).",
+      "interview": "Use Floyd's algorithm to find the middle of a linked list for merge sort."
+    }
+  },
+  {
+    "id": "merge-linked-lists",
+    "name": "Merge Two Sorted Linked Lists",
+    "category": "linked-lists",
+    "complexity": { "time": "O(n + m)", "space": "O(1)" },
+    "description": "Merge two sorted linked lists into one sorted list by comparing node values and adjusting pointers. No extra space needed — reuse existing nodes. This is the core subroutine of merge sort on linked lists.",
+    "operations": ["compare", "link-smaller", "advance-pointer", "attach-remainder"],
+    "code": {
+      "javascript": "function mergeSortedLists(l1, l2) {\n  const dummy = { next: null };\n  let curr = dummy;\n  while (l1 && l2) {\n    if (l1.val <= l2.val) { curr.next = l1; l1 = l1.next; }\n    else { curr.next = l2; l2 = l2.next; }\n    curr = curr.next;\n  }\n  curr.next = l1 || l2;\n  return dummy.next;\n}",
+      "python": "def merge_sorted_lists(l1, l2):\n    dummy = curr = type('Node', (), {'next': None})()\n    while l1 and l2:\n        if l1.val <= l2.val: curr.next, l1 = l1, l1.next\n        else: curr.next, l2 = l2, l2.next\n        curr = curr.next\n    curr.next = l1 or l2\n    return dummy.next",
+      "java": "ListNode mergeTwoLists(ListNode l1, ListNode l2) {\n    ListNode dummy = new ListNode(0), curr = dummy;\n    while (l1 != null && l2 != null) {\n        if (l1.val <= l2.val) { curr.next = l1; l1 = l1.next; }\n        else { curr.next = l2; l2 = l2.next; }\n        curr = curr.next;\n    }\n    curr.next = (l1 != null) ? l1 : l2;\n    return dummy.next;\n}",
+      "cpp": "ListNode* mergeTwoLists(ListNode* l1, ListNode* l2) {\n    ListNode dummy(0); ListNode* curr = &dummy;\n    while (l1 && l2) {\n        if (l1->val <= l2->val) { curr->next = l1; l1 = l1->next; }\n        else { curr->next = l2; l2 = l2->next; }\n        curr = curr->next;\n    }\n    curr->next = l1 ? l1 : l2;\n    return dummy.next;\n}"
+    },
+    "practice": {
+      "theory": ["Why do we use a dummy head node?", "Can this be done recursively? What is the recursive time and space complexity?"],
+      "coding": "Merge K sorted linked lists in O(n log k) using a min-heap.",
+      "interview": "How does merging sorted linked lists differ from merging sorted arrays?"
+    }
+  },
+  {
+    "id": "expression-evaluation",
+    "name": "Expression Evaluation",
+    "category": "stacks",
+    "complexity": { "time": "O(n)", "space": "O(n)" },
+    "description": "Parse and evaluate arithmetic expressions like '3 + 4 * 2'. Uses two stacks (operand and operator) or converts infix to postfix (RPN). Operator precedence is handled by comparing stack top before pushing.",
+    "operations": ["push-operand", "push-operator", "pop-and-evaluate", "handle-precedence"],
+    "code": {
+      "javascript": "function evaluate(expr) {\n  const nums = [], ops = [];\n  const prec = {'+': 1, '-': 1, '*': 2, '/': 2};\n  const applyOp = () => {\n    const b = nums.pop(), a = nums.pop(), op = ops.pop();\n    if (op === '+') nums.push(a + b);\n    else if (op === '-') nums.push(a - b);\n    else if (op === '*') nums.push(a * b);\n    else nums.push(Math.trunc(a / b));\n  };\n  let i = 0;\n  while (i < expr.length) {\n    if (expr[i] === ' ') { i++; continue; }\n    if (/\\d/.test(expr[i])) {\n      let num = 0;\n      while (i < expr.length && /\\d/.test(expr[i])) num = num * 10 + +expr[i++];\n      nums.push(num);\n    } else {\n      while (ops.length && prec[ops[ops.length-1]] >= prec[expr[i]]) applyOp();\n      ops.push(expr[i++]);\n    }\n  }\n  while (ops.length) applyOp();\n  return nums[0];\n}\nconsole.log(evaluate('3 + 4 * 2')); // 11",
+      "python": "def evaluate(expr):\n    nums, ops = [], []\n    prec = {'+': 1, '-': 1, '*': 2, '/': 2}\n    def apply_op():\n        b, a, op = nums.pop(), nums.pop(), ops.pop()\n        nums.append(a+b if op=='+' else a-b if op=='-' else a*b if op=='*' else int(a/b))\n    i = 0\n    while i < len(expr):\n        if expr[i] == ' ': i += 1; continue\n        if expr[i].isdigit():\n            num = 0\n            while i < len(expr) and expr[i].isdigit(): num = num*10 + int(expr[i]); i += 1\n            nums.append(num)\n        else:\n            while ops and prec.get(ops[-1], 0) >= prec.get(expr[i], 0): apply_op()\n            ops.append(expr[i]); i += 1\n    while ops: apply_op()\n    return nums[0]\nprint(evaluate('3 + 4 * 2'))  # 11",
+      "java": "// Two-stack approach for expression evaluation\nint evaluate(String expr) {\n    Stack<Integer> nums = new Stack<>();\n    Stack<Character> ops = new Stack<>();\n    // ... implementation similar to JavaScript\n    return nums.peek();\n}",
+      "cpp": "// Use two stacks: one for numbers, one for operators\nint evaluate(string expr) {\n    stack<int> nums;\n    stack<char> ops;\n    // ... implementation\n    return nums.top();\n}"
+    },
+    "practice": {
+      "theory": ["What is the difference between infix, prefix, and postfix notation?", "How does operator precedence affect the evaluation order?"],
+      "coding": "Convert an infix expression to postfix (Reverse Polish Notation) using a stack.",
+      "interview": "Evaluate a Reverse Polish Notation expression using a single stack."
+    }
+  },
+  {
+    "id": "parentheses-matching",
+    "name": "Parentheses Matching",
+    "category": "stacks",
+    "complexity": { "time": "O(n)", "space": "O(n)" },
+    "description": "Validate that an expression has balanced brackets. Use a stack: push opening brackets, pop when a closing bracket is seen and check if it matches. Return true only if the stack is empty at the end.",
+    "operations": ["push-open", "pop-and-check", "check-empty"],
+    "code": {
+      "javascript": "function isValid(s) {\n  const stack = [], map = { ')': '(', ']': '[', '}': '{' };\n  for (const ch of s) {\n    if ('([{'.includes(ch)) stack.push(ch);\n    else if (stack.pop() !== map[ch]) return false;\n  }\n  return stack.length === 0;\n}\nconsole.log(isValid('()[]{}')); // true\nconsole.log(isValid('(]'));     // false",
+      "python": "def is_valid(s):\n    stack = []\n    mapping = {')': '(', ']': '[', '}': '{'}\n    for ch in s:\n        if ch in '([{':\n            stack.append(ch)\n        elif not stack or stack.pop() != mapping[ch]:\n            return False\n    return len(stack) == 0\n\nprint(is_valid('()[]{}'))  # True\nprint(is_valid('(]'))      # False",
+      "java": "boolean isValid(String s) {\n    Deque<Character> stack = new ArrayDeque<>();\n    for (char ch : s.toCharArray()) {\n        if (ch == '(' || ch == '[' || ch == '{') stack.push(ch);\n        else {\n            if (stack.isEmpty()) return false;\n            char top = stack.pop();\n            if (ch == ')' && top != '(') return false;\n            if (ch == ']' && top != '[') return false;\n            if (ch == '}' && top != '{') return false;\n        }\n    }\n    return stack.isEmpty();\n}",
+      "cpp": "bool isValid(string s) {\n    stack<char> st;\n    for (char ch : s) {\n        if (ch == '(' || ch == '[' || ch == '{') st.push(ch);\n        else {\n            if (st.empty()) return false;\n            char top = st.top(); st.pop();\n            if (ch==')' && top!='(') return false;\n            if (ch==']' && top!='[') return false;\n            if (ch=='}' && top!='{') return false;\n        }\n    }\n    return st.empty();\n}"
+    },
+    "practice": {
+      "theory": ["What happens if you encounter a closing bracket on an empty stack?", "How would you find the minimum number of bracket removals to make a string valid?"],
+      "coding": "Count the minimum number of parentheses to add to make a string valid.",
+      "interview": "How would you extend this to handle nested structures like HTML tags?"
+    }
+  },
+  {
+    "id": "next-greater-element",
+    "name": "Next Greater Element",
+    "category": "stacks",
+    "complexity": { "time": "O(n)", "space": "O(n)" },
+    "description": "For each element, find the first element to its right that is greater. Brute force is O(n²). Monotonic stack achieves O(n) by maintaining a decreasing stack — pop when a greater element is found, assigning it as the answer for all popped elements.",
+    "operations": ["push-index", "pop-and-resolve", "assign-nge"],
+    "code": {
+      "javascript": "function nextGreaterElement(nums) {\n  const n = nums.length, result = new Array(n).fill(-1);\n  const stack = []; // monotonic decreasing stack of indices\n  for (let i = 0; i < n; i++) {\n    while (stack.length && nums[stack[stack.length - 1]] < nums[i]) {\n      result[stack.pop()] = nums[i];\n    }\n    stack.push(i);\n  }\n  return result;\n}\nconsole.log(nextGreaterElement([4, 5, 2, 10])); // [5, 10, 10, -1]",
+      "python": "def next_greater_element(nums):\n    n = len(nums)\n    result = [-1] * n\n    stack = []  # monotonic decreasing stack of indices\n    for i in range(n):\n        while stack and nums[stack[-1]] < nums[i]:\n            result[stack.pop()] = nums[i]\n        stack.append(i)\n    return result\n\nprint(next_greater_element([4, 5, 2, 10]))  # [5, 10, 10, -1]",
+      "java": "int[] nextGreaterElement(int[] nums) {\n    int n = nums.length;\n    int[] result = new int[n];\n    Arrays.fill(result, -1);\n    Deque<Integer> stack = new ArrayDeque<>();\n    for (int i = 0; i < n; i++) {\n        while (!stack.isEmpty() && nums[stack.peek()] < nums[i])\n            result[stack.pop()] = nums[i];\n        stack.push(i);\n    }\n    return result;\n}",
+      "cpp": "vector<int> nextGreaterElement(vector<int>& nums) {\n    int n = nums.size();\n    vector<int> result(n, -1);\n    stack<int> st;\n    for (int i = 0; i < n; i++) {\n        while (!st.empty() && nums[st.top()] < nums[i]) {\n            result[st.top()] = nums[i]; st.pop();\n        }\n        st.push(i);\n    }\n    return result;\n}"
+    },
+    "practice": {
+      "theory": ["Why does the monotonic stack guarantee O(n) total operations?", "How do you handle circular arrays for next greater element?"],
+      "coding": "Find the Next Greater Element in a circular array.",
+      "interview": "Explain the invariant maintained by the monotonic decreasing stack."
+    }
+  },
+  {
+    "id": "histogram-problems",
+    "name": "Largest Rectangle in Histogram",
+    "category": "stacks",
+    "complexity": { "time": "O(n)", "space": "O(n)" },
+    "description": "Find the largest rectangular area in a histogram. Use a monotonic increasing stack: when a shorter bar is encountered, pop taller bars and calculate area using the current bar as the height boundary.",
+    "operations": ["push-index", "pop-calculate-area", "handle-boundaries"],
+    "code": {
+      "javascript": "function largestRectangleArea(heights) {\n  const stack = [], n = heights.length;\n  let maxArea = 0;\n  for (let i = 0; i <= n; i++) {\n    const h = i === n ? 0 : heights[i];\n    while (stack.length && heights[stack[stack.length - 1]] > h) {\n      const height = heights[stack.pop()];\n      const width = stack.length ? i - stack[stack.length - 1] - 1 : i;\n      maxArea = Math.max(maxArea, height * width);\n    }\n    stack.push(i);\n  }\n  return maxArea;\n}\nconsole.log(largestRectangleArea([2, 1, 5, 6, 2, 3])); // 10",
+      "python": "def largest_rectangle_area(heights):\n    stack, max_area = [], 0\n    heights.append(0)  # sentinel\n    for i, h in enumerate(heights):\n        while stack and heights[stack[-1]] > h:\n            height = heights[stack.pop()]\n            width = i if not stack else i - stack[-1] - 1\n            max_area = max(max_area, height * width)\n        stack.append(i)\n    heights.pop()  # restore\n    return max_area\n\nprint(largest_rectangle_area([2, 1, 5, 6, 2, 3]))  # 10",
+      "java": "int largestRectangleArea(int[] heights) {\n    Deque<Integer> stack = new ArrayDeque<>();\n    int maxArea = 0, n = heights.length;\n    for (int i = 0; i <= n; i++) {\n        int h = (i == n) ? 0 : heights[i];\n        while (!stack.isEmpty() && heights[stack.peek()] > h) {\n            int height = heights[stack.pop()];\n            int width = stack.isEmpty() ? i : i - stack.peek() - 1;\n            maxArea = Math.max(maxArea, height * width);\n        }\n        stack.push(i);\n    }\n    return maxArea;\n}",
+      "cpp": "int largestRectangleArea(vector<int>& heights) {\n    stack<int> st;\n    int maxArea = 0, n = heights.size();\n    heights.push_back(0);\n    for (int i = 0; i <= n; i++) {\n        while (!st.empty() && heights[st.top()] > heights[i]) {\n            int h = heights[st.top()]; st.pop();\n            int w = st.empty() ? i : i - st.top() - 1;\n            maxArea = max(maxArea, h * w);\n        }\n        st.push(i);\n    }\n    return maxArea;\n}"
+    },
+    "practice": {
+      "theory": ["Why do we append a 0-height sentinel bar at the end?", "How does this extend to the maximal rectangle in a binary matrix?"],
+      "coding": "Find the maximal rectangle in a binary matrix (each row is a histogram).",
+      "interview": "Trace through heights=[2,1,5,6,2,3] step by step and show the stack contents."
+    }
+  },
+  {
+    "id": "deque",
+    "name": "Deque (Double-Ended Queue)",
+    "category": "queues",
+    "complexity": { "time": "O(1) all operations", "space": "O(n)" },
+    "description": "A Deque allows insertion and deletion from both the front and the rear in O(1). Used in sliding window maximum/minimum problems, palindrome checking, and as a base for monotonic queue.",
+    "operations": ["push-front", "push-rear", "pop-front", "pop-rear", "peek-front", "peek-rear"],
+    "code": {
+      "javascript": "class Deque {\n  constructor() { this.items = {}; this.front = 0; this.rear = 0; }\n  pushFront(val) { this.items[--this.front] = val; }\n  pushRear(val) { this.items[this.rear++] = val; }\n  popFront() {\n    if (this.isEmpty()) return null;\n    const val = this.items[this.front];\n    delete this.items[this.front++];\n    return val;\n  }\n  popRear() {\n    if (this.isEmpty()) return null;\n    const val = this.items[--this.rear];\n    delete this.items[this.rear];\n    return val;\n  }\n  peekFront() { return this.items[this.front]; }\n  peekRear() { return this.items[this.rear - 1]; }\n  isEmpty() { return this.front === this.rear; }\n  size() { return this.rear - this.front; }\n}",
+      "python": "from collections import deque\ndq = deque()\ndq.appendleft(1)  # push front\ndq.append(2)       # push rear\ndq.appendleft(0)\nprint(list(dq))   # [0, 1, 2]\ndq.popleft()      # pop front -> 0\ndq.pop()          # pop rear  -> 2\nprint(list(dq))   # [1]",
+      "java": "Deque<Integer> dq = new ArrayDeque<>();\ndq.addFirst(1); // push front\ndq.addLast(2);  // push rear\ndq.addFirst(0);\nSystem.out.println(dq); // [0, 1, 2]\ndq.removeFirst(); // pop front\ndq.removeLast();  // pop rear",
+      "cpp": "#include <deque>\nstd::deque<int> dq;\ndq.push_front(1);\ndq.push_back(2);\ndq.push_front(0);\n// dq = [0, 1, 2]\ndq.pop_front(); // 0\ndq.pop_back();  // 2"
+    },
+    "practice": {
+      "theory": ["How does a deque differ from a stack and a queue?", "What data structure backs a deque for O(1) operations at both ends?"],
+      "coding": "Implement a sliding window maximum using a monotonic deque.",
+      "interview": "Design a data structure that supports push, pop from both ends and returns the maximum in O(1)."
+    }
+  },
+  {
+    "id": "priority-queue",
+    "name": "Priority Queue",
+    "category": "queues",
+    "complexity": { "time": "O(log n) insert/extract, O(1) peek", "space": "O(n)" },
+    "description": "A priority queue always serves the highest (or lowest) priority element first. Backed by a binary heap: the root is the min/max element. Used in Dijkstra's algorithm, Huffman coding, and top-K problems.",
+    "operations": ["insert", "extract-min", "peek-min", "heapify-up", "heapify-down"],
+    "code": {
+      "javascript": "// Min-heap priority queue\nclass MinHeap {\n  constructor() { this.heap = []; }\n  insert(val) {\n    this.heap.push(val);\n    this._siftUp(this.heap.length - 1);\n  }\n  extractMin() {\n    if (this.heap.length === 1) return this.heap.pop();\n    const min = this.heap[0];\n    this.heap[0] = this.heap.pop();\n    this._siftDown(0);\n    return min;\n  }\n  _siftUp(i) {\n    while (i > 0) {\n      const parent = Math.floor((i - 1) / 2);\n      if (this.heap[parent] <= this.heap[i]) break;\n      [this.heap[parent], this.heap[i]] = [this.heap[i], this.heap[parent]];\n      i = parent;\n    }\n  }\n  _siftDown(i) {\n    const n = this.heap.length;\n    while (true) {\n      let min = i, l = 2*i+1, r = 2*i+2;\n      if (l < n && this.heap[l] < this.heap[min]) min = l;\n      if (r < n && this.heap[r] < this.heap[min]) min = r;\n      if (min === i) break;\n      [this.heap[min], this.heap[i]] = [this.heap[i], this.heap[min]];\n      i = min;\n    }\n  }\n}",
+      "python": "import heapq\npq = []\nheapq.heappush(pq, 5)\nheapq.heappush(pq, 1)\nheapq.heappush(pq, 3)\nprint(heapq.heappop(pq))  # 1 (min)\nprint(heapq.heappop(pq))  # 3\n# Max-heap: negate values\nmax_pq = []\nheapq.heappush(max_pq, -5)\nprint(-heapq.heappop(max_pq))  # 5",
+      "java": "PriorityQueue<Integer> pq = new PriorityQueue<>();\npq.offer(5); pq.offer(1); pq.offer(3);\nSystem.out.println(pq.poll()); // 1\n// Max-heap:\nPriorityQueue<Integer> maxPq = new PriorityQueue<>(Collections.reverseOrder());\nmaxPq.offer(5); maxPq.offer(1);\nSystem.out.println(maxPq.poll()); // 5",
+      "cpp": "#include <queue>\nstd::priority_queue<int, std::vector<int>, std::greater<int>> pq; // min-heap\npq.push(5); pq.push(1); pq.push(3);\nstd::cout << pq.top(); // 1\npq.pop();"
+    },
+    "practice": {
+      "theory": ["Why is extract-min O(log n) in a binary heap?", "How does a priority queue enable Dijkstra's algorithm?"],
+      "coding": "Find the K largest elements in an array using a min-heap of size K.",
+      "interview": "How would you implement a priority queue with O(1) increase-key operation?"
+    }
+  },
+  {
+    "id": "monotonic-queue",
+    "name": "Monotonic Queue (Sliding Window Min/Max)",
+    "category": "queues",
+    "complexity": { "time": "O(n) total", "space": "O(k) window size" },
+    "description": "A monotonic deque maintains a decreasing (for max) or increasing (for min) sequence of elements within a sliding window. Each element enters and leaves the deque at most once, making the total time O(n).",
+    "operations": ["remove-out-of-window", "remove-smaller-from-rear", "push-rear", "peek-front"],
+    "code": {
+      "javascript": "function slidingWindowMax(nums, k) {\n  const deque = [], result = [];\n  for (let i = 0; i < nums.length; i++) {\n    // Remove elements outside window\n    while (deque.length && deque[0] < i - k + 1) deque.shift();\n    // Maintain decreasing deque\n    while (deque.length && nums[deque[deque.length-1]] < nums[i]) deque.pop();\n    deque.push(i);\n    if (i >= k - 1) result.push(nums[deque[0]]);\n  }\n  return result;\n}\nconsole.log(slidingWindowMax([1,3,-1,-3,5,3,6,7], 3)); // [3,3,5,5,6,7]",
+      "python": "from collections import deque\ndef sliding_window_max(nums, k):\n    dq, result = deque(), []\n    for i, n in enumerate(nums):\n        while dq and dq[0] < i - k + 1: dq.popleft()\n        while dq and nums[dq[-1]] < n: dq.pop()\n        dq.append(i)\n        if i >= k - 1: result.append(nums[dq[0]])\n    return result\n\nprint(sliding_window_max([1,3,-1,-3,5,3,6,7], 3))  # [3,3,5,5,6,7]",
+      "java": "int[] maxSlidingWindow(int[] nums, int k) {\n    int n = nums.length;\n    int[] result = new int[n - k + 1];\n    Deque<Integer> dq = new ArrayDeque<>();\n    for (int i = 0; i < n; i++) {\n        while (!dq.isEmpty() && dq.peekFirst() < i - k + 1) dq.pollFirst();\n        while (!dq.isEmpty() && nums[dq.peekLast()] < nums[i]) dq.pollLast();\n        dq.addLast(i);\n        if (i >= k - 1) result[i - k + 1] = nums[dq.peekFirst()];\n    }\n    return result;\n}",
+      "cpp": "vector<int> maxSlidingWindow(vector<int>& nums, int k) {\n    deque<int> dq;\n    vector<int> result;\n    for (int i = 0; i < nums.size(); i++) {\n        while (!dq.empty() && dq.front() < i - k + 1) dq.pop_front();\n        while (!dq.empty() && nums[dq.back()] < nums[i]) dq.pop_back();\n        dq.push_back(i);\n        if (i >= k - 1) result.push_back(nums[dq.front()]);\n    }\n    return result;\n}"
+    },
+    "practice": {
+      "theory": ["Why does each element enter and leave the deque exactly once?", "How would you adapt the monotonic queue to find the sliding window minimum?"],
+      "coding": "Find the maximum sum of subarrays with length between k1 and k2.",
+      "interview": "Explain the invariant maintained in the monotonic deque and why it enables O(n) performance."
+    }
+  },
+  {
+    "id": "hash-function",
+    "name": "Hash Function",
+    "category": "hashing",
+    "complexity": { "time": "O(k) for key of length k", "space": "O(1)" },
+    "description": "A hash function maps a key to an integer index in a fixed-size array (hash table). A good hash function is deterministic, uniform (distributes evenly), and fast. Common technique: polynomial rolling hash with a prime modulus.",
+    "operations": ["compute-hash", "modulo-index", "distribute-keys"],
+    "code": {
+      "javascript": "// Simple polynomial hash\nfunction hash(key, tableSize) {\n  let h = 0;\n  const PRIME = 31;\n  for (let i = 0; i < key.length; i++) {\n    h = (h * PRIME + key.charCodeAt(i)) % tableSize;\n  }\n  return h;\n}\nconsole.log(hash('hello', 97)); // some index 0-96\nconsole.log(hash('world', 97));\n\n// djb2 hash\nfunction djb2(key) {\n  let hash = 5381;\n  for (let i = 0; i < key.length; i++)\n    hash = ((hash << 5) + hash) + key.charCodeAt(i);\n  return hash >>> 0; // unsigned 32-bit\n}",
+      "python": "def poly_hash(key, table_size, prime=31):\n    h = 0\n    for ch in key:\n        h = (h * prime + ord(ch)) % table_size\n    return h\n\nprint(poly_hash('hello', 97))\nprint(poly_hash('world', 97))\n\n# Python built-in\nprint(hash('hello') % 97)",
+      "java": "int polyHash(String key, int tableSize) {\n    long h = 0;\n    for (char c : key.toCharArray())\n        h = (h * 31 + c) % tableSize;\n    return (int) h;\n}",
+      "cpp": "int polyHash(const string& key, int tableSize) {\n    long long h = 0;\n    for (char c : key)\n        h = (h * 31 + c) % tableSize;\n    return (int) h;\n}"
+    },
+    "practice": {
+      "theory": ["What makes a hash function 'good'?", "Why do we use a prime number for the table size?"],
+      "coding": "Implement a simple string hash table from scratch with a custom hash function.",
+      "interview": "What properties must a cryptographic hash function have that regular hash functions don't need?"
+    }
+  },
+  {
+    "id": "collision-handling",
+    "name": "Collision Handling",
+    "category": "hashing",
+    "complexity": { "time": "O(1) average, O(n) worst case", "space": "O(n)" },
+    "description": "A collision occurs when two keys hash to the same index. Two main strategies: (1) Separate Chaining — store a linked list at each bucket, (2) Open Addressing (Linear Probing) — find the next empty slot by incrementing the index.",
+    "operations": ["chain-insert", "chain-search", "probe-insert", "probe-search"],
+    "code": {
+      "javascript": "// Separate Chaining\nclass ChainingHashTable {\n  constructor(size = 53) {\n    this.table = Array.from({length: size}, () => []);\n    this.size = size;\n  }\n  hash(key) {\n    let h = 0;\n    for (let c of key) h = (h * 31 + c.charCodeAt(0)) % this.size;\n    return h;\n  }\n  set(key, val) {\n    const idx = this.hash(key);\n    const bucket = this.table[idx];\n    const existing = bucket.find(([k]) => k === key);\n    if (existing) existing[1] = val;\n    else bucket.push([key, val]);\n  }\n  get(key) {\n    const bucket = this.table[this.hash(key)];\n    return (bucket.find(([k]) => k === key) || [])[1];\n  }\n}",
+      "python": "class ChainingHashTable:\n    def __init__(self, size=53):\n        self.table = [[] for _ in range(size)]\n        self.size = size\n    def _hash(self, key):\n        h = 0\n        for c in key: h = (h * 31 + ord(c)) % self.size\n        return h\n    def set(self, key, val):\n        bucket = self.table[self._hash(key)]\n        for i, (k, v) in enumerate(bucket):\n            if k == key: bucket[i] = (key, val); return\n        bucket.append((key, val))\n    def get(self, key):\n        for k, v in self.table[self._hash(key)]:\n            if k == key: return v\n        return None",
+      "java": "// Separate chaining with ArrayList per bucket\nclass ChainingHashTable {\n    private List<int[]>[] table;\n    private int size;\n    @SuppressWarnings(\"unchecked\")\n    ChainingHashTable(int size) {\n        this.size = size;\n        table = new ArrayList[size];\n        for (int i = 0; i < size; i++) table[i] = new ArrayList<>();\n    }\n}",
+      "cpp": "class ChainingHashTable {\n    vector<list<pair<string,int>>> table;\n    int size;\n    int hash(const string& key) { int h=0; for(char c:key) h=(h*31+c)%size; return h; }\npublic:\n    ChainingHashTable(int s=53) : size(s), table(s) {}\n    void set(const string& key, int val) {\n        auto& bucket = table[hash(key)];\n        for (auto& [k,v] : bucket) if (k==key){v=val;return;}\n        bucket.push_back({key,val});\n    }\n};"
+    },
+    "practice": {
+      "theory": ["What is the load factor and how does it affect hash table performance?", "Why does linear probing suffer from primary clustering?"],
+      "coding": "Implement a hash table with open addressing (linear probing) and demonstrate deletion using tombstones.",
+      "interview": "Explain the difference between chaining and open addressing and when you'd choose each."
+    }
+  },
+  {
+    "id": "hashset",
+    "name": "HashSet",
+    "category": "hashing",
+    "complexity": { "time": "O(1) average for add/remove/contains", "space": "O(n)" },
+    "description": "A HashSet stores unique elements and provides O(1) average membership testing. Backed by a hash table with no associated values. Used for deduplication, cycle detection, and complement lookups.",
+    "operations": ["add", "remove", "contains", "iterate"],
+    "code": {
+      "javascript": "// Using built-in Set\nconst set = new Set();\nset.add(1); set.add(2); set.add(2); // duplicates ignored\nconsole.log(set.has(2));  // true\nconsole.log(set.size);    // 2\nset.delete(1);\nconsole.log([...set]);    // [2]\n\n// Contains duplicate problem\nfunction containsDuplicate(nums) {\n  return nums.length !== new Set(nums).size;\n}",
+      "python": "s = set()\ns.add(1)\ns.add(2)\ns.add(2)  # ignored\nprint(2 in s)   # True\nprint(len(s))   # 2\ns.discard(1)\nprint(s)        # {2}\n\n# Contains duplicate\ndef contains_duplicate(nums):\n    return len(nums) != len(set(nums))",
+      "java": "Set<Integer> set = new HashSet<>();\nset.add(1); set.add(2); set.add(2);\nSystem.out.println(set.contains(2));  // true\nSystem.out.println(set.size());       // 2\nset.remove(1);\nSystem.out.println(set);  // [2]",
+      "cpp": "#include <unordered_set>\nstd::unordered_set<int> s;\ns.insert(1); s.insert(2); s.insert(2);\nstd::cout << s.count(2) << std::endl; // 1 (exists)\nstd::cout << s.size() << std::endl;   // 2\ns.erase(1);"
+    },
+    "practice": {
+      "theory": ["How is a HashSet different from a HashMap?", "What is the time complexity of converting an array to a HashSet?"],
+      "coding": "Find the longest consecutive sequence in O(n) using a HashSet.",
+      "interview": "When would you prefer a TreeSet over a HashSet?"
+    }
+  },
+  {
+    "id": "frequency-map",
+    "name": "Frequency Map",
+    "category": "hashing",
+    "complexity": { "time": "O(n)", "space": "O(k) distinct elements" },
+    "description": "A frequency map counts occurrences of each element in a collection. It's the single most common pattern in coding interviews — used for anagram detection, character frequency, majority elements, top-K problems, and more.",
+    "operations": ["count", "compare", "filter-by-count"],
+    "code": {
+      "javascript": "// Anagram check using frequency map\nfunction isAnagram(s, t) {\n  if (s.length !== t.length) return false;\n  const freq = {};\n  for (const c of s) freq[c] = (freq[c] || 0) + 1;\n  for (const c of t) {\n    if (!freq[c]) return false;\n    freq[c]--;\n  }\n  return true;\n}\n\n// Top K frequent\nfunction topKFrequent(nums, k) {\n  const freq = new Map();\n  for (const n of nums) freq.set(n, (freq.get(n) || 0) + 1);\n  return [...freq.entries()].sort((a, b) => b[1] - a[1]).slice(0, k).map(([n]) => n);\n}",
+      "python": "from collections import Counter\n\ndef is_anagram(s, t):\n    return Counter(s) == Counter(t)\n\ndef top_k_frequent(nums, k):\n    return [x for x, _ in Counter(nums).most_common(k)]\n\nprint(is_anagram('anagram', 'nagaram'))  # True\nprint(top_k_frequent([1,1,1,2,2,3], 2)) # [1, 2]",
+      "java": "boolean isAnagram(String s, String t) {\n    if (s.length() != t.length()) return false;\n    int[] freq = new int[26];\n    for (char c : s.toCharArray()) freq[c - 'a']++;\n    for (char c : t.toCharArray()) {\n        if (--freq[c - 'a'] < 0) return false;\n    }\n    return true;\n}",
+      "cpp": "bool isAnagram(string s, string t) {\n    if (s.size() != t.size()) return false;\n    unordered_map<char,int> freq;\n    for (char c : s) freq[c]++;\n    for (char c : t) if (--freq[c] < 0) return false;\n    return true;\n}"
+    },
+    "practice": {
+      "theory": ["How does a frequency map differ from a simple hashmap?", "Why is the frequency map pattern so universally applicable?"],
+      "coding": "Group anagrams together in O(n * k) where k is average string length.",
+      "interview": "How would you find all pairs of elements that sum to a target using a frequency map?"
+    }
+  },
+  {
+    "id": "lower-bound",
+    "name": "Lower Bound",
+    "category": "searching",
+    "complexity": { "time": "O(log n)", "space": "O(1)" },
+    "description": "Lower bound finds the first index where a value >= target can be inserted to keep the array sorted. If target exists, it returns the first occurrence. Binary search variant: move right pointer when mid >= target.",
+    "operations": ["compare-mid", "narrow-left", "narrow-right", "return-left"],
+    "code": {
+      "javascript": "function lowerBound(nums, target) {\n  let lo = 0, hi = nums.length;\n  while (lo < hi) {\n    const mid = (lo + hi) >> 1;\n    if (nums[mid] < target) lo = mid + 1;\n    else hi = mid;\n  }\n  return lo; // first index where nums[i] >= target\n}\nconsole.log(lowerBound([1, 2, 2, 3, 4], 2)); // 1\nconsole.log(lowerBound([1, 2, 2, 3, 4], 5)); // 5 (insert at end)",
+      "python": "import bisect\n\ndef lower_bound(nums, target):\n    lo, hi = 0, len(nums)\n    while lo < hi:\n        mid = (lo + hi) // 2\n        if nums[mid] < target: lo = mid + 1\n        else: hi = mid\n    return lo\n\n# Or use standard library\nprint(bisect.bisect_left([1, 2, 2, 3, 4], 2))  # 1",
+      "java": "int lowerBound(int[] nums, int target) {\n    int lo = 0, hi = nums.length;\n    while (lo < hi) {\n        int mid = (lo + hi) >>> 1;\n        if (nums[mid] < target) lo = mid + 1;\n        else hi = mid;\n    }\n    return lo;\n}",
+      "cpp": "#include <algorithm>\n// Standard: std::lower_bound\nint lb = std::lower_bound(arr, arr+n, target) - arr;\n// Manual:\nint lowerBound(vector<int>& v, int target) {\n    int lo = 0, hi = v.size();\n    while (lo < hi) {\n        int mid = (lo+hi)/2;\n        if (v[mid] < target) lo = mid+1;\n        else hi = mid;\n    }\n    return lo;\n}"
+    },
+    "practice": {
+      "theory": ["What is the difference between lower_bound and upper_bound?", "When would you return lo vs lo-1 from a binary search?"],
+      "coding": "Count the number of occurrences of a target in a sorted array using lower and upper bound.",
+      "interview": "How can lower_bound help you solve the 'Search Insert Position' problem?"
+    }
+  },
+  {
+    "id": "upper-bound",
+    "name": "Upper Bound",
+    "category": "searching",
+    "complexity": { "time": "O(log n)", "space": "O(1)" },
+    "description": "Upper bound finds the first index where a value > target would be inserted. If target appears multiple times, upper bound returns the index after the last occurrence. Paired with lower bound to count occurrences.",
+    "operations": ["compare-mid", "narrow-left", "narrow-right", "return-left"],
+    "code": {
+      "javascript": "function upperBound(nums, target) {\n  let lo = 0, hi = nums.length;\n  while (lo < hi) {\n    const mid = (lo + hi) >> 1;\n    if (nums[mid] <= target) lo = mid + 1;\n    else hi = mid;\n  }\n  return lo; // first index where nums[i] > target\n}\nconsole.log(upperBound([1, 2, 2, 3, 4], 2)); // 3\n// Count occurrences of 2:\nconsole.log(upperBound([1,2,2,3,4], 2) - lowerBound([1,2,2,3,4], 2)); // 2",
+      "python": "import bisect\n\ndef upper_bound(nums, target):\n    lo, hi = 0, len(nums)\n    while lo < hi:\n        mid = (lo + hi) // 2\n        if nums[mid] <= target: lo = mid + 1\n        else: hi = mid\n    return lo\n\nprint(bisect.bisect_right([1, 2, 2, 3, 4], 2))  # 3",
+      "java": "int upperBound(int[] nums, int target) {\n    int lo = 0, hi = nums.length;\n    while (lo < hi) {\n        int mid = (lo + hi) >>> 1;\n        if (nums[mid] <= target) lo = mid + 1;\n        else hi = mid;\n    }\n    return lo;\n}",
+      "cpp": "#include <algorithm>\n// Standard: std::upper_bound\nint ub = std::upper_bound(arr, arr+n, target) - arr;\n// Manual:\nint upperBound(vector<int>& v, int target) {\n    int lo = 0, hi = v.size();\n    while (lo < hi) {\n        int mid = (lo+hi)/2;\n        if (v[mid] <= target) lo = mid+1;\n        else hi = mid;\n    }\n    return lo;\n}"
+    },
+    "practice": {
+      "theory": ["Why does upper_bound use <= instead of < for the comparison?", "What does upper_bound return when target is larger than all elements?"],
+      "coding": "Use lower_bound and upper_bound to implement 'count occurrences of target' in O(log n).",
+      "interview": "How would you find the range [first, last] of indices where a target appears in O(log n)?"
+    }
+  },
+  {
+    "id": "binary-search-on-answer",
+    "name": "Binary Search on Answer",
+    "category": "searching",
+    "complexity": { "time": "O(n log(maxAns))", "space": "O(1)" },
+    "description": "Instead of searching sorted data, binary search on the possible answer space. The key insight: if a value X is feasible, all values > X (or < X) are also feasible — creating a monotone predicate that binary search can exploit.",
+    "operations": ["define-predicate", "check-feasibility", "narrow-answer-space"],
+    "code": {
+      "javascript": "// Classic: Koko Eating Bananas - find minimum eating speed\nfunction minEatingSpeed(piles, h) {\n  let lo = 1, hi = Math.max(...piles);\n  while (lo < hi) {\n    const mid = (lo + hi) >> 1;\n    // Check: can Koko eat all bananas in h hours at speed mid?\n    const hours = piles.reduce((sum, p) => sum + Math.ceil(p / mid), 0);\n    if (hours <= h) hi = mid; // feasible, try smaller\n    else lo = mid + 1;       // not feasible, need faster\n  }\n  return lo;\n}\nconsole.log(minEatingSpeed([3, 6, 7, 11], 8)); // 4",
+      "python": "import math\n\ndef min_eating_speed(piles, h):\n    lo, hi = 1, max(piles)\n    while lo < hi:\n        mid = (lo + hi) // 2\n        hours = sum(math.ceil(p / mid) for p in piles)\n        if hours <= h: hi = mid\n        else: lo = mid + 1\n    return lo\n\nprint(min_eating_speed([3, 6, 7, 11], 8))  # 4",
+      "java": "int minEatingSpeed(int[] piles, int h) {\n    int lo = 1, hi = 0;\n    for (int p : piles) hi = Math.max(hi, p);\n    while (lo < hi) {\n        int mid = (lo + hi) / 2;\n        int hours = 0;\n        for (int p : piles) hours += Math.ceil((double)p / mid);\n        if (hours <= h) hi = mid;\n        else lo = mid + 1;\n    }\n    return lo;\n}",
+      "cpp": "int minEatingSpeed(vector<int>& piles, int h) {\n    int lo = 1, hi = *max_element(piles.begin(), piles.end());\n    while (lo < hi) {\n        int mid = (lo + hi) / 2;\n        long hours = 0;\n        for (int p : piles) hours += (p + mid - 1) / mid;\n        if (hours <= h) hi = mid;\n        else lo = mid + 1;\n    }\n    return lo;\n}"
+    },
+    "practice": {
+      "theory": ["What does it mean for a predicate to be 'monotone'?", "How do you determine the valid range for the binary search in this pattern?"],
+      "coding": "Find the minimum capacity of a ship to deliver all packages within D days.",
+      "interview": "Explain how you identified binary search on answer as the approach for a given problem."
+    }
+  },
+  {
+    "id": "ternary-search",
+    "name": "Ternary Search",
+    "category": "searching",
+    "complexity": { "time": "O(log n)", "space": "O(1)" },
+    "description": "Ternary search finds the maximum or minimum of a strictly unimodal function (first increases then decreases) in O(log n). Split the range into three parts with two midpoints and eliminate one-third each iteration.",
+    "operations": ["split-into-thirds", "compare-midpoints", "eliminate-third"],
+    "code": {
+      "javascript": "// Find max of unimodal discrete function f over [lo, hi]\nfunction ternarySearchMax(f, lo, hi) {\n  while (hi - lo > 2) {\n    const m1 = lo + Math.floor((hi - lo) / 3);\n    const m2 = hi - Math.floor((hi - lo) / 3);\n    if (f(m1) < f(m2)) lo = m1 + 1;\n    else hi = m2 - 1;\n  }\n  // Linear scan the remaining few elements\n  let best = lo;\n  for (let i = lo + 1; i <= hi; i++) if (f(i) > f(best)) best = i;\n  return best;\n}\n\n// Find peak index in mountain array\nfunction peakIndexInMountainArray(arr) {\n  let lo = 0, hi = arr.length - 1;\n  while (lo < hi) {\n    const mid = (lo + hi) >> 1;\n    if (arr[mid] < arr[mid + 1]) lo = mid + 1;\n    else hi = mid;\n  }\n  return lo;\n}",
+      "python": "def ternary_search_max(f, lo, hi, eps=1e-9):\n    \"\"\"Continuous version for floating-point range\"\"\"\n    while hi - lo > eps:\n        m1 = lo + (hi - lo) / 3\n        m2 = hi - (hi - lo) / 3\n        if f(m1) < f(m2): lo = m1\n        else: hi = m2\n    return (lo + hi) / 2\n\n# Discrete version for arrays\ndef peak_index(arr):\n    lo, hi = 0, len(arr) - 1\n    while lo < hi:\n        mid = (lo + hi) // 2\n        if arr[mid] < arr[mid+1]: lo = mid + 1\n        else: hi = mid\n    return lo",
+      "java": "int peakIndex(int[] arr) {\n    int lo = 0, hi = arr.length - 1;\n    while (lo < hi) {\n        int mid = (lo + hi) / 2;\n        if (arr[mid] < arr[mid + 1]) lo = mid + 1;\n        else hi = mid;\n    }\n    return lo;\n}",
+      "cpp": "int peakIndex(vector<int>& arr) {\n    int lo = 0, hi = arr.size() - 1;\n    while (lo < hi) {\n        int mid = (lo + hi) / 2;\n        if (arr[mid] < arr[mid+1]) lo = mid + 1;\n        else hi = mid;\n    }\n    return lo;\n}"
+    },
+    "practice": {
+      "theory": ["What makes a function 'unimodal' and why is that required for ternary search?", "How does ternary search compare to binary search in number of iterations?"],
+      "coding": "Find the minimum value of a convex function over a range using ternary search.",
+      "interview": "Can you use ternary search on a bitonic array? How would you find the peak element?"
+    }
+  },
+  {
+    "id": "counting-sort",
+    "name": "Counting Sort",
+    "category": "sorting",
+    "complexity": { "time": "O(n + k)", "space": "O(k)" },
+    "description": "Counting sort works for integers in a bounded range [0, k]. Count occurrences of each value, compute prefix sums to get positions, then place elements. Stable and linear — but requires O(k) extra space.",
+    "operations": ["count", "prefix-sum", "place-elements"],
+    "code": {
+      "javascript": "function countingSort(arr, maxVal) {\n  const count = new Array(maxVal + 1).fill(0);\n  for (const x of arr) count[x]++;\n  // Prefix sum to find positions\n  for (let i = 1; i <= maxVal; i++) count[i] += count[i-1];\n  const output = new Array(arr.length);\n  for (let i = arr.length - 1; i >= 0; i--) {\n    output[--count[arr[i]]] = arr[i];\n  }\n  return output;\n}\nconsole.log(countingSort([4, 2, 1, 3, 2], 4)); // [1, 2, 2, 3, 4]",
+      "python": "def counting_sort(arr, max_val):\n    count = [0] * (max_val + 1)\n    for x in arr: count[x] += 1\n    for i in range(1, max_val + 1): count[i] += count[i-1]\n    output = [0] * len(arr)\n    for x in reversed(arr):\n        count[x] -= 1\n        output[count[x]] = x\n    return output\n\nprint(counting_sort([4, 2, 1, 3, 2], 4))  # [1, 2, 2, 3, 4]",
+      "java": "int[] countingSort(int[] arr, int maxVal) {\n    int[] count = new int[maxVal + 1];\n    for (int x : arr) count[x]++;\n    for (int i = 1; i <= maxVal; i++) count[i] += count[i-1];\n    int[] output = new int[arr.length];\n    for (int i = arr.length-1; i >= 0; i--) output[--count[arr[i]]] = arr[i];\n    return output;\n}",
+      "cpp": "vector<int> countingSort(vector<int>& arr, int maxVal) {\n    vector<int> count(maxVal+1, 0);\n    for (int x : arr) count[x]++;\n    for (int i = 1; i <= maxVal; i++) count[i] += count[i-1];\n    vector<int> output(arr.size());\n    for (int i = arr.size()-1; i >= 0; i--) output[--count[arr[i]]] = arr[i];\n    return output;\n}"
+    },
+    "practice": {
+      "theory": ["Why do we iterate backwards to place elements (for stability)?", "What is the space complexity limitation of counting sort?"],
+      "coding": "Sort an array of characters using counting sort.",
+      "interview": "Why can't you use counting sort to sort floating-point numbers?"
+    }
+  },
+  {
+    "id": "radix-sort",
+    "name": "Radix Sort",
+    "category": "sorting",
+    "complexity": { "time": "O(d * (n + k))", "space": "O(n + k)" },
+    "description": "Radix sort processes digits from least significant to most significant (LSD) using a stable sort (like counting sort) at each digit position. Total time is O(d*(n+k)) where d is number of digits and k is the radix (usually 10).",
+    "operations": ["get-digit", "counting-sort-by-digit", "repeat-for-each-digit"],
+    "code": {
+      "javascript": "function radixSort(arr) {\n  const max = Math.max(...arr);\n  for (let exp = 1; Math.floor(max / exp) > 0; exp *= 10) {\n    countingSortByDigit(arr, exp);\n  }\n  return arr;\n}\n\nfunction countingSortByDigit(arr, exp) {\n  const n = arr.length, output = new Array(n), count = new Array(10).fill(0);\n  for (const x of arr) count[Math.floor(x / exp) % 10]++;\n  for (let i = 1; i < 10; i++) count[i] += count[i-1];\n  for (let i = n - 1; i >= 0; i--) {\n    const digit = Math.floor(arr[i] / exp) % 10;\n    output[--count[digit]] = arr[i];\n  }\n  for (let i = 0; i < n; i++) arr[i] = output[i];\n}\nconsole.log(radixSort([170, 45, 75, 90, 802, 24, 2, 66]));",
+      "python": "def radix_sort(arr):\n    max_val = max(arr)\n    exp = 1\n    while max_val // exp > 0:\n        counting_sort_by_digit(arr, exp)\n        exp *= 10\n    return arr\n\ndef counting_sort_by_digit(arr, exp):\n    n = len(arr)\n    output = [0] * n\n    count = [0] * 10\n    for x in arr: count[(x // exp) % 10] += 1\n    for i in range(1, 10): count[i] += count[i-1]\n    for i in range(n-1, -1, -1):\n        d = (arr[i] // exp) % 10\n        count[d] -= 1\n        output[count[d]] = arr[i]\n    for i in range(n): arr[i] = output[i]",
+      "java": "void radixSort(int[] arr) {\n    int max = Arrays.stream(arr).max().getAsInt();\n    for (int exp = 1; max / exp > 0; exp *= 10)\n        countingSortByDigit(arr, exp);\n}",
+      "cpp": "void radixSort(vector<int>& arr) {\n    int maxVal = *max_element(arr.begin(), arr.end());\n    for (int exp = 1; maxVal / exp > 0; exp *= 10)\n        countingSortByDigit(arr, exp);\n}"
+    },
+    "practice": {
+      "theory": ["Why must the per-digit sort be stable for radix sort to work correctly?", "What is LSD radix sort vs MSD radix sort?"],
+      "coding": "Implement MSD radix sort that recursively sorts by most significant digit first.",
+      "interview": "When would radix sort beat quicksort in practice?"
+    }
+  },
+  {
+    "id": "bucket-sort",
+    "name": "Bucket Sort",
+    "category": "sorting",
+    "complexity": { "time": "O(n) average for uniform data", "space": "O(n + k)" },
+    "description": "Bucket sort distributes elements into k buckets based on value ranges, sorts each bucket individually, then concatenates. Average O(n) for uniformly distributed data because each bucket gets O(n/k) elements.",
+    "operations": ["assign-bucket", "sort-bucket", "concatenate"],
+    "code": {
+      "javascript": "function bucketSort(arr, bucketCount = 5) {\n  if (arr.length === 0) return arr;\n  const min = Math.min(...arr), max = Math.max(...arr);\n  const buckets = Array.from({length: bucketCount}, () => []);\n  const range = max - min + 1;\n  for (const x of arr) {\n    const idx = Math.floor((x - min) / range * bucketCount);\n    buckets[Math.min(idx, bucketCount - 1)].push(x);\n  }\n  return buckets.flatMap(b => b.sort((a, b) => a - b));\n}\nconsole.log(bucketSort([0.42, 0.32, 0.23, 0.52, 0.25, 0.47, 0.51]));",
+      "python": "def bucket_sort(arr, bucket_count=5):\n    if not arr: return arr\n    min_val, max_val = min(arr), max(arr)\n    buckets = [[] for _ in range(bucket_count)]\n    range_val = max_val - min_val + 1e-10\n    for x in arr:\n        idx = int((x - min_val) / range_val * bucket_count)\n        buckets[min(idx, bucket_count-1)].append(x)\n    return [x for bucket in buckets for x in sorted(bucket)]",
+      "java": "List<Double> bucketSort(double[] arr) {\n    List<List<Double>> buckets = new ArrayList<>();\n    int n = arr.length;\n    for (int i = 0; i < n; i++) buckets.add(new ArrayList<>());\n    for (double x : arr) buckets.get((int)(x * n)).add(x);\n    List<Double> result = new ArrayList<>();\n    for (List<Double> bucket : buckets) { Collections.sort(bucket); result.addAll(bucket); }\n    return result;\n}",
+      "cpp": "vector<float> bucketSort(vector<float>& arr) {\n    int n = arr.size();\n    vector<vector<float>> buckets(n);\n    for (float x : arr) buckets[(int)(x * n)].push_back(x);\n    for (auto& b : buckets) sort(b.begin(), b.end());\n    vector<float> result;\n    for (auto& b : buckets) result.insert(result.end(), b.begin(), b.end());\n    return result;\n}"
+    },
+    "practice": {
+      "theory": ["Why does bucket sort work best for uniformly distributed data?", "What sorting algorithm is usually used to sort individual buckets?"],
+      "coding": "Sort an array of floating-point numbers in [0, 1) using bucket sort.",
+      "interview": "How does bucket sort achieve O(n) average time and when does it degrade to O(n²)?"
+    }
+  },
+  {
+    "id": "tim-sort",
+    "name": "Tim Sort",
+    "category": "sorting",
+    "complexity": { "time": "O(n log n) worst, O(n) best (sorted data)", "space": "O(n)" },
+    "description": "Tim Sort is the hybrid sort used by Python's sorted() and Java's Arrays.sort(). It divides the array into natural 'runs' (already sorted subsequences), sorts small runs with insertion sort, then merges them using a merge sort style with optimizations like galloping.",
+    "operations": ["find-run", "insertion-sort-run", "merge-runs", "gallop"],
+    "code": {
+      "javascript": "// Simplified Tim Sort concept (real implementation is complex)\nconst MIN_RUN = 32;\n\nfunction insertionSort(arr, lo, hi) {\n  for (let i = lo + 1; i <= hi; i++) {\n    const key = arr[i];\n    let j = i - 1;\n    while (j >= lo && arr[j] > key) { arr[j+1] = arr[j]; j--; }\n    arr[j+1] = key;\n  }\n}\n\nfunction timSort(arr) {\n  const n = arr.length;\n  // Sort runs of MIN_RUN using insertion sort\n  for (let i = 0; i < n; i += MIN_RUN) {\n    insertionSort(arr, i, Math.min(i + MIN_RUN - 1, n - 1));\n  }\n  // Merge sorted runs\n  for (let size = MIN_RUN; size < n; size *= 2) {\n    for (let lo = 0; lo < n; lo += 2 * size) {\n      const mid = Math.min(lo + size - 1, n - 1);\n      const hi = Math.min(lo + 2 * size - 1, n - 1);\n      if (mid < hi) merge(arr, lo, mid, hi);\n    }\n  }\n  return arr;\n}",
+      "python": "# Python's built-in sort IS TimSort\narr = [5, 3, 1, 4, 2]\nprint(sorted(arr))     # [1, 2, 3, 4, 5]\narr.sort()             # in-place\n\n# Simplified implementation to understand the concept\nMIN_RUN = 32\n\ndef insertion_sort(arr, lo, hi):\n    for i in range(lo+1, hi+1):\n        key = arr[i]\n        j = i - 1\n        while j >= lo and arr[j] > key:\n            arr[j+1] = arr[j]; j -= 1\n        arr[j+1] = key\n\ndef tim_sort(arr):\n    n = len(arr)\n    for i in range(0, n, MIN_RUN):\n        insertion_sort(arr, i, min(i+MIN_RUN-1, n-1))\n    # ... merge steps",
+      "java": "// Java's Arrays.sort uses TimSort internally for objects\nInteger[] arr = {5, 3, 1, 4, 2};\nArrays.sort(arr);  // Uses TimSort\nSystem.out.println(Arrays.toString(arr));",
+      "cpp": "// C++ uses introsort by default, not TimSort\n#include <algorithm>\nstd::vector<int> v = {5, 3, 1, 4, 2};\nstd::sort(v.begin(), v.end()); // introsort\n// For TimSort behavior: use stable_sort\nstd::stable_sort(v.begin(), v.end());"
+    },
+    "practice": {
+      "theory": ["What is a 'run' in Tim Sort and how is it detected?", "Why is Tim Sort faster than quicksort for partially sorted data?"],
+      "coding": "Implement the merge step of Tim Sort that handles merging of two sorted runs.",
+      "interview": "Why does Python use Tim Sort instead of quicksort? What are the tradeoffs?"
+    }
+  },
+  {
+    "id": "tree-boundary-views",
+    "name": "Tree Boundary & Views",
+    "category": "trees",
+    "complexity": { "time": "O(n)", "space": "O(h) where h is height" },
+    "description": "Compute different 'views' of a binary tree: left view (leftmost node at each level), right view, top view, and bottom view. These are common interview problems that combine DFS/BFS with level tracking.",
+    "operations": ["left-view", "right-view", "boundary-traversal", "level-order-view"],
+    "code": {
+      "javascript": "// Left view: leftmost node at each level using BFS\nfunction leftView(root) {\n  if (!root) return [];\n  const result = [], queue = [root];\n  while (queue.length) {\n    const levelSize = queue.length;\n    for (let i = 0; i < levelSize; i++) {\n      const node = queue.shift();\n      if (i === 0) result.push(node.val); // first in level\n      if (node.left) queue.push(node.left);\n      if (node.right) queue.push(node.right);\n    }\n  }\n  return result;\n}\n\n// Right view: rightmost at each level\nfunction rightView(root) {\n  if (!root) return [];\n  const result = [], queue = [root];\n  while (queue.length) {\n    const levelSize = queue.length;\n    for (let i = 0; i < levelSize; i++) {\n      const node = queue.shift();\n      if (i === levelSize - 1) result.push(node.val); // last in level\n      if (node.left) queue.push(node.left);\n      if (node.right) queue.push(node.right);\n    }\n  }\n  return result;\n}",
+      "python": "from collections import deque\n\ndef left_view(root):\n    if not root: return []\n    result, queue = [], deque([root])\n    while queue:\n        for i in range(len(queue)):\n            node = queue.popleft()\n            if i == 0: result.append(node.val)\n            if node.left: queue.append(node.left)\n            if node.right: queue.append(node.right)\n    return result\n\ndef right_view(root):\n    if not root: return []\n    result, queue = [], deque([root])\n    while queue:\n        for i in range(size := len(queue)):\n            node = queue.popleft()\n            if i == size - 1: result.append(node.val)\n            if node.left: queue.append(node.left)\n            if node.right: queue.append(node.right)\n    return result",
+      "java": "List<Integer> leftView(TreeNode root) {\n    List<Integer> result = new ArrayList<>();\n    if (root == null) return result;\n    Queue<TreeNode> q = new LinkedList<>();\n    q.offer(root);\n    while (!q.isEmpty()) {\n        int size = q.size();\n        for (int i = 0; i < size; i++) {\n            TreeNode node = q.poll();\n            if (i == 0) result.add(node.val);\n            if (node.left != null) q.offer(node.left);\n            if (node.right != null) q.offer(node.right);\n        }\n    }\n    return result;\n}",
+      "cpp": "vector<int> leftView(TreeNode* root) {\n    vector<int> result;\n    if (!root) return result;\n    queue<TreeNode*> q;\n    q.push(root);\n    while (!q.empty()) {\n        int size = q.size();\n        for (int i = 0; i < size; i++) {\n            auto node = q.front(); q.pop();\n            if (i == 0) result.push_back(node->val);\n            if (node->left) q.push(node->left);\n            if (node->right) q.push(node->right);\n        }\n    }\n    return result;\n}"
+    },
+    "practice": {
+      "theory": ["What is the difference between left view and boundary traversal of a tree?", "How would you compute the top view using horizontal distance (HD) values?"],
+      "coding": "Print the complete boundary of a binary tree (left boundary + leaves + right boundary reversed).",
+      "interview": "How do you compute the top view and bottom view of a binary tree using a map of horizontal distances?"
+    }
+  },
+  {
+    "id": "lowest-common-ancestor",
+    "name": "Lowest Common Ancestor (LCA)",
+    "category": "trees",
+    "complexity": { "time": "O(n) naive, O(log n) with binary lifting", "space": "O(n)" },
+    "description": "The LCA of two nodes p and q is the deepest node that is an ancestor of both. Naive recursive approach: if both p and q are found in left and right subtrees respectively, current node is LCA. For BST: use BST property to navigate.",
+    "operations": ["search-left", "search-right", "identify-lca", "binary-lifting"],
+    "code": {
+      "javascript": "// LCA in general binary tree O(n)\nfunction lowestCommonAncestor(root, p, q) {\n  if (!root || root === p || root === q) return root;\n  const left = lowestCommonAncestor(root.left, p, q);\n  const right = lowestCommonAncestor(root.right, p, q);\n  if (left && right) return root; // p and q are in different subtrees\n  return left || right; // both in same subtree\n}\n\n// LCA in BST O(log n) average\nfunction lcaBST(root, p, q) {\n  while (root) {\n    if (p.val < root.val && q.val < root.val) root = root.left;\n    else if (p.val > root.val && q.val > root.val) root = root.right;\n    else return root;\n  }\n}",
+      "python": "def lowest_common_ancestor(root, p, q):\n    if not root or root == p or root == q: return root\n    left = lowest_common_ancestor(root.left, p, q)\n    right = lowest_common_ancestor(root.right, p, q)\n    if left and right: return root\n    return left or right\n\n# BST version\ndef lca_bst(root, p, q):\n    while root:\n        if p.val < root.val and q.val < root.val: root = root.left\n        elif p.val > root.val and q.val > root.val: root = root.right\n        else: return root",
+      "java": "TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {\n    if (root == null || root == p || root == q) return root;\n    TreeNode left = lowestCommonAncestor(root.left, p, q);\n    TreeNode right = lowestCommonAncestor(root.right, p, q);\n    if (left != null && right != null) return root;\n    return left != null ? left : right;\n}",
+      "cpp": "TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {\n    if (!root || root == p || root == q) return root;\n    auto left = lowestCommonAncestor(root->left, p, q);\n    auto right = lowestCommonAncestor(root->right, p, q);\n    if (left && right) return root;\n    return left ? left : right;\n}"
+    },
+    "practice": {
+      "theory": ["How does the LCA algorithm work when one node is an ancestor of the other?", "What is binary lifting and how does it achieve O(log n) LCA queries?"],
+      "coding": "Find the LCA of two nodes in a BST iteratively without recursion.",
+      "interview": "How would you preprocess a tree to answer many LCA queries efficiently?"
+    }
+  },
+  {
+    "id": "tree-serialization",
+    "name": "Tree Serialization & Deserialization",
+    "category": "trees",
+    "complexity": { "time": "O(n)", "space": "O(n)" },
+    "description": "Serialize a binary tree to a string representation and deserialize it back. Used in distributed systems to transmit tree structures. Preorder traversal with null markers is the simplest approach.",
+    "operations": ["serialize-preorder", "deserialize-preorder", "encode-null", "queue-decode"],
+    "code": {
+      "javascript": "function serialize(root) {\n  if (!root) return 'null';\n  return root.val + ',' + serialize(root.left) + ',' + serialize(root.right);\n}\n\nfunction deserialize(data) {\n  const vals = data.split(',');\n  let idx = 0;\n  function build() {\n    if (vals[idx] === 'null') { idx++; return null; }\n    const node = { val: +vals[idx++] };\n    node.left = build();\n    node.right = build();\n    return node;\n  }\n  return build();\n}\n\n// Example: tree {1, 2, 3}\nconst s = serialize({val:1, left:{val:2, left:null, right:null}, right:{val:3, left:null, right:null}});\nconsole.log(s); // '1,2,null,null,3,null,null'",
+      "python": "def serialize(root):\n    def encode(node):\n        if not node: return ['null']\n        return [str(node.val)] + encode(node.left) + encode(node.right)\n    return ','.join(encode(root))\n\ndef deserialize(data):\n    vals = iter(data.split(','))\n    def decode():\n        v = next(vals)\n        if v == 'null': return None\n        node = TreeNode(int(v))\n        node.left = decode()\n        node.right = decode()\n        return node\n    return decode()",
+      "java": "String serialize(TreeNode root) {\n    if (root == null) return \"null\";\n    return root.val + \",\" + serialize(root.left) + \",\" + serialize(root.right);\n}\nTreeNode deserialize(String data) {\n    Queue<String> q = new LinkedList<>(Arrays.asList(data.split(\",\")));\n    return build(q);\n}\nprivate TreeNode build(Queue<String> q) {\n    String val = q.poll();\n    if (val.equals(\"null\")) return null;\n    TreeNode node = new TreeNode(Integer.parseInt(val));\n    node.left = build(q);\n    node.right = build(q);\n    return node;\n}",
+      "cpp": "string serialize(TreeNode* root) {\n    if (!root) return \"null,\";\n    return to_string(root->val) + \",\" + serialize(root->left) + serialize(root->right);\n}"
+    },
+    "practice": {
+      "theory": ["Why do we need null markers in the serialized string?", "Can you serialize/deserialize with just inorder traversal? Why not?"],
+      "coding": "Serialize and deserialize a BST using a more compact encoding (without null markers).",
+      "interview": "What are the tradeoffs between DFS (preorder) and BFS (level-order) serialization?"
+    }
+  },
+  {
+    "id": "bst-validation",
+    "name": "BST Validation",
+    "category": "trees",
+    "complexity": { "time": "O(n)", "space": "O(h)" },
+    "description": "Validate that a binary tree satisfies BST properties: every node in the left subtree is strictly less than current, and every node in the right subtree is strictly greater. Pass min/max bounds recursively — better than just comparing with parent.",
+    "operations": ["validate-range", "update-bounds", "recurse-children"],
+    "code": {
+      "javascript": "function isValidBST(root, min = -Infinity, max = Infinity) {\n  if (!root) return true;\n  if (root.val <= min || root.val >= max) return false;\n  return isValidBST(root.left, min, root.val) &&\n         isValidBST(root.right, root.val, max);\n}\n\n// Inorder traversal approach: values should be strictly increasing\nfunction isValidBSTInorder(root) {\n  let prev = -Infinity;\n  function inorder(node) {\n    if (!node) return true;\n    if (!inorder(node.left)) return false;\n    if (node.val <= prev) return false;\n    prev = node.val;\n    return inorder(node.right);\n  }\n  return inorder(root);\n}",
+      "python": "def is_valid_bst(root, min_val=float('-inf'), max_val=float('inf')):\n    if not root: return True\n    if root.val <= min_val or root.val >= max_val: return False\n    return (is_valid_bst(root.left, min_val, root.val) and\n            is_valid_bst(root.right, root.val, max_val))\n\n# Inorder approach\ndef is_valid_bst_inorder(root):\n    prev = [float('-inf')]\n    def inorder(node):\n        if not node: return True\n        if not inorder(node.left): return False\n        if node.val <= prev[0]: return False\n        prev[0] = node.val\n        return inorder(node.right)\n    return inorder(root)",
+      "java": "boolean isValidBST(TreeNode root) { return validate(root, Long.MIN_VALUE, Long.MAX_VALUE); }\nboolean validate(TreeNode node, long min, long max) {\n    if (node == null) return true;\n    if (node.val <= min || node.val >= max) return false;\n    return validate(node.left, min, node.val) && validate(node.right, node.val, max);\n}",
+      "cpp": "bool isValidBST(TreeNode* root, long min=LONG_MIN, long max=LONG_MAX) {\n    if (!root) return true;\n    if (root->val <= min || root->val >= max) return false;\n    return isValidBST(root->left, min, root->val) && isValidBST(root->right, root->val, max);\n}"
+    },
+    "practice": {
+      "theory": ["Why is just comparing a node with its parent insufficient for BST validation?", "What edge case breaks the simple parent-comparison approach?"],
+      "coding": "Recover a BST where exactly two nodes have been swapped.",
+      "interview": "How would you validate a BST if integer values can be at INT_MIN or INT_MAX?"
+    }
+  },
+  {
+    "id": "bst-floor-ceil",
+    "name": "Floor & Ceil in BST",
+    "category": "trees",
+    "complexity": { "time": "O(h) average O(log n)", "space": "O(1) iterative" },
+    "description": "Floor of key k in BST: largest value <= k. Ceil of key k: smallest value >= k. Navigate using BST property: if current > k, potential ceil = current, go left. If current < k, potential floor = current, go right.",
+    "operations": ["compare-key", "update-candidate", "navigate-bst"],
+    "code": {
+      "javascript": "function floorBST(root, key) {\n  let floor = null;\n  while (root) {\n    if (root.val === key) return root.val;\n    if (root.val < key) { floor = root.val; root = root.right; }\n    else root = root.left;\n  }\n  return floor;\n}\n\nfunction ceilBST(root, key) {\n  let ceil = null;\n  while (root) {\n    if (root.val === key) return root.val;\n    if (root.val > key) { ceil = root.val; root = root.left; }\n    else root = root.right;\n  }\n  return ceil;\n}\n// BST: [4, 2, 6, 1, 3, 5, 7]\n// floor(4.5) = 4, ceil(4.5) = 5",
+      "python": "def floor_bst(root, key):\n    floor = None\n    while root:\n        if root.val == key: return root.val\n        elif root.val < key: floor = root.val; root = root.right\n        else: root = root.left\n    return floor\n\ndef ceil_bst(root, key):\n    ceil = None\n    while root:\n        if root.val == key: return root.val\n        elif root.val > key: ceil = root.val; root = root.left\n        else: root = root.right\n    return ceil",
+      "java": "Integer floorBST(TreeNode root, int key) {\n    Integer floor = null;\n    while (root != null) {\n        if (root.val == key) return root.val;\n        else if (root.val < key) { floor = root.val; root = root.right; }\n        else root = root.left;\n    }\n    return floor;\n}",
+      "cpp": "int floorBST(TreeNode* root, int key) {\n    int floor = -1;\n    while (root) {\n        if (root->val == key) return root->val;\n        else if (root->val < key) { floor = root->val; root = root->right; }\n        else root = root->left;\n    }\n    return floor;\n}"
+    },
+    "practice": {
+      "theory": ["How is floor/ceil in a BST related to lower_bound/upper_bound in a sorted array?", "What is the time complexity of floor/ceil in a balanced vs unbalanced BST?"],
+      "coding": "Implement floor and ceil in a BST using recursion.",
+      "interview": "Design a data structure that supports insert, delete, floor, and ceil in O(log n)."
+    }
+  },
+  {
+    "id": "kth-smallest-bst",
+    "name": "Kth Smallest in BST",
+    "category": "trees",
+    "complexity": { "time": "O(h + k)", "space": "O(h)" },
+    "description": "The inorder traversal of a BST visits nodes in ascending order. To find the kth smallest: do an inorder traversal and stop at the kth node. Can also be done with an iterative inorder to avoid full traversal.",
+    "operations": ["inorder-traverse", "count-nodes", "stop-at-k"],
+    "code": {
+      "javascript": "function kthSmallest(root, k) {\n  let count = 0, result = null;\n  function inorder(node) {\n    if (!node || result !== null) return;\n    inorder(node.left);\n    if (++count === k) { result = node.val; return; }\n    inorder(node.right);\n  }\n  inorder(root);\n  return result;\n}\n\n// Iterative approach\nfunction kthSmallestIterative(root, k) {\n  const stack = [];\n  while (root || stack.length) {\n    while (root) { stack.push(root); root = root.left; }\n    root = stack.pop();\n    if (--k === 0) return root.val;\n    root = root.right;\n  }\n}",
+      "python": "def kth_smallest(root, k):\n    stack = []\n    while root or stack:\n        while root: stack.append(root); root = root.left\n        root = stack.pop()\n        k -= 1\n        if k == 0: return root.val\n        root = root.right",
+      "java": "int kthSmallest(TreeNode root, int k) {\n    Deque<TreeNode> stack = new ArrayDeque<>();\n    while (root != null || !stack.isEmpty()) {\n        while (root != null) { stack.push(root); root = root.left; }\n        root = stack.pop();\n        if (--k == 0) return root.val;\n        root = root.right;\n    }\n    return -1;\n}",
+      "cpp": "int kthSmallest(TreeNode* root, int k) {\n    stack<TreeNode*> st;\n    while (root || !st.empty()) {\n        while (root) { st.push(root); root = root->left; }\n        root = st.top(); st.pop();\n        if (--k == 0) return root->val;\n        root = root->right;\n    }\n    return -1;\n}"
+    },
+    "practice": {
+      "theory": ["Why does inorder traversal of a BST give sorted output?", "How can you augment a BST node to answer kth-smallest queries in O(log n)?"],
+      "coding": "Find the kth largest element in a BST in O(h) time.",
+      "interview": "How would you efficiently support frequent kth-smallest queries with dynamic insertions?"
+    }
+  },
+  {
+    "id": "red-black-tree",
+    "name": "Red-Black Tree",
+    "category": "trees",
+    "complexity": { "time": "O(log n) insert/delete/search", "space": "O(n)" },
+    "description": "A Red-Black tree is a self-balancing BST with 5 properties: nodes are red or black, root is black, all leaves (nil) are black, red nodes have black children, and all paths from root to leaves have equal black-node count. These guarantee height ≤ 2 log(n+1).",
+    "operations": ["insert-and-fix", "delete-and-fix", "rotate-left", "rotate-right", "recolor"],
+    "code": {
+      "javascript": "// Red-Black Tree concept (simplified visualization)\nconst RED = 0, BLACK = 1;\nclass RBNode {\n  constructor(val) {\n    this.val = val;\n    this.color = RED; // new nodes start red\n    this.left = this.right = this.parent = null;\n  }\n}\n\n// Key properties:\n// 1. Root is always BLACK\n// 2. RED node's children must be BLACK\n// 3. Every path from root to leaf has same # of BLACK nodes\n// 4. Rotations + recoloring restore these after insert/delete\n\nfunction insertFix(tree, node) {\n  while (node.parent && node.parent.color === RED) {\n    // Uncle is RED -> recolor\n    // Uncle is BLACK -> rotate\n    // ... full implementation in real usage\n  }\n  tree.root.color = BLACK; // root always BLACK\n}",
+      "python": "# Red-Black tree properties summary\nRED, BLACK = 0, 1\n\nclass RBNode:\n    def __init__(self, val):\n        self.val = val\n        self.color = RED  # new nodes start red\n        self.left = self.right = self.parent = None\n\n# The 4 cases during insert fix:\n# Case 1: Uncle is RED - recolor parent, uncle to BLACK, grandparent to RED\n# Case 2: Uncle is BLACK, node is right child - left rotate parent (becomes case 3)\n# Case 3: Uncle is BLACK, node is left child - right rotate grandparent, swap colors\n# Case 4 (left-right mirror of 2,3) for right subtrees",
+      "java": "// Java's TreeMap and TreeSet use Red-Black trees internally\nTreeMap<Integer, String> map = new TreeMap<>();\nmap.put(1, \"a\"); map.put(3, \"c\"); map.put(2, \"b\");\nSystem.out.println(map.firstKey()); // 1\nSystem.out.println(map.lastKey());  // 3\nSystem.out.println(map.floorKey(2.5)); // 2",
+      "cpp": "// std::map and std::set use Red-Black trees\n#include <map>\nstd::map<int,std::string> m;\nm[1] = \"a\"; m[3] = \"c\"; m[2] = \"b\";\nauto it = m.lower_bound(2);\nstd::cout << it->first << std::endl; // 2"
+    },
+    "practice": {
+      "theory": ["What are the 5 properties of a Red-Black tree?", "Why is the maximum height of a Red-Black tree 2 log(n+1)?"],
+      "coding": "Implement the left-rotation operation for a Red-Black tree.",
+      "interview": "Compare AVL trees vs Red-Black trees: which is better for read-heavy vs write-heavy workloads?"
+    }
+  },
+  {
+    "id": "b-tree",
+    "name": "B-Tree",
+    "category": "trees",
+    "complexity": { "time": "O(log n) for all operations", "space": "O(n)" },
+    "description": "A B-Tree is a multi-way balanced search tree where each node can have multiple keys and multiple children. Designed for disk-based storage — minimizes disk I/O by keeping more keys per node. Used in databases (B+Trees) and file systems (NTFS, ext4).",
+    "operations": ["search", "insert-and-split", "delete-and-merge", "traverse"],
+    "code": {
+      "javascript": "// B-Tree of order t (each node has [t-1, 2t-1] keys)\nclass BTreeNode {\n  constructor(isLeaf = true) {\n    this.keys = [];       // sorted keys in this node\n    this.children = [];   // child pointers\n    this.isLeaf = isLeaf;\n  }\n}\n\n// Key concepts:\n// - Each node has at most 2t-1 keys\n// - Each internal node has at most 2t children\n// - Nodes with t-1 or fewer keys trigger merge/borrow\n// - Insertion: if node is full (2t-1 keys), split it before inserting\n// - All leaves are at the same depth — always balanced!\n\n// B+ Tree (used in databases): all data in leaves, internal nodes are index-only\n// B+ trees allow sequential scans via leaf-level linked list",
+      "python": "class BTreeNode:\n    def __init__(self, leaf=True):\n        self.keys = []     # sorted keys\n        self.children = [] # child pointers (empty if leaf)\n        self.leaf = leaf\n\n# Why B-trees are used in databases:\n# - Large node size (page = 4KB) = many keys per node\n# - Minimizes I/O operations (one read per tree level)\n# - With t=100, tree of height 3 holds 2*100^3 = 2M records\n# - B+ Trees: only leaves have data, good for range queries",
+      "java": "// Java doesn't have a built-in B-Tree, but TreeMap approximates it\n// Real B-trees are used in databases like MySQL (InnoDB uses B+Trees)\n// The structure ensures O(log_t n) operations\n// For a database with n=1M records and t=100: log_100(1M) ≈ 3 levels",
+      "cpp": "// C++ also lacks built-in B-Tree\n// Conceptually: each node is a disk page\n// Order t means each non-root node has [t-1, 2t-1] keys\n// The fan-out (branching factor) is 2t\n// Height = O(log_t n) — much shallower than BST"
+    },
+    "practice": {
+      "theory": ["Why is the B-Tree height O(log_t n) and why is this important for databases?", "How does a B+Tree differ from a B-Tree and why is it preferred for databases?"],
+      "coding": "Implement search and insert for a B-Tree of order t=2 (2-3-4 tree).",
+      "interview": "Explain why a B-Tree with large order t is more efficient than a BST for disk-based storage."
+    }
+  },
+  {
+    "id": "min-heap",
+    "name": "Min Heap",
+    "category": "trees",
+    "complexity": { "time": "O(log n) insert/extract, O(1) peek", "space": "O(n)" },
+    "description": "A Min Heap is a complete binary tree where every parent is ≤ its children. The minimum element is always at the root, accessible in O(1). Implemented as an array: left child at 2i+1, right child at 2i+2, parent at (i-1)//2.",
+    "operations": ["insert-and-sift-up", "extract-min-and-sift-down", "peek-min", "heapify"],
+    "code": {
+      "javascript": "class MinHeap {\n  constructor() { this.heap = []; }\n  \n  insert(val) {\n    this.heap.push(val);\n    this._siftUp(this.heap.length - 1);\n  }\n  \n  extractMin() {\n    if (this.heap.length === 0) return null;\n    if (this.heap.length === 1) return this.heap.pop();\n    const min = this.heap[0];\n    this.heap[0] = this.heap.pop();\n    this._siftDown(0);\n    return min;\n  }\n  \n  peek() { return this.heap[0]; }\n  \n  _siftUp(i) {\n    while (i > 0) {\n      const parent = Math.floor((i - 1) / 2);\n      if (this.heap[parent] <= this.heap[i]) break;\n      [this.heap[parent], this.heap[i]] = [this.heap[i], this.heap[parent]];\n      i = parent;\n    }\n  }\n  \n  _siftDown(i) {\n    const n = this.heap.length;\n    while (true) {\n      let smallest = i;\n      const l = 2 * i + 1, r = 2 * i + 2;\n      if (l < n && this.heap[l] < this.heap[smallest]) smallest = l;\n      if (r < n && this.heap[r] < this.heap[smallest]) smallest = r;\n      if (smallest === i) break;\n      [this.heap[smallest], this.heap[i]] = [this.heap[i], this.heap[smallest]];\n      i = smallest;\n    }\n  }\n}",
+      "python": "import heapq\n\nheap = []\nheapq.heappush(heap, 5)\nheapq.heappush(heap, 2)\nheapq.heappush(heap, 8)\nheapq.heappush(heap, 1)\nprint(heap[0])             # 1 (min)\nprint(heapq.heappop(heap)) # 1\nprint(heapq.heappop(heap)) # 2",
+      "java": "PriorityQueue<Integer> minHeap = new PriorityQueue<>();\nminHeap.offer(5);\nminHeap.offer(2);\nminHeap.offer(8);\nminHeap.offer(1);\nSystem.out.println(minHeap.peek()); // 1\nSystem.out.println(minHeap.poll()); // 1\nSystem.out.println(minHeap.poll()); // 2",
+      "cpp": "#include <queue>\nstd::priority_queue<int, std::vector<int>, std::greater<int>> minH;\nminH.push(5); minH.push(2); minH.push(8); minH.push(1);\nstd::cout << minH.top(); // 1\nminH.pop();\nstd::cout << minH.top(); // 2"
+    },
+    "practice": {
+      "theory": ["What is the array representation of a heap? Give formulas for parent/child indices.", "Why is insert O(log n) while peek is O(1)?"],
+      "coding": "Implement a min-heap from scratch with sift-up and sift-down operations.",
+      "interview": "How would you convert a max-heap to a min-heap? What is the time complexity?"
+    }
+  },
+  {
+    "id": "heapify",
+    "name": "Heapify (Build Heap in O(n))",
+    "category": "trees",
+    "complexity": { "time": "O(n) to build", "space": "O(1) in-place" },
+    "description": "Building a heap by inserting n elements one-by-one takes O(n log n). The Floyd's heapify algorithm builds a heap bottom-up in O(n) by calling sift-down on each non-leaf node from the last to the first — exploiting that lower-level sifts are cheap.",
+    "operations": ["sift-down-all", "bottom-up-pass", "heapify-subtree"],
+    "code": {
+      "javascript": "function buildHeap(arr) {\n  const n = arr.length;\n  // Start from last non-leaf node\n  for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {\n    siftDown(arr, i, n);\n  }\n  return arr;\n}\n\nfunction siftDown(arr, i, n) {\n  while (true) {\n    let smallest = i;\n    const l = 2 * i + 1, r = 2 * i + 2;\n    if (l < n && arr[l] < arr[smallest]) smallest = l;\n    if (r < n && arr[r] < arr[smallest]) smallest = r;\n    if (smallest === i) break;\n    [arr[smallest], arr[i]] = [arr[i], arr[smallest]];\n    i = smallest;\n  }\n}\n\nconsole.log(buildHeap([4, 10, 3, 5, 1])); // [1, 5, 3, 10, 4] (min-heap)",
+      "python": "import heapq\n\narr = [4, 10, 3, 5, 1]\nheapq.heapify(arr)  # O(n) in-place\nprint(arr)  # [1, 10, 3, 5, 4] (min-heap property)\nprint(arr[0])  # 1 (minimum)\n\n# Manual O(n) build\ndef build_min_heap(arr):\n    n = len(arr)\n    for i in range(n//2 - 1, -1, -1):\n        sift_down(arr, i, n)\n    return arr",
+      "java": "void buildHeap(int[] arr) {\n    int n = arr.length;\n    // All leaves are already heaps; start from last non-leaf\n    for (int i = n / 2 - 1; i >= 0; i--)\n        siftDown(arr, i, n);\n}",
+      "cpp": "void buildHeap(vector<int>& arr) {\n    int n = arr.size();\n    for (int i = n/2 - 1; i >= 0; i--)\n        siftDown(arr, i, n);\n}"
+    },
+    "practice": {
+      "theory": ["Why is Floyd's heapify O(n) and not O(n log n)?", "What is the difference between heapify and heap sort?"],
+      "coding": "Implement heap sort using build-heap (O(n)) followed by n extract-max operations.",
+      "interview": "Prove that building a heap bottom-up is O(n) using the geometric series argument."
+    }
+  },
+  {
+    "id": "median-heap",
+    "name": "Median of Stream (Two Heaps)",
+    "category": "trees",
+    "complexity": { "time": "O(log n) per insertion, O(1) median query", "space": "O(n)" },
+    "description": "Maintain a running median using two heaps: a max-heap for the lower half and a min-heap for the upper half. Balance them so their sizes differ by at most 1. Median is the max of lower half (if odd count) or average of both tops (if even count).",
+    "operations": ["insert-to-lower", "insert-to-upper", "balance-heaps", "query-median"],
+    "code": {
+      "javascript": "// MaxHeap for lower half, MinHeap for upper half\nclass MedianFinder {\n  constructor() {\n    this.lower = new MaxHeap(); // max of lower values\n    this.upper = new MinHeap(); // min of upper values\n  }\n  \n  addNum(num) {\n    if (this.lower.size() === 0 || num <= this.lower.peek()) {\n      this.lower.insert(num);\n    } else {\n      this.upper.insert(num);\n    }\n    // Balance: sizes should differ by at most 1\n    if (this.lower.size() > this.upper.size() + 1) {\n      this.upper.insert(this.lower.extractMax());\n    } else if (this.upper.size() > this.lower.size()) {\n      this.lower.insert(this.upper.extractMin());\n    }\n  }\n  \n  findMedian() {\n    if (this.lower.size() > this.upper.size()) return this.lower.peek();\n    return (this.lower.peek() + this.upper.peek()) / 2;\n  }\n}",
+      "python": "import heapq\n\nclass MedianFinder:\n    def __init__(self):\n        self.lower = []  # max-heap (negate values)\n        self.upper = []  # min-heap\n    \n    def add_num(self, num):\n        if not self.lower or num <= -self.lower[0]:\n            heapq.heappush(self.lower, -num)\n        else:\n            heapq.heappush(self.upper, num)\n        # Balance\n        if len(self.lower) > len(self.upper) + 1:\n            heapq.heappush(self.upper, -heapq.heappop(self.lower))\n        elif len(self.upper) > len(self.lower):\n            heapq.heappush(self.lower, -heapq.heappop(self.upper))\n    \n    def find_median(self):\n        if len(self.lower) > len(self.upper):\n            return -self.lower[0]\n        return (-self.lower[0] + self.upper[0]) / 2",
+      "java": "class MedianFinder {\n    PriorityQueue<Integer> lower = new PriorityQueue<>(Collections.reverseOrder());\n    PriorityQueue<Integer> upper = new PriorityQueue<>();\n    public void addNum(int num) {\n        if (lower.isEmpty() || num <= lower.peek()) lower.offer(num);\n        else upper.offer(num);\n        if (lower.size() > upper.size() + 1) upper.offer(lower.poll());\n        else if (upper.size() > lower.size()) lower.offer(upper.poll());\n    }\n    public double findMedian() {\n        if (lower.size() > upper.size()) return lower.peek();\n        return (lower.peek() + upper.peek()) / 2.0;\n    }\n}",
+      "cpp": "class MedianFinder {\n    priority_queue<int> lower;  // max-heap\n    priority_queue<int, vector<int>, greater<int>> upper;  // min-heap\npublic:\n    void addNum(int num) {\n        if (lower.empty() || num <= lower.top()) lower.push(num);\n        else upper.push(num);\n        if (lower.size() > upper.size() + 1) { upper.push(lower.top()); lower.pop(); }\n        else if (upper.size() > lower.size()) { lower.push(upper.top()); upper.pop(); }\n    }\n    double findMedian() {\n        if (lower.size() > upper.size()) return lower.top();\n        return (lower.top() + upper.top()) / 2.0;\n    }\n};"
+    },
+    "practice": {
+      "theory": ["Why do we need two heaps instead of just one?", "What is the invariant maintained between the lower max-heap and upper min-heap?"],
+      "coding": "Find the median for every prefix of a stream of integers.",
+      "interview": "How would you extend this to find the median of a sliding window of size k?"
+    }
+  },
+  {
+    "id": "xor-trie",
+    "name": "XOR Trie (Binary Trie)",
+    "category": "tries",
+    "complexity": { "time": "O(32) = O(1) per insert/query on 32-bit integers", "space": "O(n * 32)" },
+    "description": "An XOR Trie is a binary trie where integers are inserted bit by bit (from MSB to LSB). Used to maximize XOR between pairs of numbers — for each number, traverse the trie greedily choosing the opposite bit at each level.",
+    "operations": ["insert-bits", "query-max-xor", "traverse-greedily"],
+    "code": {
+      "javascript": "class XORTrieNode {\n  constructor() { this.children = [null, null]; }\n}\n\nclass XORTrie {\n  constructor() { this.root = new XORTrieNode(); }\n  \n  insert(num) {\n    let node = this.root;\n    for (let bit = 31; bit >= 0; bit--) {\n      const b = (num >> bit) & 1;\n      if (!node.children[b]) node.children[b] = new XORTrieNode();\n      node = node.children[b];\n    }\n  }\n  \n  maxXOR(num) {\n    let node = this.root, xor = 0;\n    for (let bit = 31; bit >= 0; bit--) {\n      const b = (num >> bit) & 1;\n      const want = 1 - b; // we want the opposite bit for max XOR\n      if (node.children[want]) { xor |= (1 << bit); node = node.children[want]; }\n      else if (node.children[b]) node = node.children[b];\n      else break;\n    }\n    return xor;\n  }\n}\n\n// Find maximum XOR of any two elements in array\nfunction maxXORPair(nums) {\n  const trie = new XORTrie();\n  let maxXor = 0;\n  for (const n of nums) {\n    trie.insert(n);\n    maxXor = Math.max(maxXor, trie.maxXOR(n));\n  }\n  return maxXor;\n}",
+      "python": "class XORTrieNode:\n    def __init__(self):\n        self.children = [None, None]\n\nclass XORTrie:\n    def __init__(self): self.root = XORTrieNode()\n    \n    def insert(self, num):\n        node = self.root\n        for bit in range(31, -1, -1):\n            b = (num >> bit) & 1\n            if not node.children[b]: node.children[b] = XORTrieNode()\n            node = node.children[b]\n    \n    def max_xor(self, num):\n        node, xor = self.root, 0\n        for bit in range(31, -1, -1):\n            b = (num >> bit) & 1\n            want = 1 - b\n            if node.children[want]: xor |= (1 << bit); node = node.children[want]\n            elif node.children[b]: node = node.children[b]\n            else: break\n        return xor\n\ndef max_xor_pair(nums):\n    trie = XORTrie()\n    max_xor = 0\n    for n in nums:\n        trie.insert(n)\n        max_xor = max(max_xor, trie.max_xor(n))\n    return max_xor",
+      "java": "class XORTrie {\n    int[][] trie = new int[32 * 100001][2];\n    int[] val = new int[32 * 100001];\n    int cnt = 1;\n    void insert(int num) {\n        int node = 0;\n        for (int bit = 31; bit >= 0; bit--) {\n            int b = (num >> bit) & 1;\n            if (trie[node][b] == 0) trie[node][b] = cnt++;\n            node = trie[node][b];\n        }\n    }\n    int maxXOR(int num) {\n        int node = 0, xor = 0;\n        for (int bit = 31; bit >= 0; bit--) {\n            int b = (num >> bit) & 1, want = 1 - b;\n            if (trie[node][want] != 0) { xor |= (1 << bit); node = trie[node][want]; }\n            else node = trie[node][b];\n        }\n        return xor;\n    }\n}",
+      "cpp": "struct XORTrie {\n    int ch[32*100001][2]{};\n    int cnt = 1;\n    void insert(int num) {\n        int node = 0;\n        for (int bit = 31; bit >= 0; bit--) {\n            int b = (num >> bit) & 1;\n            if (!ch[node][b]) ch[node][b] = cnt++;\n            node = ch[node][b];\n        }\n    }\n    int maxXOR(int num) {\n        int node = 0, xorVal = 0;\n        for (int bit = 31; bit >= 0; bit--) {\n            int b = (num >> bit) & 1, want = 1 - b;\n            if (ch[node][want]) { xorVal |= (1 << bit); node = ch[node][want]; }\n            else node = ch[node][b];\n        }\n        return xorVal;\n    }\n};"
+    },
+    "practice": {
+      "theory": ["Why do we choose the opposite bit at each level to maximize XOR?", "Why does the XOR Trie operate bit by bit from MSB to LSB?"],
+      "coding": "Find the maximum XOR of any two numbers in an array in O(32n) time.",
+      "interview": "How would you modify the XOR Trie to handle queries like 'maximum XOR with numbers in a range [lo, hi]'?"
+    }
+  }
+]
