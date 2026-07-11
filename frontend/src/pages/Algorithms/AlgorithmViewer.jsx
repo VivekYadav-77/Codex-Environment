@@ -4996,6 +4996,329 @@ const newGenerators = {
         }
         steps.push({ array: [...nums], comparing: [], swapping: [], sorted: bestPair, message: `Maximum XOR = ${maxXOR} from ${nums[bestPair[0]]} XOR ${nums[bestPair[1]]}. O(32n) time!`, line: 4 })
         return steps
+    },
+    'difference-array': (arr) => {
+        const steps = []
+        const base = [0, 0, 0, 0, 0]
+        const diff = [0, 0, 0, 0, 0]
+        steps.push({
+            array: [...base],
+            comparing: [],
+            swapping: [],
+            sorted: [],
+            message: "Difference Array: Initialize base array A = [0,0,0,0,0] and difference array D = [0,0,0,0,0].",
+            line: 0
+        })
+        diff[1] += 3
+        diff[4] -= 3
+        steps.push({
+            array: [...diff],
+            comparing: [1, 4],
+            swapping: [],
+            sorted: [],
+            message: "Update range [1, 3] with +3: set D[1] += 3 and D[4] -= 3.",
+            line: 1
+        })
+        diff[2] += 2
+        steps.push({
+            array: [...diff],
+            comparing: [2],
+            swapping: [],
+            sorted: [],
+            message: "Update range [2, 4] with +2: set D[2] += 2 (no boundary at index 5).",
+            line: 2
+        })
+        const finalArr = [0, 0, 0, 0, 0]
+        let sum = 0
+        for (let i = 0; i < 5; i++) {
+            sum += diff[i]
+            finalArr[i] = sum
+            steps.push({
+                array: [...finalArr],
+                comparing: [i],
+                swapping: [],
+                sorted: Array.from({ length: i + 1 }, (_, idx) => idx),
+                message: `Prefix sum at index ${i}: sum = ${sum}. A[${i}] = ${sum}`,
+                line: 3
+            })
+        }
+        steps.push({
+            array: [...finalArr],
+            comparing: [],
+            swapping: [],
+            sorted: [0, 1, 2, 3, 4],
+            message: "Range updates completed! Final array: [" + finalArr.join(', ') + "]. O(1) per update, O(n) overall.",
+            line: 4
+        })
+        return steps
+    },
+    'dutch-national-flag': (arr) => {
+        const steps = []
+        const array = [2, 0, 2, 1, 1, 0]
+        const n = array.length
+        steps.push({
+            array: [...array],
+            comparing: [],
+            swapping: [],
+            sorted: [],
+            pointers: [0, 0, n - 1],
+            message: "Dutch National Flag: Sort array of 0s, 1s, 2s. Initialize low = 0, mid = 0, high = 5.",
+            line: 0
+        })
+        let low = 0, mid = 0, high = n - 1
+        while (mid <= high) {
+            steps.push({
+                array: [...array],
+                comparing: [mid],
+                swapping: [],
+                sorted: [],
+                pointers: [low, mid, high],
+                message: `Check array[mid] = array[${mid}] = ${array[mid]}.`,
+                line: 1
+            })
+            if (array[mid] === 0) {
+                steps.push({
+                    array: [...array],
+                    comparing: [],
+                    swapping: [low, mid],
+                    sorted: [],
+                    pointers: [low, mid, high],
+                    message: `array[mid] = 0: swap array[low] (${array[low]}) and array[mid] (${array[mid]}). Move low and mid.`,
+                    line: 2
+                })
+                ;[array[low], array[mid]] = [array[mid], array[low]]
+                low++
+                mid++
+            } else if (array[mid] === 1) {
+                steps.push({
+                    array: [...array],
+                    comparing: [mid],
+                    swapping: [],
+                    sorted: [],
+                    pointers: [low, mid, high],
+                    message: `array[mid] = 1: already in correct middle segment. Move mid pointer.`,
+                    line: 3
+                })
+                mid++
+            } else {
+                steps.push({
+                    array: [...array],
+                    comparing: [],
+                    swapping: [mid, high],
+                    sorted: [],
+                    pointers: [low, mid, high],
+                    message: `array[mid] = 2: swap array[mid] (${array[mid]}) and array[high] (${array[high]}). Move high pointer.`,
+                    line: 4
+                })
+                ;[array[mid], array[high]] = [array[high], array[mid]]
+                high--
+            }
+        }
+        steps.push({
+            array: [...array],
+            comparing: [],
+            swapping: [],
+            sorted: array.map((_, i) => i),
+            pointers: [low, mid, high],
+            message: "Sorting completed in one pass! O(n) time, O(1) space.",
+            line: 5
+        })
+        return steps
+    },
+    'bellman-ford': () => {
+        const steps = []
+        const dist = [0, 99, 99, 99]
+        steps.push({
+            array: [...dist],
+            comparing: [],
+            swapping: [],
+            sorted: [],
+            message: "Bellman-Ford: Initialize dist[0] = 0, others = Infinity. Graph has edges with negative weights.",
+            line: 0
+        })
+        dist[1] = 4
+        steps.push({
+            array: [...dist],
+            comparing: [0, 1],
+            swapping: [],
+            sorted: [],
+            message: "Relax edge 0 -> 1 (weight 4): dist[1] = min(Infinity, 0 + 4) = 4.",
+            line: 1
+        })
+        dist[2] = 3
+        steps.push({
+            array: [...dist],
+            comparing: [0, 2],
+            swapping: [],
+            sorted: [],
+            message: "Relax edge 0 -> 2 (weight 3): dist[2] = min(Infinity, 0 + 3) = 3.",
+            line: 1
+        })
+        dist[2] = 2
+        steps.push({
+            array: [...dist],
+            comparing: [1, 2],
+            swapping: [],
+            sorted: [],
+            message: "Relax edge 1 -> 2 (weight -2): dist[2] = min(3, 4 + (-2)) = 2. Negative weight edge processed successfully!",
+            line: 2
+        })
+        dist[3] = 4
+        steps.push({
+            array: [...dist],
+            comparing: [2, 3],
+            swapping: [],
+            sorted: [],
+            message: "Relax edge 2 -> 3 (weight 2): dist[3] = min(Infinity, 2 + 2) = 4.",
+            line: 2
+        })
+        steps.push({
+            array: [...dist],
+            comparing: [],
+            swapping: [],
+            sorted: [0, 1, 2, 3],
+            message: "All edges relaxed V-1 times. Final distances: [0, 4, 2, 4]. No negative cycles detected.",
+            line: 3
+        })
+        return steps
+    },
+    'prims': () => {
+        const steps = []
+        const visited = [0]
+        steps.push({
+            graphNodes: [0, 1, 2, 3],
+            graphEdges: [[0, 1, 2], [0, 2, 4], [1, 2, 1], [1, 3, 5], [2, 3, 3]],
+            visited: [...visited],
+            message: "Prim's Algorithm: Find Minimum Spanning Tree. Start at Node 0. MST = {0}.",
+            line: 0
+        })
+        visited.push(1)
+        steps.push({
+            graphNodes: [0, 1, 2, 3],
+            graphEdges: [[0, 1, 2], [0, 2, 4], [1, 2, 1], [1, 3, 5], [2, 3, 3]],
+            visited: [...visited],
+            comparing: [0, 1],
+            message: "Minimum edge connecting MST {0} to unvisited is (0, 1) with weight 2. Add Node 1 to MST.",
+            line: 1
+        })
+        visited.push(2)
+        steps.push({
+            graphNodes: [0, 1, 2, 3],
+            graphEdges: [[0, 1, 2], [0, 2, 4], [1, 2, 1], [1, 3, 5], [2, 3, 3]],
+            visited: [...visited],
+            comparing: [1, 2],
+            message: "Minimum edge connecting MST {0, 1} to unvisited is (1, 2) with weight 1. Add Node 2 to MST.",
+            line: 2
+        })
+        visited.push(3)
+        steps.push({
+            graphNodes: [0, 1, 2, 3],
+            graphEdges: [[0, 1, 2], [0, 2, 4], [1, 2, 1], [1, 3, 5], [2, 3, 3]],
+            visited: [...visited],
+            comparing: [2, 3],
+            message: "Minimum edge connecting MST {0, 1, 2} to unvisited is (2, 3) with weight 3. Add Node 3 to MST.",
+            line: 2
+        })
+        steps.push({
+            graphNodes: [0, 1, 2, 3],
+            graphEdges: [[0, 1, 2], [0, 2, 4], [1, 2, 1], [1, 3, 5], [2, 3, 3]],
+            visited: [...visited],
+            sorted: [0, 1, 2, 3],
+            message: "All vertices visited. Minimum Spanning Tree built successfully! Total weight = 2 + 1 + 3 = 6.",
+            line: 3
+        })
+        return steps
+    },
+    'kruskal': () => {
+        const steps = []
+        steps.push({
+            graphNodes: [0, 1, 2, 3],
+            graphEdges: [[0, 1, 2], [0, 2, 4], [1, 2, 1], [1, 3, 5], [2, 3, 3]],
+            message: "Kruskal's Algorithm: Sort edges by weight. Initial DSU state: all nodes are independent sets.",
+            line: 0
+        })
+        steps.push({
+            graphNodes: [0, 1, 2, 3],
+            graphEdges: [[0, 1, 2], [0, 2, 4], [1, 2, 1], [1, 3, 5], [2, 3, 3]],
+            comparing: [2],
+            message: "Process minimum edge (1, 2) wt 1. Nodes 1 and 2 are in different components. Union them.",
+            line: 1
+        })
+        steps.push({
+            graphNodes: [0, 1, 2, 3],
+            graphEdges: [[0, 1, 2], [0, 2, 4], [1, 2, 1], [1, 3, 5], [2, 3, 3]],
+            comparing: [0],
+            message: "Process edge (0, 1) wt 2. Nodes 0 and 1 are in different components. Union them.",
+            line: 1
+        })
+        steps.push({
+            graphNodes: [0, 1, 2, 3],
+            graphEdges: [[0, 1, 2], [0, 2, 4], [1, 2, 1], [1, 3, 5], [2, 3, 3]],
+            comparing: [4],
+            message: "Process edge (2, 3) wt 3. Nodes 2 and 3 are in different components. Union them.",
+            line: 1
+        })
+        steps.push({
+            graphNodes: [0, 1, 2, 3],
+            graphEdges: [[0, 1, 2], [0, 2, 4], [1, 2, 1], [1, 3, 5], [2, 3, 3]],
+            comparing: [1],
+            message: "Process edge (0, 2) wt 4. Both nodes are already in the same component. Skip to avoid cycles.",
+            line: 2
+        })
+        steps.push({
+            graphNodes: [0, 1, 2, 3],
+            graphEdges: [[0, 1, 2], [0, 2, 4], [1, 2, 1], [1, 3, 5], [2, 3, 3]],
+            sorted: [0, 1, 2, 3],
+            message: "DSU check complete. MST contains V-1 edges. MST construction finished! Total weight = 6.",
+            line: 3
+        })
+        return steps
+    },
+    'fenwick-tree': (arr) => {
+        const steps = []
+        const base = arr.slice(0, 5)
+        const bit = [0, 0, 0, 0, 0, 0]
+        steps.push({
+            array: [...bit],
+            message: `Fenwick Tree (Binary Indexed Tree): Initialize BIT with zeros for array: [${base.join(', ')}]`,
+            line: 0
+        })
+        for (let i = 0; i < base.length; i++) {
+            const val = base[i]
+            let idx = i + 1
+            while (idx < bit.length) {
+                bit[idx] += val
+                steps.push({
+                    array: [...bit],
+                    comparing: [idx],
+                    message: `Insert base[${i}]=${val}: update BIT[${idx}] += ${val}. Next index is ${idx} + (${idx} & -${idx}) = ${idx + (idx & -idx)}`,
+                    line: 1
+                })
+                idx += (idx & -idx)
+            }
+        }
+        let sum = 0
+        let qIdx = 4
+        const querySteps = []
+        while (qIdx > 0) {
+            sum += bit[qIdx]
+            querySteps.push(qIdx)
+            steps.push({
+                array: [...bit],
+                comparing: [...querySteps],
+                message: `Query prefix sum of first 4 elements: add BIT[${qIdx}] (${bit[qIdx]}) -> running sum = ${sum}. Next query index is ${qIdx} - (${qIdx} & -${qIdx}) = ${qIdx - (qIdx & -qIdx)}`,
+                line: 2
+            })
+            qIdx -= (qIdx & -qIdx)
+        }
+        steps.push({
+            array: [...bit],
+            comparing: [],
+            sorted: [1, 2, 3, 4],
+            message: `Query finished. Sum of first 4 elements = ${sum}. both point updates and prefix sums are O(log n).`,
+            line: 3
+        })
+        return steps
     }
 };
 
@@ -6016,6 +6339,29 @@ const allGenerators = {
     ...advancedGenerators,
     ...complexityGenerators,
     ...trieGenerators,
+
+    // Aliases for Roadmap algorithmIds
+    'kadane': arraysGenerators['kadanes'],
+    'moore-voting': newGenerators['majority-element'],
+    'linked-list': linkedListsGenerators['singly-linked-list'],
+    'stack': stacksGenerators['stack-impl'],
+    'queue': queuesGenerators['queue-impl'],
+    'hash-table': hashingGenerators['linear-probing'],
+    'merge-sort': sortingGenerators['merge'],
+    'divide-and-conquer-merge-sort': sortingGenerators['merge'],
+    'quick-sort': sortingGenerators['quick'],
+    'divide-and-conquer-quick-sort': sortingGenerators['quick'],
+    'heap-sort': sortingGenerators['heap'],
+    'max-heap': sortingGenerators['heap'],
+    'bfs': graphsGenerators['graph-bfs'],
+    'dfs': graphsGenerators['graph-dfs'],
+    'pattern-bfs': graphsGenerators['graph-bfs'],
+    'pattern-dfs': graphsGenerators['graph-dfs'],
+    'bst': treesGenerators['bst-impl'],
+    'trie': trieGenerators['trie-prefix-search'],
+    'pattern-trie': trieGenerators['trie-prefix-search'],
+    'monotonic-stack': newGenerators['next-greater-element'] || stacksGenerators['next-greater-element'],
+    'union-find': advancedGenerators['dsu'],
 }
 
 const generateRandomArray = (size = 10, max = 100) => {
@@ -6203,6 +6549,27 @@ const ExamMode = ({ algorithm }) => {
         </motion.div>
     )
 }
+
+const LINE_MAPPINGS = {
+    bubble: {
+        javascript: { 3: 4, 4: 5, 6: 9 },
+        python: { 3: 4, 4: 5, 6: 6 },
+        java: { 3: 4, 4: 6, 6: 10 },
+        cpp: { 3: 3, 4: 4, 6: 7 }
+    },
+    selection: {
+        javascript: { 4: 5, 7: 7, 9: 9 },
+        python: { 4: 5, 7: 7, 9: 8 },
+        java: { 4: 5, 7: 8, 9: 10 },
+        cpp: { 4: 5, 7: 7, 9: 8 }
+    },
+    insertion: {
+        javascript: { 4: 4, 5: 5, 8: 10 },
+        python: { 4: 4, 5: 5, 8: 8 },
+        java: { 4: 4, 5: 5, 8: 8 },
+        cpp: { 4: 4, 5: 5, 8: 8 }
+    }
+};
 
 export default function AlgorithmViewer() {
     const { category = 'sorting', algorithmId } = useParams()
@@ -6544,7 +6911,11 @@ export default function AlgorithmViewer() {
                                     key={idx}
                                     className={`
                                         px-3 py-0.5 -mx-2 rounded transition-colors whitespace-pre
-                                        ${hasVisualization && currentStepData.line === idx
+                                        ${(() => {
+                                            const algoId = selectedAlgorithm?.id;
+                                            const mappedLine = LINE_MAPPINGS[algoId]?.[selectedLanguage]?.[currentStepData.line] ?? currentStepData.line;
+                                            return hasVisualization && mappedLine === idx;
+                                        })()
                                             ? 'bg-google-blue/20 border-l-2 border-google-blue'
                                             : ''
                                         }

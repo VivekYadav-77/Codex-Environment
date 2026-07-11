@@ -21,7 +21,7 @@ RUN npm install
 COPY . .
 
 # Expose port (Render sets PORT env var, but good for documentation)
-EXPOSE 3000
+EXPOSE 5001
 
 # Start server
 CMD ["node", "index.js"]

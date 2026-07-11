@@ -7,7 +7,7 @@ const DEFAULT_JWT_SECRET = 'local_dev_secret_change_later'
 
 const envSchema = z.object({
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-    PORT: z.coerce.number().int().positive().default(3000),
+    PORT: z.coerce.number().int().positive().default(5001),
     MONGODB_URI: z.string().min(1).default('mongodb://127.0.0.1:27017/codex_environment'),
     JWT_SECRET: z.string().min(12).default(DEFAULT_JWT_SECRET),
     FRONTEND_URL: z.url().default('http://localhost:5174'),
