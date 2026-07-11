@@ -1,0 +1,852 @@
+[
+  {
+    "id": "graph-representation",
+    "name": "Graph Representation",
+    "category": "graphs",
+    "complexity": {
+      "time": "O(V²) or O(V+E)",
+      "space": "O(V²) or O(V+E)"
+    },
+    "description": "Graphs are represented in memory primarily using an Adjacency Matrix (V x V grid) or an Adjacency List (array of linked lists/arrays). Matrices allow O(1) edge queries but consume O(V²) space, while lists use O(V+E) space.",
+    "operations": ["addEdge", "removeEdge", "hasEdge", "getNeighbors"],
+    "code": {
+      "javascript": "class Graph {\n  constructor(v) {\n    this.v = v;\n    this.adjList = new Map();\n  }\n  addEdge(u, v) {\n    if (!this.adjList.has(u)) this.adjList.set(u, []);\n    this.adjList.get(u).push(v);\n  }\n}",
+      "python": "class Graph:\n    def __init__(self, vertices):\n        self.V = vertices\n        self.adj = {i: [] for i in range(vertices)}\n    def add_edge(self, u, v):\n        self.adj[u].append(v)",
+      "java": "class Graph {\n    int V;\n    List<List<Integer>> adj;\n    Graph(int V) {\n        this.V = V;\n        adj = new ArrayList<>(V);\n        for (int i = 0; i < V; i++) adj.add(new ArrayList<>());\n    }\n    void addEdge(int u, int v) { adj.get(u).add(v); }\n}",
+      "cpp": "class Graph {\n    int V;\n    vector<vector<int>> adj;\npublic:\n    Graph(int V) {\n        this.V = V;\n        adj.resize(V);\n    }\n    void addEdge(int u, int v) { adj[u].push_back(v); }\n}"
+    },
+    "practice": {
+      "theory": [
+        "What are the space complexity differences between Adjacency Matrix and Adjacency List?",
+        "When would you choose an Adjacency Matrix over an Adjacency List?"
+      ],
+      "coding": "Implement both Adjacency Matrix and Adjacency List for a directed graph.",
+      "interview": "Design a memory-efficient graph representation for a massive social network with sparse connections."
+    }
+  },
+  {
+    "id": "graph-types",
+    "name": "Directed, Undirected & Weighted Graphs",
+    "category": "graphs",
+    "complexity": {
+      "time": "O(1)",
+      "space": "O(V+E)"
+    },
+    "description": "Understanding properties of directed edges (one-way arrows), undirected edges (two-way relationships), and weighted edges (carrying a cost or distance). These structural differences dictate choice of traversal and pathfinding algorithms.",
+    "operations": ["addWeightedEdge", "isDirected", "hasNegativeWeights"],
+    "code": {
+      "javascript": "class WeightedGraph {\n  constructor() {\n    this.adjList = new Map();\n  }\n  addEdge(u, v, weight) {\n    if (!this.adjList.has(u)) this.adjList.set(u, []);\n    this.adjList.get(u).push({ node: v, weight });\n  }\n}",
+      "python": "class WeightedGraph:\n    def __init__(self):\n        self.adj = {}\n    def add_edge(self, u, v, w):\n        if u not in self.adj: self.adj[u] = []\n        self.adj[u].append((v, w))",
+      "java": "class WeightedGraph {\n    static class Edge { int node, weight; Edge(int n, int w) { node = n; weight = w; } }\n    Map<Integer, List<Edge>> adj = new HashMap<>();\n    void addEdge(int u, int v, int w) {\n        adj.computeIfAbsent(u, k -> new ArrayList<>()).add(new Edge(v, w));\n    }\n}",
+      "cpp": "struct Edge { int node; int weight; };\nclass WeightedGraph {\n    map<int, vector<Edge>> adj;\npublic:\n    void addEdge(int u, int v, int w) { adj[u].push_back({v, w}); }\n};"
+    },
+    "practice": {
+      "theory": [
+        "What is the difference between a DAG (Directed Acyclic Graph) and a general directed graph?",
+        "Why can negative edge weights break Dijkstra's algorithm but not Bellman-Ford?"
+      ],
+      "coding": "Implement an undirected graph where edges automatically create symmetric mappings in both vertices.",
+      "interview": "Represent flight routes between airports where each route has a cost, flight time, and layover duration."
+    }
+  },
+  {
+    "id": "connected-components",
+    "name": "Connected Components",
+    "category": "graphs",
+    "complexity": {
+      "time": "O(V + E)",
+      "space": "O(V)"
+    },
+    "description": "Finds isolated subgraphs where every vertex is reachable from any other vertex in the component. Commonly solved using DFS/BFS sweeps or the Disjoint Set Union (Union-Find) structure.",
+    "operations": ["findComponents", "isConnected", "countComponents"],
+    "code": {
+      "javascript": "function countComponents(n, edges) {\n  const adj = Array.from({ length: n }, () => []);\n  for (const [u, v] of edges) { adj[u].push(v); adj[v].push(u); }\n  const visited = new Set();\n  let count = 0;\n  function dfs(node) {\n    visited.add(node);\n    for (const neighbor of adj[node]) if (!visited.has(neighbor)) dfs(neighbor);\n  }\n  for (let i = 0; i < n; i++) {\n    if (!visited.has(i)) { count++; dfs(i); }\n  }\n  return count;\n}",
+      "python": "def countComponents(n, edges):\n    adj = [[] for _ in range(n)]\n    for u, v in edges:\n        adj[u].append(v)\n        adj[v].append(u)\n    visited = set()\n    count = 0\n    def dfs(node):\n        visited.add(node)\n        for neighbor in adj[node]:\n            if neighbor not in visited: dfs(neighbor)\n    for i in range(n):\n        if i not in visited:\n            count += 1\n            dfs(i)\n    return count",
+      "java": "public int countComponents(int n, int[][] edges) {\n    List<List<Integer>> adj = new ArrayList<>();\n    for (int i = 0; i < n; i++) adj.add(new ArrayList<>());\n    for (int[] e : edges) { adj.get(e[0]).add(e[1]); adj.get(e[1]).add(e[0]); }\n    boolean[] visited = new boolean[n];\n    int count = 0;\n    for (int i = 0; i < n; i++) {\n        if (!visited[i]) { count++; dfs(i, adj, visited); }\n    }\n    return count;\n}\nprivate void dfs(int u, List<List<Integer>> adj, boolean[] visited) {\n    visited[u] = true;\n    for (int v : adj.get(u)) if (!visited[v]) dfs(v, adj, visited);\n}",
+      "cpp": "int countComponents(vector<vector<int>>& edges, int n) {\n    vector<vector<int>> adj(n);\n    for (auto& e : edges) { adj[e[0]].push_back(e[1]); adj[e[1]].push_back(e[0]); }\n    vector<bool> visited(n, false);\n    int count = 0;\n    auto dfs = [&](auto self, int u) -> void {\n        visited[u] = true;\n        for (int v : adj[u]) if (!visited[v]) self(self, v);\n    };\n    for (int i = 0; i < n; i++) {\n        if (!visited[i]) { count++; dfs(dfs, i); }\n    }\n    return count;\n}"
+    },
+    "practice": {
+      "theory": [
+        "Explain how Union-Find can be used to find connected components compared to DFS.",
+        "What is the difference between connected components in undirected vs strongly connected components in directed graphs?"
+      ],
+      "coding": "Count components in an undirected graph represented as an adjacency matrix.",
+      "interview": "Find the number of isolated networks of servers in a data center given redundant connection lists."
+    }
+  },
+  {
+    "id": "flood-fill",
+    "name": "Flood Fill",
+    "category": "graphs",
+    "complexity": {
+      "time": "O(R * C)",
+      "space": "O(R * C)"
+    },
+    "description": "An algorithm that determines and alters the area connected to a given node in a multi-dimensional array. It functions similarly to the 'bucket fill' paint tool, traversing adjacent matching cells recursively.",
+    "operations": ["colorPixel", "exploreNeighbors", "boundaryCheck"],
+    "code": {
+      "javascript": "function floodFill(image, sr, sc, newColor) {\n  const color = image[sr][sc];\n  if (color === newColor) return image;\n  const R = image.length, C = image[0].length;\n  function dfs(r, c) {\n    if (r < 0 || r >= R || c < 0 || c >= C || image[r][c] !== color) return;\n    image[r][c] = newColor;\n    dfs(r+1, c); dfs(r-1, c); dfs(r, c+1); dfs(r, c-1);\n  }\n  dfs(sr, sc);\n  return image;\n}",
+      "python": "def floodFill(image, sr, sc, newColor):\n    color = image[sr][sc]\n    if color == newColor: return image\n    R, C = len(image), len(image[0])\n    def dfs(r, c):\n        if r < 0 or r >= R or c < 0 or c >= C or image[r][c] != color: return\n        image[r][c] = newColor\n        dfs(r+1, c); dfs(r-1, c); dfs(r, c+1); dfs(r, c-1)\n    dfs(sr, sc)\n    return image",
+      "java": "public int[][] floodFill(int[][] image, int sr, int sc, int newColor) {\n    int color = image[sr][sc];\n    if (color != newColor) dfs(image, sr, sc, color, newColor);\n    return image;\n}\nprivate void dfs(int[][] img, int r, int c, int color, int newColor) {\n    if (r < 0 || r >= img.length || c < 0 || c >= img[0].length || img[r][c] != color) return;\n    img[r][c] = newColor;\n    dfs(img, r+1, c, color, newColor);\n    dfs(img, r-1, c, color, newColor);\n    dfs(img, r, c+1, color, newColor);\n    dfs(img, r, c-1, color, newColor);\n}",
+      "cpp": "vector<vector<int>> floodFill(vector<vector<int>>& image, int sr, int sc, int newColor) {\n    int color = image[sr][sc];\n    if (color == newColor) return image;\n    int R = image.size(), C = image[0].size();\n    auto dfs = [&](auto self, int r, int c) -> void {\n        if (r < 0 || r >= R || c < 0 || c >= C || image[r][c] != color) return;\n        image[r][c] = newColor;\n        self(self, r+1, c); self(self, r-1, c); self(self, r, c+1); self(self, r, c-1);\n    };\n    dfs(dfs, sr, sc);\n    return image;\n}"
+    },
+    "practice": {
+      "theory": [
+        "Why is recursion safe for small grids, and how can we prevent stack overflow in huge grids?",
+        "Explain how BFS can be used to solve flood fill iteratively."
+      ],
+      "coding": "Implement flood fill using BFS with a queue.",
+      "interview": "Solve the 'Number of Islands' problem on LeetCode using a variation of flood fill."
+    }
+  },
+  {
+    "id": "multi-source-bfs",
+    "name": "Multi-Source BFS",
+    "category": "graphs",
+    "complexity": {
+      "time": "O(R * C)",
+      "space": "O(R * C)"
+    },
+    "description": "Runs BFS starting from multiple nodes/sources simultaneously. It is useful for finding the shortest distance from any node to the nearest source (e.g., proximity mapping, spreading fires/infections).",
+    "operations": ["enqueueSources", "expandFrontier", "updateDistances"],
+    "code": {
+      "javascript": "function updateMatrix(mat) {\n  const R = mat.length, C = mat[0].length;\n  const dist = Array.from({ length: R }, () => Array(C).fill(Infinity));\n  const queue = [];\n  for (let r = 0; r < R; r++) {\n    for (let c = 0; c < C; c++) {\n      if (mat[r][c] === 0) { dist[r][c] = 0; queue.push([r, c]); }\n    }\n  }\n  const dirs = [[1,0], [-1,0], [0,1], [0,-1]];\n  while (queue.length) {\n    const [r, c] = queue.shift();\n    for (const [dr, dc] of dirs) {\n      const nr = r + dr, nc = c + dc;\n      if (nr >= 0 && nr < R && nc >= 0 && nc < C) {\n        if (dist[r][c] + 1 < dist[nr][nc]) {\n          dist[nr][nc] = dist[r][c] + 1;\n          queue.push([nr, nc]);\n        }\n      }\n    }\n  }\n  return dist;\n}",
+      "python": "from collections import deque\ndef updateMatrix(mat):\n    R, C = len(mat), len(mat[0])\n    dist = [[float('inf')] * C for _ in range(R)]\n    queue = deque()\n    for r in range(R):\n        for c in range(C):\n            if mat[r][c] == 0:\n                dist[r][c] = 0\n                queue.append((r, c))\n    dirs = [(1,0), (-1,0), (0,1), (0,-1)]\n    while queue:\n        r, c = queue.popleft()\n        for dr, dc in dirs:\n            nr, nc = r + dr, c + dc\n            if 0 <= nr < R and 0 <= nc < C:\n                if dist[r][c] + 1 < dist[nr][nc]:\n                    dist[nr][nc] = dist[r][c] + 1\n                    queue.append((nr, nc))\n    return dist",
+      "java": "public int[][] updateMatrix(int[][] mat) {\n    int R = mat.length, C = mat[0].length;\n    Queue<int[]> q = new LinkedList<>();\n    for (int r = 0; r < R; r++) {\n        for (int c = 0; c < C; c++) {\n            if (mat[r][c] == 0) q.add(new int[]{r, c});\n            else mat[r][c] = Integer.MAX_VALUE;\n        }\n    }\n    int[][] dirs = {{1,0}, {-1,0}, {0,1}, {0,-1}};\n    while (!q.isEmpty()) {\n        int[] curr = q.poll();\n        for (int[] d : dirs) {\n            int nr = curr[0] + d[0], nc = curr[1] + d[1];\n            if (nr >= 0 && nr < R && nc >= 0 && nc < C) {\n                if (mat[curr[0]][curr[1]] + 1 < mat[nr][nc]) {\n                    mat[nr][nc] = mat[curr[0]][curr[1]] + 1;\n                    q.add(new int[]{nr, nc});\n                }\n            }\n        }\n    }\n    return mat;\n}",
+      "cpp": "vector<vector<int>> updateMatrix(vector<vector<int>>& mat) {\n    int R = mat.size(), C = mat[0].size();\n    queue<pair<int,int>> q;\n    for (int r = 0; r < R; r++) {\n        for (int c = 0; c < C; c++) {\n            if (mat[r][c] == 0) q.push({r, c});\n            else mat[r][c] = 1e9;\n        }\n    }\n    int dr[] = {1, -1, 0, 0}, dc[] = {0, 0, 1, -1};\n    while (!q.empty()) {\n        auto [r, c] = q.front(); q.pop();\n        for (int i = 0; i < 4; i++) {\n            int nr = r + dr[i], nc = c + dc[i];\n            if (nr >= 0 && nr < R && nc >= 0 && nc < C) {\n                if (mat[r][c] + 1 < mat[nr][nc]) {\n                    mat[nr][nc] = mat[r][c] + 1;\n                    q.push({nr, nc});\n                }\n            }\n        }\n    }\n    return mat;\n}"
+    },
+    "practice": {
+      "theory": [
+        "Why is it incorrect to run separate BFS searches for each source node?",
+        "What is the time complexity difference between running BFS once from multiple sources vs running BFS V times?"
+      ],
+      "coding": "Solve the LeetCode 'Rotting Oranges' problem using Multi-Source BFS.",
+      "interview": "In a grid representing a map, find the location for a fire station that minimizes the maximum distance to any house."
+    }
+  },
+  {
+    "id": "floyd-warshall",
+    "name": "Floyd-Warshall Algorithm",
+    "category": "graphs",
+    "complexity": {
+      "time": "O(V³)",
+      "space": "O(V²)"
+    },
+    "description": "Calculates the shortest paths between all pairs of vertices in a weighted graph. It uses dynamic programming on the adjacency matrix, progressively evaluating if path (i -> j) can be shortened by going through an intermediate node k.",
+    "operations": ["initializeMatrix", "relaxEdgesMatrix", "detectNegativeCycles"],
+    "code": {
+      "javascript": "function floydWarshall(V, graph) {\n  const dist = Array.from({ length: V }, (_, i) => \n    Array.from({ length: V }, (_, j) => i === j ? 0 : (graph[i]?.[j] ?? Infinity))\n  );\n  for (let k = 0; k < V; k++) {\n    for (let i = 0; i < V; i++) {\n      for (let j = 0; j < V; j++) {\n        if (dist[i][k] + dist[k][j] < dist[i][j]) {\n          dist[i][j] = dist[i][k] + dist[k][j];\n        }\n      }\n    }\n  }\n  return dist;\n}",
+      "python": "def floydWarshall(V, graph):\n    dist = [[0 if i == j else graph[i][j] for j in range(V)] for i in range(V)]\n    for k in range(V):\n        for i in range(V):\n            for j in range(V):\n                dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])\n    return dist",
+      "java": "public void floydWarshall(int V, int[][] dist) {\n    for (int k = 0; k < V; k++) {\n        for (int i = 0; i < V; i++) {\n            for (int j = 0; j < V; j++) {\n                if (dist[i][k] != Integer.MAX_VALUE && dist[k][j] != Integer.MAX_VALUE) {\n                    dist[i][j] = Math.min(dist[i][j], dist[i][k] + dist[k][j]);\n                }\n            }\n        }\n    }\n}",
+      "cpp": "void floydWarshall(int V, vector<vector<int>>& dist) {\n    for (int k = 0; k < V; k++) {\n        for (int i = 0; i < V; i++) {\n            for (int j = 0; j < V; j++) {\n                if (dist[i][k] != 1e9 && dist[k][j] != 1e9) {\n                    dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);\n                }\n            }\n        }\n    }\n}"
+    },
+    "practice": {
+      "theory": [
+        "What does the index 'k' in the outer loop represent in Floyd-Warshall?",
+        "How can we detect a negative weight cycle using Floyd-Warshall?"
+      ],
+      "coding": "Implement Floyd-Warshall and count how many pairs have a valid path between them.",
+      "interview": "Optimize network routing tables in a distributed system where edge delays change slowly over time."
+    }
+  },
+  {
+    "id": "scc",
+    "name": "Strongly Connected Components (Tarjan / Kosaraju)",
+    "category": "graphs",
+    "complexity": {
+      "time": "O(V + E)",
+      "space": "O(V)"
+    },
+    "description": "Finds SCCs in directed graphs — groups of nodes where each node is reachable from every other node in the group. Kosaraju's uses two DFS runs (one on transpose graph); Tarjan's uses a single DFS tracking node discovery times and low links via a stack.",
+    "operations": ["dfsDiscovery", "transposeGraph", "extractSCC"],
+    "code": {
+      "javascript": "function kosaraju(V, adj) {\n  const visited = new Set(), stack = [], sccs = [];\n  function dfs1(u) {\n    visited.add(u);\n    for (const v of adj[u] || []) if (!visited.has(v)) dfs1(v);\n    stack.push(u);\n  }\n  for (let i = 0; i < V; i++) if (!visited.has(i)) dfs1(i);\n  const transpose = Array.from({ length: V }, () => []);\n  for (let u = 0; u < V; u++) {\n    for (const v of adj[u] || []) transpose[v].push(u);\n  }\n  visited.clear();\n  function dfs2(u, currSCC) {\n    visited.add(u); currSCC.push(u);\n    for (const v of transpose[u] || []) if (!visited.has(v)) dfs2(v, currSCC);\n  }\n  while (stack.length) {\n    const u = stack.pop();\n    if (!visited.has(u)) { const curr = []; dfs2(u, curr); sccs.push(curr); }\n  }\n  return sccs;\n}",
+      "python": "def kosaraju(V, adj):\n    visited, stack, sccs = set(), [], []\n    def dfs1(u):\n        visited.add(u)\n        for v in adj[u]:\n            if v not in visited: dfs1(v)\n        stack.append(u)\n    for i in range(V):\n        if i not in visited: dfs1(i)\n    transpose = [[] for _ in range(V)]\n    for u in range(V):\n        for v in adj[u]: transpose[v].append(u)\n    visited.clear()\n    def dfs2(u, curr):\n        visited.add(u); curr.append(u)\n        for v in transpose[u]:\n            if v not in visited: dfs2(v, curr)\n    while stack:\n        u = stack.pop()\n        if u not in visited:\n            curr = []\n            dfs2(u, curr)\n            sccs.append(curr)\n    return sccs",
+      "java": "public List<List<Integer>> kosaraju(int V, List<List<Integer>> adj) {\n    List<Integer> stack = new ArrayList<>();\n    boolean[] visited = new boolean[V];\n    for (int i = 0; i < V; i++) if (!visited[i]) dfs1(i, adj, visited, stack);\n    List<List<Integer>> transpose = new ArrayList<>();\n    for (int i = 0; i < V; i++) transpose.add(new ArrayList<>());\n    for (int u = 0; u < V; u++) for (int v : adj.get(u)) transpose.get(v).add(u);\n    Arrays.fill(visited, false);\n    List<List<Integer>> sccs = new ArrayList<>();\n    for (int i = stack.size() - 1; i >= 0; i--) {\n        int u = stack.get(i);\n        if (!visited[u]) { List<Integer> curr = new ArrayList<>(); dfs2(u, transpose, visited, curr); sccs.add(curr); }\n    }\n    return sccs;\n}\nprivate void dfs1(int u, List<List<Integer>> adj, boolean[] vis, List<Integer> stack) {\n    vis[u] = true;\n    for (int v : adj.get(u)) if (!vis[v]) dfs1(v, adj, vis, stack);\n    stack.add(u);\n}\nprivate void dfs2(int u, List<List<Integer>> adjT, boolean[] vis, List<Integer> curr) {\n    vis[u] = true; curr.add(u);\n    for (int v : adjT.get(u)) if (!vis[v]) dfs2(v, adjT, vis, curr);\n}",
+      "cpp": "vector<vector<int>> kosaraju(int V, vector<vector<int>>& adj) {\n    vector<int> stack; vector<bool> vis(V, false);\n    auto dfs1 = [&](auto self, int u) -> void {\n        vis[u] = true;\n        for (int v : adj[u]) if (!vis[v]) self(self, v);\n        stack.push_back(u);\n    };\n    for (int i = 0; i < V; i++) if (!vis[i]) dfs1(dfs1, i);\n    vector<vector<int>> adjT(V);\n    for (int u = 0; u < V; u++) for (int v : adj[u]) adjT[v].push_back(u);\n    fill(vis.begin(), vis.end(), false);\n    vector<vector<int>> sccs;\n    auto dfs2 = [&](auto self, int u, vector<int>& curr) -> void {\n        vis[u] = true; curr.push_back(u);\n        for (int v : adjT[u]) if (!vis[v]) self(self, v, curr);\n    };\n    reverse(stack.begin(), stack.end());\n    for (int u : stack) {\n        if (!vis[u]) { vector<int> curr; dfs2(dfs2, u, curr); sccs.push_back(curr); }\n    }\n    return sccs;\n}"
+    },
+    "practice": {
+      "theory": [
+        "Why does reversing edges in a graph keep its strongly connected components unchanged?",
+        "Compare the memory overhead of Tarjan's vs Kosaraju's algorithms."
+      ],
+      "coding": "Count the number of strongly connected components in a directed graph.",
+      "interview": "In a dependency graph of software components, identify circular dependencies by grouping components into SCCs."
+    }
+  },
+  {
+    "id": "bridges-articulation",
+    "name": "Bridges & Articulation Points",
+    "category": "graphs",
+    "complexity": {
+      "time": "O(V + E)",
+      "space": "O(V)"
+    },
+    "description": "Finds critical connections in undirected graphs. Bridges are edges whose removal disconnects the graph; Articulation Points are vertices whose removal disconnects the graph. Solved using Tarjan's bridge finder with discovery timers.",
+    "operations": ["dfsTimestamps", "checkBackEdges", "identifyBridges"],
+    "code": {
+      "javascript": "function findBridges(n, connections) {\n  const adj = Array.from({ length: n }, () => []);\n  for (const [u, v] of connections) { adj[u].push(v); adj[v].push(u); }\n  const tin = Array(n).fill(-1), low = Array(n).fill(-1);\n  const bridges = [];\n  let timer = 0;\n  function dfs(u, parent = -1) {\n    tin[u] = low[u] = timer++;\n    for (const v of adj[u]) {\n      if (v === parent) continue;\n      if (tin[v] !== -1) low[u] = Math.min(low[u], tin[v]);\n      else {\n        dfs(v, u);\n        low[u] = Math.min(low[u], low[v]);\n        if (low[v] > tin[u]) bridges.push([u, v]);\n      }\n    }\n  }\n  dfs(0);\n  return bridges;\n}",
+      "python": "def findBridges(n, connections):\n    adj = [[] for _ in range(n)]\n    for u, v in connections: adj[u].append(v); adj[v].append(u)\n    tin, low = [-1]*n, [-1]*n\n    bridges, timer = [], 0\n    def dfs(u, p=-1):\n        nonlocal timer\n        tin[u] = low[u] = timer; timer += 1\n        for v in adj[u]:\n            if v == p: continue\n            if tin[v] != -1: low[u] = min(low[u], tin[v])\n            else:\n                dfs(v, u)\n                low[u] = min(low[u], low[v])\n                if low[v] > tin[u]: bridges.append([u, v])\n    dfs(0)\n    return bridges",
+      "java": "public List<List<Integer>> findBridges(int n, List<List<Integer>> connections) {\n    List<List<Integer>> adj = new ArrayList<>();\n    for (int i = 0; i < n; i++) adj.add(new ArrayList<>());\n    for (List<Integer> c : connections) { adj.get(c.get(0)).add(c.get(1)); adj.get(c.get(1)).add(c.get(0)); }\n    int[] tin = new int[n], low = new int[n];\n    Arrays.fill(tin, -1); Arrays.fill(low, -1);\n    List<List<Integer>> bridges = new ArrayList<>();\n    dfs(0, -1, 0, adj, tin, low, bridges);\n    return bridges;\n}\nprivate void dfs(int u, int p, int timer, List<List<Integer>> adj, int[] tin, int[] low, List<List<Integer>> bridges) {\n    tin[u] = low[u] = timer++;\n    for (int v : adj.get(u)) {\n        if (v == p) continue;\n        if (tin[v] != -1) low[u] = Math.min(low[u], tin[v]);\n        else {\n            dfs(v, u, timer, adj, tin, low, bridges);\n            low[u] = Math.min(low[u], low[v]);\n            if (low[v] > tin[u]) bridges.add(Arrays.asList(u, v));\n        }\n    }\n}",
+      "cpp": "vector<vector<int>> findBridges(int n, vector<vector<int>>& connections) {\n    vector<vector<int>> adj(n);\n    for (auto& c : connections) { adj[c[0]].push_back(c[1]); adj[c[1]].push_back(c[0]); }\n    vector<int> tin(n, -1), low(n, -1);\n    vector<vector<int>> bridges; int timer = 0;\n    auto dfs = [&](auto self, int u, int p = -1) -> void {\n        tin[u] = low[u] = timer++;\n        for (int v : adj[u]) {\n            if (v == p) continue;\n            if (tin[v] != -1) low[u] = min(low[u], tin[v]);\n            else {\n                self(self, v, u);\n                low[u] = min(low[u], low[v]);\n                if (low[v] > tin[u]) bridges.push_back({u, v});\n            }\n        }\n    };\n    dfs(dfs, 0);\n    return bridges;\n}"
+    },
+    "practice": {
+      "theory": [
+        "Define the condition that makes an edge (u, v) a bridge in undirected graphs.",
+        "What is the distinction in Tarjan's check condition for bridges vs articulation points?"
+      ],
+      "coding": "Solve the Critical Connections in a Network problem on LeetCode.",
+      "interview": "Design a vulnerability scanner that finds single points of failure in network router topologies."
+    }
+  },
+  {
+    "id": "bipartite-check",
+    "name": "Bipartite Check",
+    "category": "graphs",
+    "complexity": {
+      "time": "O(V + E)",
+      "space": "O(V)"
+    },
+    "description": "Determines if a graph can be 2-colored such that no two adjacent vertices share the same color. A graph is bipartite if and only if it contains no odd-length cycles. Commonly solved using BFS/DFS color toggles.",
+    "operations": ["colorNode", "detectOddCycle", "toggleColor"],
+    "code": {
+      "javascript": "function isBipartite(graph) {\n  const n = graph.length;\n  const colors = Array(n).fill(0); // 0: uncolored, 1: Red, -1: Blue\n  for (let i = 0; i < n; i++) {\n    if (colors[i] !== 0) continue;\n    const queue = [i]; colors[i] = 1;\n    while (queue.length) {\n      const u = queue.shift();\n      for (const v of graph[u]) {\n        if (colors[v] === colors[u]) return false;\n        if (colors[v] === 0) { colors[v] = -colors[u]; queue.push(v); }\n      }\n    }\n  }\n  return true;\n}",
+      "python": "def isBipartite(graph):\n    n = len(graph)\n    colors = [0] * n\n    for i in range(n):\n        if colors[i] != 0: continue\n        queue = [i]; colors[i] = 1\n        while queue:\n            u = queue.pop(0)\n            for v in graph[u]:\n                if colors[v] == colors[u]: return False\n                if colors[v] == 0:\n                    colors[v] = -colors[u]\n                    queue.append(v)\n    return True",
+      "java": "public boolean isBipartite(int[][] graph) {\n    int n = graph.length;\n    int[] colors = new int[n];\n    for (int i = 0; i < n; i++) {\n        if (colors[i] != 0) continue;\n        Queue<Integer> q = new LinkedList<>();\n        q.add(i); colors[i] = 1;\n        while (!q.isEmpty()) {\n            int u = q.poll();\n            for (int v : graph[u]) {\n                if (colors[v] == colors[u]) return false;\n                if (colors[v] == 0) { colors[v] = -colors[u]; q.add(v); }\n            }\n        }\n    }\n    return true;\n}",
+      "cpp": "bool isBipartite(vector<vector<int>>& graph) {\n    int n = graph.size(); vector<int> colors(n, 0);\n    for (int i = 0; i < n; i++) {\n        if (colors[i] != 0) continue;\n        queue<int> q; q.push(i); colors[i] = 1;\n        while (!q.empty()) {\n            int u = q.front(); q.pop();\n            for (int v : graph[u]) {\n                if (colors[v] == colors[u]) return false;\n                if (colors[v] == 0) { colors[v] = -colors[u]; q.push(v); }\n            }\n        }\n    }\n    return true;\n}"
+    },
+    "practice": {
+      "theory": [
+        "Why can a graph with odd cycles never be bipartite?",
+        "If a graph is a tree, is it always bipartite?"
+      ],
+      "coding": "Solve the 'Possible Bipartition' problem on LeetCode.",
+      "interview": "Design a system that splits a group of people into two groups such that there are no conflicts, given a list of dislikes."
+    }
+  },
+  {
+    "id": "network-flow",
+    "name": "Network Flow & Max Cut",
+    "category": "graphs",
+    "complexity": {
+      "time": "O(V * E²)",
+      "space": "O(V + E)"
+    },
+    "description": "Models material transmission through a network with edge capacities. The Ford-Fulkerson (Edmonds-Karp) algorithm finds maximum flow by repeatedly finding augmenting paths in a residual graph, illustrating the Max-Flow Min-Cut Theorem.",
+    "operations": ["findAugmentingPath", "updateResidualGraph", "calculateMinCut"],
+    "code": {
+      "javascript": "function edmondsKarp(capacity, source, sink) {\n  const n = capacity.length;\n  const flow = Array.from({ length: n }, () => Array(n).fill(0));\n  let maxFlow = 0;\n  while (true) {\n    const parent = Array(n).fill(-1);\n    const queue = [source]; parent[source] = source;\n    while (queue.length && parent[sink] === -1) {\n      const u = queue.shift();\n      for (let v = 0; v < n; v++) {\n        if (parent[v] === -1 && capacity[u][v] - flow[u][v] > 0) {\n          parent[v] = u; queue.push(v);\n        }\n      }\n    }\n    if (parent[sink] === -1) break;\n    let pathFlow = Infinity;\n    for (let v = sink; v !== source; v = parent[v]) {\n      const u = parent[v]; pathFlow = Math.min(pathFlow, capacity[u][v] - flow[u][v]);\n    }\n    for (let v = sink; v !== source; v = parent[v]) {\n      const u = parent[v]; flow[u][v] += pathFlow; flow[v][u] -= pathFlow;\n    }\n    maxFlow += pathFlow;\n  }\n  return maxFlow;\n}",
+      "python": "def edmondsKarp(capacity, source, sink):\n    n = len(capacity)\n    flow = [[0]*n for _ in range(n)]\n    max_flow = 0\n    while True:\n        parent = [-1]*n\n        queue = [source]; parent[source] = source\n        while queue and parent[sink] == -1:\n            u = queue.pop(0)\n            for v in range(n):\n                if parent[v] == -1 and capacity[u][v] - flow[u][v] > 0:\n                    parent[v] = u; queue.append(v)\n        if parent[sink] == -1: break\n        path_flow = float('inf')\n        v = sink\n        while v != source:\n            u = parent[v]; path_flow = min(path_flow, capacity[u][v] - flow[u][v]); v = parent[v]\n        v = sink\n        while v != source:\n            u = parent[v]; flow[u][v] += path_flow; flow[v][u] -= path_flow; v = parent[v]\n        max_flow += path_flow\n    return max_flow",
+      "java": "public int edmondsKarp(int[][] capacity, int source, int sink) {\n    int n = capacity.length, maxFlow = 0;\n    int[][] flow = new int[n][n];\n    while (true) {\n        int[] parent = new int[n]; Arrays.fill(parent, -1);\n        Queue<Integer> q = new LinkedList<>();\n        q.add(source); parent[source] = source;\n        while (!q.isEmpty() && parent[sink] == -1) {\n            int u = q.poll();\n            for (int v = 0; v < n; v++) {\n                if (parent[v] == -1 && capacity[u][v] - flow[u][v] > 0) {\n                    parent[v] = u; q.add(v);\n                }\n            }\n        }\n        if (parent[sink] == -1) break;\n        int pathFlow = Integer.MAX_VALUE;\n        for (int v = sink; v != source; v = parent[v]) {\n            pathFlow = Math.min(pathFlow, capacity[parent[v]][v] - flow[parent[v]][v]);\n        }\n        for (int v = sink; v != source; v = parent[v]) {\n            flow[parent[v]][v] += pathFlow; flow[v][parent[v]] -= pathFlow;\n        }\n        maxFlow += pathFlow;\n    }\n    return maxFlow;\n}",
+      "cpp": "int edmondsKarp(vector<vector<int>>& capacity, int source, int sink) {\n    int n = capacity.size(), maxFlow = 0;\n    vector<vector<int>> flow(n, vector<int>(n, 0));\n    while (true) {\n        vector<int> parent(n, -1);\n        queue<int> q; q.push(source); parent[source] = source;\n        while (!q.empty() && parent[sink] == -1) {\n            int u = q.front(); q.pop();\n            for (int v = 0; v < n; v++) {\n                if (parent[v] == -1 && capacity[u][v] - flow[u][v] > 0) {\n                    parent[v] = u; q.push(v);\n                }\n            }\n        }\n        if (parent[sink] == -1) break;\n        int pathFlow = 1e9;\n        for (int v = sink; v != source; v = parent[v]) {\n            pathFlow = min(pathFlow, capacity[parent[v]][v] - flow[parent[v]][v]);\n        }\n        for (int v = sink; v != source; v = parent[v]) {\n            flow[parent[v]][v] += pathFlow; flow[v][parent[v]] -= pathFlow;\n        }\n        maxFlow += pathFlow;\n    }\n    return maxFlow;\n}"
+    },
+    "practice": {
+      "theory": [
+        "Explain the Max-Flow Min-Cut Theorem in intuitive terms.",
+        "How does Edmonds-Karp improve upon standard Ford-Fulkerson?"
+      ],
+      "coding": "Solve a bipartite matching problem by modeling it as network flow.",
+      "interview": "Design a package shipping route optimization system that maximizes parcel flow under capacity constraints."
+    }
+  },
+  {
+    "id": "call-stack",
+    "name": "Call Stack",
+    "category": "backtracking",
+    "complexity": {
+      "time": "O(n)",
+      "space": "O(n)"
+    },
+    "description": "A visualization of the recursion call stack mechanism. Every time a function is called, a new frame is pushed onto the call stack containing parameters and local variables. The frame is popped off once execution completes.",
+    "operations": ["pushFrame", "executeBody", "popFrame"],
+    "code": {
+      "javascript": "function factorial(n) {\n  if (n <= 1) return 1;\n  return n * factorial(n - 1);\n}",
+      "python": "def factorial(n):\n    if n <= 1: return 1\n    return n * factorial(n - 1)",
+      "java": "int factorial(int n) {\n    if (n <= 1) return 1;\n    return n * factorial(n - 1);\n}",
+      "cpp": "int factorial(int n) {\n    if (n <= 1) return 1;\n    return n * factorial(n - 1);\n}"
+    },
+    "practice": {
+      "theory": [
+        "What is the difference between active frame parameters and call return locations?",
+        "Explain stack overflow in recursion."
+      ],
+      "coding": "Convert a simple recursive factorial function to run iteratively using a manual stack array.",
+      "interview": "Explain what happens in the call stack of a web engine when executing deep recursive DOM transversals."
+    }
+  },
+  {
+    "id": "recursive-tree",
+    "name": "Recursive Tree",
+    "category": "backtracking",
+    "complexity": {
+      "time": "O(2ⁿ)",
+      "space": "O(n)"
+    },
+    "description": "Visualizes recursive calls as a branching tree (e.g. Fibonacci, Divide & Conquer steps). It allows developers to analyze time complexity by calculating the depth of the tree and the number of calls at each level.",
+    "operations": ["spawnLeftBranch", "spawnRightBranch", "returnSubproblem"],
+    "code": {
+      "javascript": "function fib(n) {\n  if (n <= 1) return n;\n  return fib(n - 1) + fib(n - 2);\n}",
+      "python": "def fib(n):\n    if n <= 1: return n\n    return fib(n - 1) + fib(n - 2)",
+      "java": "int fib(int n) {\n    if (n <= 1) return n;\n    return fib(n - 1) + fib(n - 2);\n}",
+      "cpp": "int fib(int n) {\n    if (n <= 1) return n;\n    return fib(n - 1) + fib(n - 2);\n}"
+    },
+    "practice": {
+      "theory": [
+        "How many leaf nodes are there in a recursion tree of height H with branching factor B?",
+        "Explain how overlap in the subproblems of a recursion tree suggests using DP."
+      ],
+      "coding": "Draw/simulate the recursive tree calls for fib(5) returning all execution logs.",
+      "interview": "Analyze the time complexity of a recursive algorithm that calls itself three times with size N/2."
+    }
+  },
+  {
+    "id": "backtracking-basics",
+    "name": "Backtracking Basics",
+    "category": "backtracking",
+    "complexity": {
+      "time": "O(2ⁿ) or O(N!)",
+      "space": "O(N)"
+    },
+    "description": "Backtracking is an exhaustive search method that builds a solution step-by-step and reverses ('backtracks') decisions when paths fail constraint checks. It follows a clean pattern: Choose, Recurse, Unchoose.",
+    "operations": ["chooseState", "recurseBranch", "unchooseState"],
+    "code": {
+      "javascript": "function backtrack(state, choices) {\n  if (isSolution(state)) { save(state); return; }\n  for (let choice of choices) {\n    if (isValid(choice, state)) {\n      makeChoice(choice, state);\n      backtrack(state, choices);\n      undoChoice(choice, state);\n    }\n  }\n}",
+      "python": "def backtrack(state, choices):\n    if is_solution(state):\n        save(state); return\n    for choice in choices:\n        if is_valid(choice, state):\n            make_choice(choice, state)\n            backtrack(state, choices)\n            undo_choice(choice, state)",
+      "java": "void backtrack(State state, List<Choice> choices) {\n    if (isSolution(state)) { save(state); return; }\n    for (Choice choice : choices) {\n        if (isValid(choice, state)) {\n            makeChoice(choice, state);\n            backtrack(state, choices);\n            undoChoice(choice, state);\n        }\n    }\n}",
+      "cpp": "void backtrack(State& state, vector<Choice>& choices) {\n    if (isSolution(state)) { save(state); return; }\n    for (auto& choice : choices) {\n        if (isValid(choice, state)) {\n            makeChoice(choice, state);\n            backtrack(state, choices);\n            undoChoice(choice, state);\n        }\n    }\n}"
+    },
+    "practice": {
+      "theory": [
+        "Explain the choose-explore-unchoose cycle.",
+        "Why is it essential to undo changes in backtracking, and what happens if you forget to?"
+      ],
+      "coding": "Implement a simple permutations generator using backtracking basics.",
+      "interview": "Discuss the difference between backtracking and DFS traversal in terms of state management."
+    }
+  },
+  {
+    "id": "sudoku-solver",
+    "name": "Sudoku Solver",
+    "category": "backtracking",
+    "complexity": {
+      "time": "O(9^(N²))",
+      "space": "O(N²)"
+    },
+    "description": "Fills a 9x9 board with digits from 1 to 9. It uses backtracking to check constraints (no duplicates in row, column, or 3x3 block), moving forward on valid numbers and resetting cell choices when a path gets stuck.",
+    "operations": ["placeDigit", "checkConstraints", "backtrackCell"],
+    "code": {
+      "javascript": "function solveSudoku(board) {\n  function isValid(r, c, val) {\n    for (let i = 0; i < 9; i++) {\n      if (board[r][i] === val) return false;\n      if (board[i][c] === val) return false;\n      const boxR = 3 * Math.floor(r / 3) + Math.floor(i / 3);\n      const boxC = 3 * Math.floor(c / 3) + (i % 3);\n      if (board[boxR][boxC] === val) return false;\n    }\n    return true;\n  }\n  for (let r = 0; r < 9; r++) {\n    for (let c = 0; c < 9; c++) {\n      if (board[r][c] === '.') {\n        for (let val = 1; val <= 9; val++) {\n          const char = val.toString();\n          if (isValid(r, c, char)) {\n            board[r][c] = char;\n            if (solveSudoku(board)) return true;\n            board[r][c] = '.';\n          }\n        }\n        return false;\n      }\n    }\n  }\n  return true;\n}",
+      "python": "def solveSudoku(board):\n    def isValid(r, c, val):\n        for i in range(9):\n            if board[r][i] == val: return False\n            if board[i][c] == val: return False\n            if board[3 * (r // 3) + i // 3][3 * (c // 3) + i % 3] == val: return False\n        return True\n    for r in range(9):\n        for c in range(9):\n            if board[r][c] == '.':\n                for val in map(str, range(1, 10)):\n                    if isValid(r, c, val):\n                        board[r][c] = val\n                        if solveSudoku(board): return True\n                        board[r][c] = '.'\n                return False\n    return True",
+      "java": "public void solveSudoku(char[][] board) {\n    solve(board);\n}\nprivate boolean solve(char[][] board) {\n    for (int r = 0; r < 9; r++) {\n        for (int c = 0; c < 9; c++) {\n            if (board[r][c] == '.') {\n                for (char val = '1'; val <= '9'; val++) {\n                    if (isValid(board, r, c, val)) {\n                        board[r][c] = val;\n                        if (solve(board)) return true;\n                        board[r][c] = '.';\n                    }\n                }\n                return false;\n            }\n        }\n    }\n    return true;\n}\nprivate boolean isValid(char[][] board, int r, int c, char val) {\n    for (int i = 0; i < 9; i++) {\n        if (board[r][i] == val) return false;\n        if (board[i][c] == val) return false;\n        if (board[3*(r/3)+i/3][3*(c/3)+i%3] == val) return false;\n    }\n    return true;\n}",
+      "cpp": "bool solveSudoku(vector<vector<char>>& board) {\n    auto isValid = [&](int r, int c, char val) {\n        for (int i = 0; i < 9; ++i) {\n            if (board[r][i] == val) return false;\n            if (board[i][c] == val) return false;\n            if (board[3 * (r / 3) + i / 3][3 * (c / 3) + i % 3] == val) return false;\n        }\n        return true;\n    };\n    for (int r = 0; r < 9; ++r) {\n        for (int c = 0; c < 9; ++c) {\n            if (board[r][c] == '.') {\n                for (char val = '1'; val <= '9'; ++val) {\n                    if (isValid(r, c, val)) {\n                        board[r][c] = val;\n                        if (solveSudoku(board)) return true;\n                        board[r][c] = '.';\n                    }\n                }\n                return false;\n            }\n        }\n    }\n    return true;\n}"
+    },
+    "practice": {
+      "theory": [
+        "Why is Sudoku solving classified as NP-Complete?",
+        "How can pruning (e.g. keeping track of row/col bitmasks) speed up Sudoku backtracking?"
+      ],
+      "coding": "Implement validation checks for a completed Sudoku board.",
+      "interview": "Solve Sudoku and explain how to model general puzzle solvers with modular backtracking state check objects."
+    }
+  },
+  {
+    "id": "rat-in-maze",
+    "name": "Rat in a Maze",
+    "category": "backtracking",
+    "complexity": {
+      "time": "O(4^(N²))",
+      "space": "O(N²)"
+    },
+    "description": "A rat starts at cell (0,0) and needs to find a path to cell (N-1, N-1) in a grid of blocks. Backtracking explores paths in all directions (Down, Up, Right, Left) and retreats when hitting a wall or visited cells.",
+    "operations": ["moveDirection", "markVisitedGrid", "unmarkVisitedGrid"],
+    "code": {
+      "javascript": "function findPath(maze, n) {\n  const paths = [], visited = Array.from({length: n}, () => Array(n).fill(false));\n  function dfs(r, c, path) {\n    if (r === n - 1 && c === n - 1) { paths.push(path); return; }\n    const dirs = [['D', 1, 0], ['L', 0, -1], ['R', 0, 1], ['U', -1, 0]];\n    visited[r][c] = true;\n    for (const [dir, dr, dc] of dirs) {\n      const nr = r + dr, nc = c + dc;\n      if (nr >= 0 && nr < n && nc >= 0 && nc < n && !visited[nr][nc] && maze[nr][nc] === 1) {\n        dfs(nr, nc, path + dir);\n      }\n    }\n    visited[r][c] = false;\n  }\n  if (maze[0][0] === 1) dfs(0, 0, '');\n  return paths;\n}",
+      "python": "def findPath(maze, n):\n    paths, visited = [], [[False]*n for _ in range(n)]\n    def dfs(r, c, path):\n        if r == n-1 and c == n-1:\n            paths.append(path); return\n        dirs = [('D', 1, 0), ('L', 0, -1), ('R', 0, 1), ('U', -1, 0)]\n        visited[r][c] = True\n        for dir_name, dr, dc in dirs:\n            nr, nc = r + dr, c + dc\n            if 0 <= nr < n and 0 <= nc < n and not visited[nr][nc] and maze[nr][nc] == 1:\n                dfs(nr, nc, path + dir_name)\n        visited[r][c] = False\n    if maze[0][0] == 1: dfs(0, 0, '')\n    return paths",
+      "java": "public List<String> findPath(int[][] maze, int n) {\n    List<String> paths = new ArrayList<>();\n    boolean[][] visited = new boolean[n][n];\n    if (maze[0][0] == 1) dfs(0, 0, \"\", maze, n, visited, paths);\n    return paths;\n}\nprivate void dfs(int r, int c, String path, int[][] maze, int n, boolean[][] visited, List<String> paths) {\n    if (r == n - 1 && c == n - 1) { paths.add(path); return; }\n    visited[r][c] = true;\n    int[] dr = {1, 0, 0, -1}, dc = {0, -1, 1, 0};\n    char[] dirNames = {'D', 'L', 'R', 'U'};\n    for (int i = 0; i < 4; i++) {\n        int nr = r + dr[i], nc = c + dc[i];\n        if (nr >= 0 && nr < n && nc >= 0 && nc < n && !visited[nr][nc] && maze[nr][nc] == 1) {\n            dfs(nr, nc, path + dirNames[i], maze, n, visited, paths);\n        }\n    }\n    visited[r][c] = false;\n}",
+      "cpp": "vector<string> findPath(vector<vector<int>>& maze, int n) {\n    vector<string> paths; vector<vector<bool>> visited(n, vector<bool>(n, false));\n    auto dfs = [&](auto self, int r, int c, string path) -> void {\n        if (r == n-1 && c == n-1) { paths.push_back(path); return; }\n        visited[r][c] = true;\n        int dr[] = {1, 0, 0, -1}, dc[] = {0, -1, 1, 0};\n        char dirNames[] = {'D', 'L', 'R', 'U'};\n        for (int i = 0; i < 4; i++) {\n            int nr = r + dr[i], nc = c + dc[i];\n            if (nr >= 0 && nr < n && nc >= 0 && nc < n && !visited[nr][nc] && maze[nr][nc] == 1) {\n                self(self, nr, nc, path + dirNames[i]);\n            }\n        }\n        visited[r][c] = false;\n    };\n    if (maze[0][0] == 1) dfs(dfs, 0, 0, \"\");\n    return paths;\n}"
+    },
+    "practice": {
+      "theory": [
+        "What guarantees that the rat won't loop infinitely in the maze?",
+        "Under what conditions does BFS pathfinding perform better than backtracking DFS for mazes?"
+      ],
+      "coding": "Find the shortest path length in a maze using BFS instead of DFS.",
+      "interview": "Solve the rat in a maze puzzle showing all possible pathways formatted clearly."
+    }
+  },
+  {
+    "id": "word-search",
+    "name": "Word Search",
+    "category": "backtracking",
+    "complexity": {
+      "time": "O(R * C * 4^L)",
+      "space": "O(L)"
+    },
+    "description": "Searches for a word in a 2D character grid by starting DFS from every character match. For each matching letter, recursion visits adjacent neighbors, replacing character symbols to avoid reusing grid cells.",
+    "operations": ["matchLetter", "dfsWordCheck", "restoreLetter"],
+    "code": {
+      "javascript": "function exist(board, word) {\n  const R = board.length, C = board[0].length;\n  function dfs(r, c, idx) {\n    if (idx === word.length) return true;\n    if (r < 0 || r >= R || c < 0 || c >= C || board[r][c] !== word[idx]) return false;\n    const temp = board[r][c]; board[r][c] = '#';\n    const found = dfs(r+1, c, idx+1) || dfs(r-1, c, idx+1) || dfs(r, c+1, idx+1) || dfs(r, c-1, idx+1);\n    board[r][c] = temp;\n    return found;\n  }\n  for (let r = 0; r < R; r++) {\n    for (let c = 0; c < C; c++) {\n      if (dfs(r, c, 0)) return true;\n    }\n  }\n  return false;\n}",
+      "python": "def exist(board, word):\n    R, C = len(board), len(board[0])\n    def dfs(r, c, idx):\n        if idx == len(word): return True\n        if r < 0 or r >= R or c < 0 or c >= C or board[r][c] != word[idx]: return False\n        temp = board[r][c]; board[r][c] = '#'\n        found = dfs(r+1, c, idx+1) or dfs(r-1, c, idx+1) or dfs(r, c+1, idx+1) or dfs(r, c-1, idx+1)\n        board[r][c] = temp\n        return found\n    for r in range(R):\n        for c in range(C):\n            if dfs(r, c, 0): return True\n    return False",
+      "java": "public boolean exist(char[][] board, String word) {\n    int R = board.length, C = board[0].length;\n    for (int r = 0; r < R; r++) {\n        for (int c = 0; c < C; c++) {\n            if (dfs(board, r, c, word, 0)) return true;\n        }\n    }\n    return false;\n}\nprivate boolean dfs(char[][] board, int r, int c, String word, int idx) {\n    if (idx == word.length()) return true;\n    if (r < 0 || r >= board.length || c < 0 || c >= board[0].length || board[r][c] != word.charAt(idx)) return false;\n    char temp = board[r][c]; board[r][c] = '#';\n    boolean found = dfs(board, r+1, c, word, idx+1) ||\n                    dfs(board, r-1, c, word, idx+1) ||\n                    dfs(board, r, c+1, word, idx+1) ||\n                    dfs(board, r, c-1, word, idx+1);\n    board[r][c] = temp;\n    return found;\n}",
+      "cpp": "bool exist(vector<vector<char>>& board, string word) {\n    int R = board.size(), C = board[0].size();\n    auto dfs = [&](auto self, int r, int c, int idx) -> bool {\n        if (idx == word.length()) return true;\n        if (r < 0 || r >= R || c < 0 || c >= C || board[r][c] != word[idx]) return false;\n        char temp = board[r][c]; board[r][c] = '#';\n        bool found = self(self, r+1, c, idx+1) || self(self, r-1, c, idx+1) ||\n                     self(self, r, c+1, idx+1) || self(self, r, c-1, idx+1);\n        board[r][c] = temp;\n        return found;\n    };\n    for (int r = 0; r < R; r++) {\n        for (int c = 0; c < C; c++) {\n            if (dfs(dfs, r, c, 0)) return true;\n        }\n    }\n    return false;\n}"
+    },
+    "practice": {
+      "theory": [
+        "Why is it better to mark visited cells in-place with special characters like '#' instead of using a visited set?",
+        "Explain the worst-case time complexity multiplier L in word search."
+      ],
+      "coding": "Extend the word search to find all matching words in a dictionary (Word Search II using Tries).",
+      "interview": "Solve the Word Search problem and dry-run with input board matrix."
+    }
+  },
+  {
+    "id": "greedy-strategy",
+    "name": "Greedy Strategy",
+    "category": "greedy",
+    "complexity": {
+      "time": "O(1)",
+      "space": "O(1)"
+    },
+    "description": "An algorithmic paradigm that makes the locally optimal choice at each stage in the hope of finding a global optimum. Greedy strategies require two key properties: Greedy Choice Property and Optimal Substructure.",
+    "operations": ["evaluateChoice", "makeGreedyStep", "proveCorrectness"],
+    "code": {
+      "javascript": "// Greedy paradigm explanation code (e.g. coin collection)\nfunction minCoinsGreedy(coins, amount) {\n  coins.sort((a, b) => b - a);\n  let count = 0;\n  for (let coin of coins) {\n    while (amount >= coin) { amount -= coin; count++; }\n  }\n  return amount === 0 ? count : -1;\n}",
+      "python": "def minCoinsGreedy(coins, amount):\n    coins.sort(reverse=True)\n    count = 0\n    for coin in coins:\n        count += amount // coin\n        amount %= coin\n    return count if amount == 0 else -1",
+      "java": "public int minCoinsGreedy(int[] coins, int amount) {\n    Arrays.sort(coins);\n    int count = 0;\n    for (int i = coins.length - 1; i >= 0; i--) {\n        count += amount / coins[i];\n        amount %= coins[i];\n    }\n    return amount == 0 ? count : -1;\n}",
+      "cpp": "int minCoinsGreedy(vector<int>& coins, int amount) {\n    sort(coins.rbegin(), coins.rend());\n    int count = 0;\n    for (int coin : coins) {\n        count += amount / coin;\n        amount %= coin;\n    }\n    return amount == 0 ? count : -1;\n}"
+    },
+    "practice": {
+      "theory": [
+        "What is the distinction between Dynamic Programming and Greedy algorithms?",
+        "Give an example where the greedy coin change fails to find the optimal solution."
+      ],
+      "coding": "Solve a fractional coin collection problem using greedy steps.",
+      "interview": "Explain the structural properties a problem must possess for a greedy solution to be guaranteed optimal."
+    }
+  },
+  {
+    "id": "fractional-knapsack",
+    "name": "Fractional Knapsack",
+    "category": "greedy",
+    "complexity": {
+      "time": "O(N log N)",
+      "space": "O(N)"
+    },
+    "description": "Collects items with maximum value under a weight limit. Unlike 0/1 Knapsack, you can take fractional parts of items. The greedy strategy sorts items by value-to-weight ratio and takes items with high ratios first.",
+    "operations": ["calculateRatios", "sortByRatio", "addFraction"],
+    "code": {
+      "javascript": "function fractionalKnapsack(W, items) {\n  items.sort((a, b) => (b.value / b.weight) - (a.value / a.weight));\n  let totalVal = 0;\n  for (let item of items) {\n    if (W >= item.weight) { totalVal += item.value; W -= item.weight; }\n    else { totalVal += item.value * (W / item.weight); break; }\n  }\n  return totalVal;\n}",
+      "python": "def fractionalKnapsack(W, items):\n    items.sort(key=lambda x: x['value']/x['weight'], reverse=True)\n    total_val = 0.0\n    for item in items:\n        if W >= item['weight']:\n            total_val += item['value']\n            W -= item['weight']\n        else:\n            total_val += item['value'] * (W / item['weight'])\n            break\n    return total_val",
+      "java": "public double fractionalKnapsack(int W, Item[] items) {\n    Arrays.sort(items, (a, b) -> Double.compare((double)b.value/b.weight, (double)a.value/a.weight));\n    double totalVal = 0.0;\n    for (Item item : items) {\n        if (W >= item.weight) { totalVal += item.value; W -= item.weight; }\n        else { totalVal += item.value * ((double)W / item.weight); break; }\n    }\n    return totalVal;\n}",
+      "cpp": "double fractionalKnapsack(int W, vector<Item>& items) {\n    sort(items.begin(), items.end(), [](Item& a, Item& b) {\n        return (double)a.value/a.weight > (double)b.value/b.weight;\n    });\n    double totalVal = 0.0;\n    for (auto& item : items) {\n        if (W >= item.weight) { totalVal += item.value; W -= item.weight; }\n        else { totalVal += item.value * ((double)W / item.weight); break; }\n    }\n    return totalVal;\n}"
+    },
+    "practice": {
+      "theory": [
+        "Why does the greedy choice of value-to-weight ratio yield an optimal choice in fractional knapsack?",
+        "Contrast the greedy approach for fractional knapsack with 0/1 knapsack."
+      ],
+      "coding": "Solve a fractional knapsack problem and return selected item percentages.",
+      "interview": "Prove why 0/1 knapsack cannot be solved using a greedy strategy."
+    }
+  },
+  {
+    "id": "job-scheduling",
+    "name": "Job Scheduling",
+    "category": "greedy",
+    "complexity": {
+      "time": "O(N²)",
+      "space": "O(N)"
+    },
+    "description": "Given N jobs with deadlines and profits, schedule the jobs to maximize total profit. Each job takes 1 unit of time. The greedy strategy sorts jobs by profit in descending order and schedules each job at its latest available slot before its deadline.",
+    "operations": ["sortJobsProfit", "findLatestSlot", "allocateSlot"],
+    "code": {
+      "javascript": "function jobScheduling(jobs) {\n  jobs.sort((a, b) => b.profit - a.profit);\n  const maxDeadline = Math.max(...jobs.map(j => j.deadline));\n  const slots = Array(maxDeadline + 1).fill(-1);\n  let count = 0, profit = 0;\n  for (let job of jobs) {\n    for (let i = job.deadline; i > 0; i--) {\n      if (slots[i] === -1) { slots[i] = job.id; count++; profit += job.profit; break; }\n    }\n  }\n  return { count, profit };\n}",
+      "python": "def jobScheduling(jobs):\n    jobs.sort(key=lambda x: x['profit'], reverse=True)\n    max_dl = max(j['deadline'] for j in jobs)\n    slots = [-1] * (max_dl + 1)\n    count, profit = 0, 0\n    for job in jobs:\n        for i in range(job['deadline'], 0, -1):\n            if slots[i] == -1:\n                slots[i] = job['id']\n                count += 1\n                profit += job['profit']\n                break\n    return count, profit",
+      "java": "public int[] jobScheduling(Job[] jobs) {\n    Arrays.sort(jobs, (a, b) -> b.profit - a.profit);\n    int maxDl = 0;\n    for (Job j : jobs) maxDl = Math.max(maxDl, j.deadline);\n    int[] slots = new int[maxDl + 1];\n    Arrays.fill(slots, -1);\n    int count = 0, profit = 0;\n    for (Job job : jobs) {\n        for (int i = job.deadline; i > 0; i--) {\n            if (slots[i] == -1) { slots[i] = job.id; count++; profit += job.profit; break; }\n        }\n    }\n    return new int[]{count, profit};\n}",
+      "cpp": "pair<int, int> jobScheduling(vector<Job>& jobs) {\n    sort(jobs.begin(), jobs.end(), [](Job& a, Job& b) { return a.profit > b.profit; });\n    int maxDl = 0;\n    for (auto& j : jobs) maxDl = max(maxDl, j.deadline);\n    vector<int> slots(maxDl + 1, -1);\n    int count = 0, profit = 0;\n    for (auto& job : jobs) {\n        for (int i = job.deadline; i > 0; i--) {\n            if (slots[i] == -1) {\n                slots[i] = job.id; count++; profit += job.profit; break;\n            }\n        }\n    }\n    return {count, profit};\n}"
+    },
+    "practice": {
+      "theory": [
+        "Why is it optimal to place jobs in their latest possible slot?",
+        "How can we optimize the search for slot allocation from O(N²) to O(N log N) using Union-Find?"
+      ],
+      "coding": "Solve a job scheduling variant where jobs have different durations.",
+      "interview": "Solve the Job Scheduling Problem with deadlines and profits, highlighting slot allocations."
+    }
+  },
+  {
+    "id": "activity-selection",
+    "name": "Activity Selection",
+    "category": "greedy",
+    "complexity": {
+      "time": "O(N log N)",
+      "space": "O(N)"
+    },
+    "description": "Selects the maximum number of activities that can be performed by a single person, assuming each activity is non-overlapping. Sorts activities by end time and takes the next compatible activity greedily.",
+    "operations": ["sortActivitiesEnd", "selectNextActivity", "updateCurrentTime"],
+    "code": {
+      "javascript": "function activitySelection(start, end) {\n  const n = start.length;\n  const activities = start.map((s, i) => ({ s, e: end[i], id: i }));\n  activities.sort((a, b) => a.e - b.e);\n  const selected = [activities[0].id];\n  let lastEnd = activities[0].e;\n  for (let i = 1; i < n; i++) {\n    if (activities[i].s >= lastEnd) { selected.push(activities[i].id); lastEnd = activities[i].e; }\n  }\n  return selected;\n}",
+      "python": "def activitySelection(start, end):\n    n = len(start)\n    activities = sorted([{'s': start[i], 'e': end[i], 'id': i} for i in range(n)], key=lambda x: x['e'])\n    selected = [activities[0]['id']]\n    last_end = activities[0]['e']\n    for i in range(1, n):\n        if activities[i]['s'] >= last_end:\n            selected.append(activities[i]['id'])\n            last_end = activities[i]['e']\n    return selected",
+      "java": "public List<Integer> activitySelection(int[] start, int[] end) {\n    int n = start.length;\n    int[][] act = new int[n][3];\n    for (int i = 0; i < n; i++) { act[i][0] = start[i]; act[i][1] = end[i]; act[i][2] = i; }\n    Arrays.sort(act, (a, b) -> a[1] - b[1]);\n    List<Integer> selected = new ArrayList<>();\n    selected.add(act[0][2]);\n    int lastEnd = act[0][1];\n    for (int i = 1; i < n; i++) {\n        if (act[i][0] >= lastEnd) { selected.add(act[i][2]); lastEnd = act[i][1]; }\n    }\n    return selected;\n}",
+      "cpp": "vector<int> activitySelection(vector<int>& start, vector<int>& end) {\n    int n = start.size();\n    vector<vector<int>> act(n, vector<int>(3));\n    for (int i = 0; i < n; i++) { act[i][0] = start[i]; act[i][1] = end[i]; act[i][2] = i; }\n    sort(act.begin(), act.end(), [](vector<int>& a, vector<int>& b) { return a[1] < b[1]; });\n    vector<int> selected = {act[0][2]};\n    int lastEnd = act[0][1];\n    for (int i = 1; i < n; i++) {\n        if (act[i][0] >= lastEnd) { selected.push_back(act[i][2]); lastEnd = act[i][1]; }\n    }\n    return selected;\n}"
+    },
+    "practice": {
+      "theory": [
+        "Why does sorting by end time guarantee an optimal selection compared to sorting by start time or duration?",
+        "Prove the greedy choice property for Activity Selection."
+      ],
+      "coding": "Solve the Activity Selection problem on a set of intervals.",
+      "interview": "Design a conference room scheduling system that books the maximum number of meetings."
+    }
+  },
+  {
+    "id": "merge-intervals",
+    "name": "Merge Intervals",
+    "category": "greedy",
+    "complexity": {
+      "time": "O(N log N)",
+      "space": "O(N)"
+    },
+    "description": "Combines overlapping intervals into a list of mutually exclusive intervals. It sorts intervals by start times and iterates through, merging overlapping neighbors dynamically.",
+    "operations": ["sortIntervalsStart", "checkOverlap", "mergeOverlap"],
+    "code": {
+      "javascript": "function mergeIntervals(intervals) {\n  if (!intervals.length) return [];\n  intervals.sort((a, b) => a[0] - b[0]);\n  const merged = [intervals[0]];\n  for (let i = 1; i < intervals.length; i++) {\n    const last = merged[merged.length - 1];\n    if (intervals[i][0] <= last[1]) last[1] = Math.max(last[1], intervals[i][1]);\n    else merged.push(intervals[i]);\n  }\n  return merged;\n}",
+      "python": "def mergeIntervals(intervals):\n    if not intervals: return []\n    intervals.sort(key=lambda x: x[0])\n    merged = [intervals[0]]\n    for i in range(1, len(intervals)):\n        last = merged[-1]\n        if intervals[i][0] <= last[1]:\n            last[1] = max(last[1], intervals[i][1])\n        else:\n            merged.append(intervals[i])\n    return merged",
+      "java": "public int[][] mergeIntervals(int[][] intervals) {\n    if (intervals.length == 0) return new int[0][0];\n    Arrays.sort(intervals, (a, b) -> a[0] - b[0]);\n    List<int[]> merged = new ArrayList<>();\n    merged.add(intervals[0]);\n    for (int i = 1; i < intervals.length; i++) {\n        int[] last = merged.get(merged.size() - 1);\n        if (intervals[i][0] <= last[1]) last[1] = Math.max(last[1], intervals[i][1]);\n        else merged.add(intervals[i]);\n    }\n    return merged.toArray(new int[merged.size()][]);\n}",
+      "cpp": "vector<vector<int>> mergeIntervals(vector<vector<int>>& intervals) {\n    if (intervals.empty()) return {};\n    sort(intervals.begin(), intervals.end(), [](vector<int>& a, vector<int>& b) { return a[0] < b[0]; });\n    vector<vector<int>> merged = {intervals[0]};\n    for (int i = 1; i < intervals.size(); i++) {\n        if (intervals[i][0] <= merged.back()[1]) {\n            merged.back()[1] = max(merged.back()[1], intervals[i][1]);\n        } else {\n            merged.push_back(intervals[i]);\n        }\n    }\n    return merged;\n}"
+    },
+    "practice": {
+      "theory": [
+        "Why must we sort by start times and not end times to merge intervals correctly?",
+        "What is the space complexity if we are allowed to modify the input array in-place?"
+      ],
+      "coding": "Solve the LeetCode 'Insert Interval' problem using merge interval blocks.",
+      "interview": "Explain the interval merging process in calendar booking applications."
+    }
+  },
+  {
+    "id": "closest-pair-points",
+    "name": "Closest Pair of Points",
+    "category": "divide-and-conquer",
+    "complexity": {
+      "time": "O(N log N)",
+      "space": "O(N)"
+    },
+    "description": "Finds the two closest points in a 2D plane. It uses divide-and-conquer to split the plane vertically, find the minimum distance delta in each half, and search a strip of width 2*delta across the division line in O(N) time.",
+    "operations": ["partitionPoints", "solveSubproblems", "searchStrip"],
+    "code": {
+      "javascript": "function closestPair(points) {\n  points.sort((a, b) => a.x - b.x);\n  function dist(p1, p2) {\n    return Math.sqrt((p1.x - p2.x)**2 + (p1.y - p2.y)**2);\n  }\n  function solve(l, r) {\n    if (r - l <= 3) {\n      let minD = Infinity;\n      for (let i = l; i <= r; i++) {\n        for (let j = i + 1; j <= r; j++) minD = Math.min(minD, dist(points[i], points[j]));\n      }\n      return minD;\n    }\n    const mid = Math.floor((l + r) / 2);\n    const midPt = points[mid];\n    const dl = solve(l, mid), dr = solve(mid + 1, r);\n    let d = Math.min(dl, dr);\n    const strip = [];\n    for (let i = l; i <= r; i++) {\n      if (Math.abs(points[i].x - midPt.x) < d) strip.push(points[i]);\n    }\n    strip.sort((a, b) => a.y - b.y);\n    for (let i = 0; i < strip.length; i++) {\n      for (let j = i + 1; j < strip.length && (strip[j].y - strip[i].y) < d; j++) {\n        d = Math.min(d, dist(strip[i], strip[j]));\n      }\n    }\n    return d;\n  }\n  return solve(0, points.length - 1);\n}",
+      "python": "import math\ndef closestPair(points):\n    points.sort(key=lambda p: p[0])\n    def dist(p1, p2): return math.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)\n    def solve(l, r):\n        if r - l <= 3:\n            return min(dist(points[i], points[j]) for i in range(l, r+1) for j in range(i+1, r+1))\n        mid = (l + r) // 2\n        mid_pt = points[mid]\n        d = min(solve(l, mid), solve(mid+1, r))\n        strip = [p for p in points[l:r+1] if abs(p[0] - mid_pt[0]) < d]\n        strip.sort(key=lambda p: p[1])\n        for i in range(len(strip)):\n            for j in range(i+1, len(strip)):\n                if strip[j][1] - strip[i][1] >= d: break\n                d = min(d, dist(strip[i], strip[j]))\n        return d\n    return solve(0, len(points)-1)",
+      "java": "public double closestPair(Point[] points) {\n    Arrays.sort(points, (a, b) -> Double.compare(a.x, b.x));\n    return solve(points, 0, points.length - 1);\n}\nprivate double dist(Point p1, Point p2) { return Math.sqrt((p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y)); }\nprivate double solve(Point[] pts, int l, int r) {\n    if (r - l <= 3) {\n        double minD = Double.MAX_VALUE;\n        for (int i = l; i <= r; i++)\n            for (int j = i + 1; j <= r; j++) minD = Math.min(minD, dist(pts[i], pts[j]));\n        return minD;\n    }\n    int mid = (l + r) / 2;\n    Point midPt = pts[mid];\n    double d = Math.min(solve(pts, l, mid), solve(pts, mid + 1, r));\n    List<Point> strip = new ArrayList<>();\n    for (int i = l; i <= r; i++) if (Math.abs(pts[i].x - midPt.x) < d) strip.add(pts[i]);\n    strip.sort((a, b) -> Double.compare(a.y, b.y));\n    for (int i = 0; i < strip.size(); i++) {\n        for (int j = i + 1; j < strip.size() && (strip.get(j).y - strip.get(i).y) < d; j++) {\n            d = Math.min(d, dist(strip.get(i), strip.get(j)));\n        }\n    }\n    return d;\n}",
+      "cpp": "double closestPair(vector<Point>& points) {\n    sort(points.begin(), points.end(), [](Point& a, Point& b) { return a.x < b.x; });\n    auto dist = [](Point a, Point b) { return sqrt((a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y)); };\n    auto solve = [&](auto self, int l, int r) -> double {\n        if (r - l <= 3) {\n            double minD = 1e9;\n            for (int i = l; i <= r; ++i)\n                for (int j = i + 1; j <= r; ++j) minD = min(minD, dist(points[i], points[j]));\n            return minD;\n        }\n        int mid = (l + r) / 2;\n        Point midPt = points[mid];\n        double d = min(self(self, l, mid), self(self, mid + 1, r));\n        vector<Point> strip;\n        for (int i = l; i <= r; ++i) if (abs(points[i].x - midPt.x) < d) strip.push_back(points[i]);\n        sort(strip.begin(), strip.end(), [](Point& a, Point& b) { return a.y < b.y; });\n        for (size_t i = 0; i < strip.size(); ++i) {\n            for (size_t j = i + 1; j < strip.size() && (strip[j].y - strip[i].y) < d; ++j) {\n                d = min(d, dist(strip[i], strip[j]));\n            }\n        }\n        return d;\n    };\n    return solve(solve, 0, points.size() - 1);\n}"
+    },
+    "practice": {
+      "theory": [
+        "Why is it sufficient to check only 7 neighboring points in the sorted strip for each point?",
+        "Prove why sorting the strip points by Y-coordinate takes O(N log N) if done naively, and how to reduce it to O(N) by merging."
+      ],
+      "coding": "Solve the closest pair of points return indices problem.",
+      "interview": "Explain the Closest Pair of Points divide and conquer recursion limits."
+    }
+  },
+  {
+    "id": "inversion-count",
+    "name": "Inversion Count",
+    "category": "divide-and-conquer",
+    "complexity": {
+      "time": "O(N log N)",
+      "space": "O(N)"
+    },
+    "description": "Counts how close an array is to being sorted. An inversion occurs when i < j and arr[i] > arr[j]. Calculated by modifying Merge Sort: when merging left and right halves, if an element from right is smaller, it creates (mid - i + 1) inversions.",
+    "operations": ["splitArrayCount", "mergeAndCount", "accumulateInversions"],
+    "code": {
+      "javascript": "function inversionCount(arr) {\n  function merge(l, mid, r) {\n    let i = l, j = mid + 1, k = 0, count = 0;\n    const temp = [];\n    while (i <= mid && j <= r) {\n      if (arr[i] <= arr[j]) temp[k++] = arr[i++];\n      else { temp[k++] = arr[j++]; count += (mid - i + 1); }\n    }\n    while (i <= mid) temp[k++] = arr[i++];\n    while (j <= r) temp[k++] = arr[j++];\n    for (i = l, k = 0; i <= r; i++, k++) arr[i] = temp[k];\n    return count;\n  }\n  function solve(l, r) {\n    if (l >= r) return 0;\n    const mid = Math.floor((l + r) / 2);\n    return solve(l, mid) + solve(mid + 1, r) + merge(l, mid, r);\n  }\n  return solve(0, arr.length - 1);\n}",
+      "python": "def inversionCount(arr):\n    def merge(l, mid, r):\n        i, j, count = l, mid + 1, 0\n        temp = []\n        while i <= mid and j <= r:\n            if arr[i] <= arr[j]: temp.append(arr[i]); i += 1\n            else:\n                temp.append(arr[j]); j += 1\n                count += (mid - i + 1)\n        temp.extend(arr[i:mid+1])\n        temp.extend(arr[j:r+1])\n        arr[l:r+1] = temp\n        return count\n    def solve(l, r):\n        if l >= r: return 0\n        mid = (l + r) // 2\n        return solve(l, mid) + solve(mid+1, r) + merge(l, mid, r)\n    return solve(0, len(arr)-1)",
+      "java": "public long inversionCount(int[] arr) {\n    return solve(arr, 0, arr.length - 1);\n}\nprivate long solve(int[] arr, int l, int r) {\n    if (l >= r) return 0;\n    int mid = (l + r) / 2;\n    return solve(arr, l, mid) + solve(arr, mid + 1, r) + merge(arr, l, mid, r);\n}\nprivate long merge(int[] arr, int l, int mid, int r) {\n    int i = l, j = mid + 1, k = 0;\n    int[] temp = new int[r - l + 1];\n    long count = 0;\n    while (i <= mid && j <= r) {\n        if (arr[i] <= arr[j]) temp[k++] = arr[i++];\n        else { temp[k++] = arr[j++]; count += (mid - i + 1); }\n    }\n    while (i <= mid) temp[k++] = arr[i++];\n    while (j <= r) temp[k++] = arr[j++];\n    for (i = l, k = 0; i <= r; i++, k++) arr[i] = temp[k];\n    return count;\n}",
+      "cpp": "long long inversionCount(vector<int>& arr) {\n    auto merge = [&](auto& self, int l, int mid, int r) -> long long {\n        int i = l, j = mid + 1, k = 0;\n        vector<int> temp(r - l + 1);\n        long long count = 0;\n        while (i <= mid && j <= r) {\n            if (arr[i] <= arr[j]) temp[k++] = arr[i++];\n            else { temp[k++] = arr[j++]; count += (mid - i + 1); }\n        }\n        while (i <= mid) temp[k++] = arr[i++];\n        while (j <= r) temp[k++] = arr[j++];\n        for (i = l, k = 0; i <= r; i++, k++) arr[i] = temp[k];\n        return count;\n    };\n    auto solve = [&](auto self, int l, int r) -> long long {\n        if (l >= r) return 0;\n        int mid = (l + r) / 2;\n        return self(self, l, mid) + self(self, mid + 1, r) + merge(self, l, mid, r);\n    };\n    return solve(solve, 0, arr.size() - 1);\n}"
+    },
+    "practice": {
+      "theory": [
+        "Why is it (mid - i + 1) inversions instead of just 1 when arr[i] > arr[j]?",
+        "Compare recursion stack costs of Inversion Count vs iterative implementations."
+      ],
+      "coding": "Count inversions using Fenwick Tree (Binary Indexed Tree) in O(N log N).",
+      "interview": "Explain why Merge Sort provides a natural platform to count inversions dynamically."
+    }
+  },
+  {
+    "id": "dp-memoization",
+    "name": "Memoization (Top-Down DP)",
+    "category": "dp",
+    "complexity": {
+      "time": "O(N)",
+      "space": "O(N)"
+    },
+    "description": "An optimization technique that speeds up recursive algorithms by caching the results of expensive subproblem calls. When a subproblem is encountered again, the cached result is returned directly.",
+    "operations": ["checkCache", "computeRecurse", "writeCache"],
+    "code": {
+      "javascript": "function fibMemo(n, memo = {}) {\n  if (n <= 1) return n;\n  if (n in memo) return memo[n];\n  memo[n] = fibMemo(n - 1, memo) + fibMemo(n - 2, memo);\n  return memo[n];\n}",
+      "python": "def fibMemo(n, memo={}):\n    if n <= 1: return n\n    if n in memo: return memo[n]\n    memo[n] = fibMemo(n - 1, memo) + fibMemo(n - 2, memo)\n    return memo[n]",
+      "java": "int fibMemo(int n, int[] memo) {\n    if (n <= 1) return n;\n    if (memo[n] != -1) return memo[n];\n    memo[n] = fibMemo(n - 1, memo) + fibMemo(n - 2, memo);\n    return memo[n];\n}",
+      "cpp": "int fibMemo(int n, vector<int>& memo) {\n    if (n <= 1) return n;\n    if (memo[n] != -1) return memo[n];\n    return memo[n] = fibMemo(n - 1, memo) + fibMemo(n - 2, memo);\n}"
+    },
+    "practice": {
+      "theory": [
+        "What is the difference in call structure between memoized recursion and naive recursion?",
+        "Explain stack depth constraints in Top-Down DP."
+      ],
+      "coding": "Implement memoization for finding the grid path sum problem.",
+      "interview": "Design a generic decorator in Python or higher-order function in JS to automatically memoize any recursive function."
+    }
+  },
+  {
+    "id": "dp-tabulation",
+    "name": "Tabulation (Bottom-Up DP)",
+    "category": "dp",
+    "complexity": {
+      "time": "O(N)",
+      "space": "O(N)"
+    },
+    "description": "An iterative approach to dynamic programming. It starts by solving the base cases and fills a table (array/matrix) sequentially from the bottom up, ensuring that all subproblems are solved before their results are needed.",
+    "operations": ["initializeTable", "fillIteratively", "returnLastSlot"],
+    "code": {
+      "javascript": "function fibTab(n) {\n  if (n <= 1) return n;\n  const dp = [0, 1];\n  for (let i = 2; i <= n; i++) dp[i] = dp[i - 1] + dp[i - 2];\n  return dp[n];\n}",
+      "python": "def fibTab(n):\n    if n <= 1: return n\n    dp = [0] * (n + 1)\n    dp[1] = 1\n    for i in range(2, n + 1): dp[i] = dp[i - 1] + dp[i - 2]\n    return dp[n]",
+      "java": "int fibTab(int n) {\n    if (n <= 1) return n;\n    int[] dp = new int[n + 1];\n    dp[1] = 1;\n    for (int i = 2; i <= n; i++) dp[i] = dp[i - 1] + dp[i - 2];\n    return dp[n];\n}",
+      "cpp": "int fibTab(int n) {\n    if (n <= 1) return n;\n    vector<int> dp(n + 1);\n    dp[0] = 0; dp[1] = 1;\n    for (int i = 2; i <= n; i++) dp[i] = dp[i - 1] + dp[i - 2];\n    return dp[n];\n}"
+    },
+    "practice": {
+      "theory": [
+        "Contrast Tabulation (Bottom-Up) with Memoization (Top-Down) in terms of constant-factor performance and subproblem coverage.",
+        "How can space optimization be applied to Tabulation when only the last few states are required?"
+      ],
+      "coding": "Solve the climbing stairs problem iteratively using only O(1) extra space.",
+      "interview": "Compare recursion stack overhead in memoization vs loop-based tabulation tables."
+    }
+  },
+  {
+    "id": "dp-state-design",
+    "name": "State Design",
+    "category": "dp",
+    "complexity": {
+      "time": "O(1)",
+      "space": "O(1)"
+    },
+    "description": "The process of defining DP state parameters. A state is a set of variables that uniquely describe a subproblem. Proper state design is crucial for minimizing complexity and ensuring correctness.",
+    "operations": ["identifyVariables", "reduceDimensions", "defineSubproblemGoal"],
+    "code": {
+      "javascript": "// Concept code: designing state variables for multidimensional DP\n// dp[i][j] represents: maximum profit considering first i items with remaining capacity j",
+      "python": "# State design: dp[index][capacity] = max_profit",
+      "java": "// State definition: dp[index][capacity]",
+      "cpp": "// State definition: dp[index][capacity]"
+    },
+    "practice": {
+      "theory": [
+        "Why is it essential for a DP state to satisfy the 'independent subproblems' constraint?",
+        "How does adding variables to a state impact the time and space complexity of the solution?"
+      ],
+      "coding": "Define the state parameters and base cases for the Edit Distance problem.",
+      "interview": "Explain how you would design the state representation for a game where players can make choices that affect future turns."
+    }
+  },
+  {
+    "id": "dp-state-transition",
+    "name": "State Transition",
+    "category": "dp",
+    "complexity": {
+      "time": "O(1)",
+      "space": "O(1)"
+    },
+    "description": "Expresses the mathematical relationship between different DP states. The transition formula defines how the value of a state is computed from the values of smaller, already-solved states.",
+    "operations": ["analyzeSubproblemRelations", "writeFormula", "validateStateBounds"],
+    "code": {
+      "javascript": "// Transition formula: dp[i] = min(dp[i - 1] + cost1, dp[i - 2] + cost2)",
+      "python": "# dp[i] = min(dp[i-1] + cost1, dp[i-2] + cost2)",
+      "java": "// dp[i] = Math.min(dp[i-1] + cost1, dp[i-2] + cost2)",
+      "cpp": "// dp[i] = min(dp[i-1] + cost1, dp[i-2] + cost2)"
+    },
+    "practice": {
+      "theory": [
+        "What is optimal substructure, and why is it a requirement for state transitions?",
+        "Explain how a state transition DAG (Directed Acyclic Graph) represents the computation order."
+      ],
+      "coding": "Write the state transition code for the Longest Common Subsequence (LCS) problem.",
+      "interview": "Derive the state transition relation for the matrix path sum problem."
+    }
+  },
+  {
+    "id": "edit-distance",
+    "name": "Edit Distance (Levenshtein)",
+    "category": "dp",
+    "complexity": {
+      "time": "O(M * N)",
+      "space": "O(M * N)"
+    },
+    "description": "Computes the minimum number of operations (insert, delete, replace) required to convert string A to string B. It builds a 2D grid DP table where `dp[i][j]` is the minimum edits for prefix `A[0..i-1]` and `B[0..j-1]`.",
+    "operations": ["initializeGridHeaders", "calculateEdits", "findMinPath"],
+    "code": {
+      "javascript": "function minDistance(word1, word2) {\n  const m = word1.length, n = word2.length;\n  const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));\n  for (let i = 0; i <= m; i++) dp[i][0] = i;\n  for (let j = 0; j <= n; j++) dp[0][j] = j;\n  for (let i = 1; i <= m; i++) {\n    for (let j = 1; j <= n; j++) {\n      if (word1[i-1] === word2[j-1]) dp[i][j] = dp[i-1][j-1];\n      else dp[i][j] = 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);\n    }\n  }\n  return dp[m][n];\n}",
+      "python": "def minDistance(word1, word2):\n    m, n = len(word1), len(word2)\n    dp = [[0] * (n + 1) for _ in range(m + 1)]\n    for i in range(m + 1): dp[i][0] = i\n    for j in range(n + 1): dp[0][j] = j\n    for i in range(1, m + 1):\n        for j in range(1, n + 1):\n            if word1[i-1] == word2[j-1]: dp[i][j] = dp[i-1][j-1]\n            else: dp[i][j] = 1 + min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1])\n    return dp[m][n]",
+      "java": "public int minDistance(String word1, String word2) {\n    int m = word1.length(), n = word2.length();\n    int[][] dp = new int[m + 1][n + 1];\n    for (int i = 0; i <= m; i++) dp[i][0] = i;\n    for (int j = 0; j <= n; j++) dp[0][j] = j;\n    for (int i = 1; i <= m; i++) {\n        for (int j = 1; j <= n; j++) {\n            if (word1.charAt(i-1) == word2.charAt(j-1)) dp[i][j] = dp[i-1][j-1];\n            else dp[i][j] = 1 + Math.min(dp[i-1][j], Math.min(dp[i][j-1], dp[i-1][j-1]));\n        }\n    }\n    return dp[m][n];\n}",
+      "cpp": "int minDistance(string word1, string word2) {\n    int m = word1.length(), n = word2.length();\n    vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));\n    for (int i = 0; i <= m; i++) dp[i][0] = i;\n    for (int j = 0; j <= n; j++) dp[0][j] = j;\n    for (int i = 1; i <= m; i++) {\n        for (int j = 1; j <= n; j++) {\n            if (word1[i-1] == word2[j-1]) dp[i][j] = dp[i-1][j-1];\n            else dp[i][j] = 1 + min({dp[i-1][j], dp[i][j-1], dp[i-1][j-1]});\n        }\n    }\n    return dp[m][n];\n}"
+    },
+    "practice": {
+      "theory": [
+        "Explain what each of the three operations: `dp[i-1][j]`, `dp[i][j-1]`, and `dp[i-1][j-1]` represent physically in edit distance.",
+        "How can space complexity be reduced from O(M*N) to O(min(M,N))?"
+      ],
+      "coding": "Solve the edit distance problem and return the list of operations required.",
+      "interview": "Solve the Edit Distance Levenshtein problem live and dry-run word alignments."
+    }
+  },
+  {
+    "id": "matrix-chain",
+    "name": "Matrix Chain Multiplication",
+    "category": "dp",
+    "complexity": {
+      "time": "O(N³)",
+      "space": "O(N²)"
+    },
+    "description": "Finds the most efficient way to multiply a chain of matrices. Since matrix multiplication is associative, the ordering of multiplications changes the total scalar operations. Uses interval partitioning DP.",
+    "operations": ["defineChainIntervals", "findPartitionSplit", "calculateCosts"],
+    "code": {
+      "javascript": "function matrixChainOrder(p) {\n  const n = p.length - 1;\n  const dp = Array.from({ length: n + 1 }, () => Array(n + 1).fill(0));\n  for (let len = 2; len <= n; len++) {\n    for (let i = 1; i <= n - len + 1; i++) {\n      const j = i + len - 1;\n      dp[i][j] = Infinity;\n      for (let k = i; k < j; k++) {\n        const cost = dp[i][k] + dp[k + 1][j] + p[i - 1] * p[k] * p[j];\n        if (cost < dp[i][j]) dp[i][j] = cost;\n      }\n    }\n  }\n  return dp[1][n];\n}",
+      "python": "def matrixChainOrder(p):\n    n = len(p) - 1\n    dp = [[0] * (n + 1) for _ in range(n + 1)]\n    for length in range(2, n + 1):\n        for i in range(1, n - length + 2):\n            j = i + length - 1\n            dp[i][j] = float('inf')\n            for k in range(i, j):\n                cost = dp[i][k] + dp[k+1][j] + p[i-1] * p[k] * p[j]\n                dp[i][j] = min(dp[i][j], cost)\n    return dp[1][n]",
+      "java": "public int matrixChainOrder(int[] p) {\n    int n = p.length - 1;\n    int[][] dp = new int[n + 1][n + 1];\n    for (int len = 2; len <= n; len++) {\n        for (int i = 1; i <= n - len + 1; i++) {\n            int j = i + len - 1;\n            dp[i][j] = Integer.MAX_VALUE;\n            for (int k = i; k < j; k++) {\n                int cost = dp[i][k] + dp[k + 1][j] + p[i - 1] * p[k] * p[j];\n                dp[i][j] = Math.min(dp[i][j], cost);\n            }\n        }\n    }\n    return dp[1][n];\n}",
+      "cpp": "int matrixChainOrder(vector<int>& p) {\n    int n = p.size() - 1;\n    vector<vector<int>> dp(n + 1, vector<int>(n + 1, 0));\n    for (int len = 2; len <= n; len++) {\n        for (int i = 1; i <= n - len + 1; i++) {\n            int j = i + len - 1;\n            dp[i][j] = 1e9;\n            for (int k = i; k < j; k++) {\n                int cost = dp[i][k] + dp[k + 1][j] + p[i - 1] * p[k] * p[j];\n                dp[i][j] = min(dp[i][j], cost);\n            }\n        }\n    }\n    return dp[1][n];\n}"
+    },
+    "practice": {
+      "theory": [
+        "Explain why interval length is the primary outer loop iteration variable in Matrix Chain Multiplication.",
+        "How do you print the optimal parenthesis splitting after executing MCM?"
+      ],
+      "coding": "Solve the Matrix Chain Multiplication problem and return the cost matrix.",
+      "interview": "Derive the recursive relation for Matrix Chain Multiplication step-by-step."
+    }
+  },
+  {
+    "id": "partition-dp",
+    "name": "Partition DP",
+    "category": "dp",
+    "complexity": {
+      "time": "O(N²)",
+      "space": "O(N)"
+    },
+    "description": "Solves problems where an array or string must be partitioned into contiguous segments optimally. Examples include Palindrome Partitioning II and Burst Balloons. The state tracks partitioning cost up to index `i` by checking all possible partition points `j`.",
+    "operations": ["scanPartitionEnd", "evaluateSplitPoint", "updateOptimalCost"],
+    "code": {
+      "javascript": "function minCut(s) {\n  const n = s.length;\n  const dp = Array(n).fill(0);\n  const isPal = Array.from({length: n}, () => Array(n).fill(false));\n  for (let i = 0; i < n; i++) {\n    let min = i;\n    for (let j = 0; j <= i; j++) {\n      if (s[j] === s[i] && (i - j < 2 || isPal[j + 1][i - 1])) {\n        isPal[j][i] = true;\n        min = j === 0 ? 0 : Math.min(min, dp[j - 1] + 1);\n      }\n    }\n    dp[i] = min;\n  }\n  return dp[n - 1];\n}",
+      "python": "def minCut(s):\n    n = len(s)\n    dp = [i for i in range(n)]\n    is_pal = [[False]*n for _ in range(n)]\n    for i in range(n):\n        for j in range(i + 1):\n            if s[j] == s[i] and (i - j < 2 or is_pal[j + 1][i - 1]):\n                is_pal[j][i] = True\n                dp[i] = 0 if j == 0 else min(dp[i], dp[j - 1] + 1)\n    return dp[n - 1]",
+      "java": "public int minCut(String s) {\n    int n = s.length();\n    int[] dp = new int[n];\n    boolean[][] isPal = new boolean[n][n];\n    for (int i = 0; i < n; i++) {\n        int min = i;\n        for (int j = 0; j <= i; j++) {\n            if (s.charAt(j) == s.charAt(i) && (i - j < 2 || isPal[j + 1][i - 1])) {\n                isPal[j][i] = true;\n                min = (j == 0) ? 0 : Math.min(min, dp[j - 1] + 1);\n            }\n        }\n        dp[i] = min;\n    }\n    return dp[n - 1];\n}",
+      "cpp": "int minCut(string s) {\n    int n = s.length();\n    vector<int> dp(n);\n    vector<vector<bool>> isPal(n, vector<bool>(n, false));\n    for (int i = 0; i < n; ++i) {\n        int minC = i;\n        for (int j = 0; j <= i; ++j) {\n            if (s[j] == s[i] && (i - j < 2 || isPal[j + 1][i - 1])) {\n                isPal[j][i] = true;\n                minC = (j == 0) ? 0 : min(minC, dp[j - 1] + 1);\n            }\n        }\n        dp[i] = minC;\n    }\n    return dp[n - 1];\n}"
+    },
+    "practice": {
+      "theory": [
+        "Explain how Partition DP splits subproblems at a pivot index.",
+        "Compare Palindrome Partitioning II time complexity of O(N²) vs naive backtracking O(2^N)."
+      ],
+      "coding": "Implement Partition DP to solve Palindrome Partitioning II.",
+      "interview": "Solve the Partition DP problem and dry run split choices."
+    }
+  },
+  {
+    "id": "digit-dp",
+    "name": "Digit DP",
+    "category": "dp",
+    "complexity": {
+      "time": "O(len(N) * 10 * states)",
+      "space": "O(len(N) * states)"
+    },
+    "description": "Counts integers in a range [A..B] satisfying digit-based properties. Instead of iterating, it places digits position by position, tracking bounds (tight/loose limits) and custom states.",
+    "operations": ["placeDigitPos", "checkTightFlag", "accumulateRangeSum"],
+    "code": {
+      "javascript": "function countNumbers(nStr) {\n  const memo = {};\n  function solve(pos, tight, sum) {\n    if (pos === nStr.length) return sum;\n    const key = `${pos}-${tight}-${sum}`;\n    if (key in memo) return memo[key];\n    const limit = tight ? parseInt(nStr[pos]) : 9;\n    let ans = 0;\n    for (let d = 0; d <= limit; d++) {\n      ans += solve(pos + 1, tight && (d === limit), sum + d);\n    }\n    return memo[key] = ans;\n  }\n  return solve(0, true, 0);\n}",
+      "python": "def solve(n_str):\n    memo = {}\n    def solve_helper(pos, tight, current_sum):\n        if pos == len(n_str): return current_sum\n        key = (pos, tight, current_sum)\n        if key in memo: return memo[key]\n        limit = int(n_str[pos]) if tight else 9\n        ans = 0\n        for d in range(limit + 1):\n            ans += solve_helper(pos + 1, tight and (d == limit), current_sum + d)\n        memo[key] = ans\n        return ans\n    return solve_helper(0, True, 0)",
+      "java": "public int countNumbers(String nStr) {\n    int[][][] memo = new int[nStr.length()][2][100];\n    for (int[][] arr2D : memo) for (int[] arr1D : arr2D) Arrays.fill(arr1D, -1);\n    return solve(0, 1, 0, nStr, memo);\n}\nprivate int solve(int pos, int tight, int sum, String nStr, int[][][] memo) {\n    if (pos == nStr.length()) return sum;\n    if (memo[pos][tight][sum] != -1) return memo[pos][tight][sum];\n    int limit = tight == 1 ? (nStr.charAt(pos) - '0') : 9;\n    int ans = 0;\n    for (int d = 0; d <= limit; d++) {\n        ans += solve(pos + 1, (tight == 1 && d == limit) ? 1 : 0, sum + d, nStr, memo);\n    }\n    return memo[pos][tight][sum] = ans;\n}",
+      "cpp": "int countNumbers(string nStr) {\n    int memo[20][2][200];\n    memset(memo, -1, sizeof(memo));\n    auto solve = [&](auto self, int pos, bool tight, int sum) -> int {\n        if (pos == nStr.length()) return sum;\n        if (memo[pos][tight][sum] != -1) return memo[pos][tight][sum];\n        int limit = tight ? (nStr[pos] - '0') : 9;\n        int ans = 0;\n        for (int d = 0; d <= limit; d++) {\n            ans += self(self, pos + 1, tight && (d == limit), sum + d);\n        }\n        return memo[pos][tight][sum] = ans;\n    };\n    return solve(solve, 0, true, 0);\n}"
+    },
+    "practice": {
+      "theory": [
+        "What does the 'tight' flag represent in Digit DP?",
+        "Explain the space complexity savings of Digit DP over iterating through all numbers."
+      ],
+      "coding": "Solve the 'Numbers At Most N Given Digit Set' problem on LeetCode.",
+      "interview": "Solve Digit DP and trace the digit placement loops."
+    }
+  },
+  {
+    "id": "tree-dp",
+    "name": "Tree DP",
+    "category": "dp",
+    "complexity": {
+      "time": "O(N)",
+      "space": "O(N)"
+    },
+    "description": "Runs dynamic programming on a tree structure. It computes DP values for each node based on the values of its child nodes in a post-order traversal (DFS), e.g. Maximum Path Sum or House Robber III.",
+    "operations": ["dfsPostOrder", "collectChildrenStates", "updateNodeDP"],
+    "code": {
+      "javascript": "function rob(root) {\n  function solve(node) {\n    if (!node) return [0, 0]; // [robbed, skipped]\n    const left = solve(node.left);\n    const right = solve(node.right);\n    const robbed = node.val + left[1] + right[1];\n    const skipped = Math.max(left[0], left[1]) + Math.max(right[0], right[1]);\n    return [robbed, skipped];\n  }\n  const res = solve(root);\n  return Math.max(res[0], res[1]);\n}",
+      "python": "def rob(root):\n    def solve(node):\n        if not node: return (0, 0) # (robbed, skipped)\n        l_rob, l_skip = solve(node.left)\n        r_rob, r_skip = solve(node.right)\n        robbed = node.val + l_skip + r_skip\n        skipped = max(l_rob, l_skip) + max(r_rob, r_skip)\n        return (robbed, skipped)\n    return max(solve(root))",
+      "java": "public int rob(TreeNode root) {\n    int[] res = solve(root);\n    return Math.max(res[0], res[1]);\n}\nprivate int[] solve(TreeNode node) {\n    if (node == null) return new int[]{0, 0};\n    int[] left = solve(node.left);\n    int[] right = solve(node.right);\n    int robbed = node.val + left[1] + right[1];\n    int skipped = Math.max(left[0], left[1]) + Math.max(right[0], right[1]);\n    return new int[]{robbed, skipped};\n}",
+      "cpp": "int rob(TreeNode* root) {\n    auto solve = [&](auto self, TreeNode* node) -> pair<int, int> {\n        if (!node) return {0, 0};\n        auto left = self(self, node->left);\n        auto right = self(self, node->right);\n        int robbed = node->val + left.second + right.second;\n        int skipped = max(left.first, left.second) + max(right.first, right.second);\n        return {robbed, skipped};\n    };\n    auto res = solve(solve, root);\n    return max(res.first, res.second);\n}"
+    },
+    "practice": {
+      "theory": [
+        "Explain how the tree topology avoids cyclic dependencies in state transitions.",
+        "What is tree rerooting DP, and when is it required?"
+      ],
+      "coding": "Solve the House Robber III problem on LeetCode.",
+      "interview": "Derive Tree DP states for computing the diameter of a binary tree."
+    }
+  },
+  {
+    "id": "bitmask-dp",
+    "name": "Bitmask DP",
+    "category": "dp",
+    "complexity": {
+      "time": "O(N² * 2ⁿ)",
+      "space": "O(N * 2ⁿ)"
+    },
+    "description": "Uses integer bitmasks to represent subsets as DP states. It solves NP-Hard problems on small inputs (like the Travelling Salesman Problem for N <= 20) by tracking visited nodes using bitwise representation.",
+    "operations": ["bitmaskUnion", "checkBitActive", "iterateSubsetTransitions"],
+    "code": {
+      "javascript": "function tsp(n, dist) {\n  const memo = Array.from({length: 1 << n}, () => Array(n).fill(-1));\n  function solve(mask, u) {\n    if (mask === (1 << n) - 1) return dist[u][0];\n    if (memo[mask][u] !== -1) return memo[mask][u];\n    let minCost = Infinity;\n    for (let v = 0; v < n; v++) {\n      if ((mask & (1 << v)) === 0) {\n        const cost = dist[u][v] + solve(mask | (1 << v), v);\n        minCost = Math.min(minCost, cost);\n      }\n    }\n    return memo[mask][u] = minCost;\n  }\n  return solve(1, 0);\n}",
+      "python": "def tsp(n, dist):\n    memo = [[-1]*n for _ in range(1 << n)]\n    def solve(mask, u):\n        if mask == (1 << n) - 1: return dist[u][0]\n        if memo[mask][u] != -1: return memo[mask][u]\n        min_cost = float('inf')\n        for v in range(n):\n            if (mask & (1 << v)) == 0:\n                cost = dist[u][v] + solve(mask | (1 << v), v)\n                min_cost = min(min_cost, cost)\n        memo[mask][u] = min_cost\n        return min_cost\n    return solve(1, 0)",
+      "java": "public int tsp(int n, int[][] dist) {\n    int[][] memo = new int[1 << n][n];\n    for (int[] r : memo) Arrays.fill(r, -1);\n    return solve(1, 0, n, dist, memo);\n}\nprivate int solve(int mask, int u, int n, int[][] dist, int[][] memo) {\n    if (mask == (1 << n) - 1) return dist[u][0];\n    if (memo[mask][u] != -1) return memo[mask][u];\n    int minCost = Integer.MAX_VALUE;\n    for (int v = 0; v < n; v++) {\n        if ((mask & (1 << v)) == 0) {\n            int cost = dist[u][v] + solve(mask | (1 << v), v, n, dist, memo);\n            minCost = Math.min(minCost, cost);\n        }\n    }\n    return memo[mask][u] = minCost;\n}",
+      "cpp": "int tsp(int n, vector<vector<int>>& dist) {\n    vector<vector<int>> memo(1 << n, vector<int>(n, -1));\n    auto solve = [&](auto self, int mask, int u) -> int {\n        if (mask == (1 << n) - 1) return dist[u][0];\n        if (memo[mask][u] != -1) return memo[mask][u];\n        int minCost = 1e9;\n        for (int v = 0; v < n; v++) {\n            if ((mask & (1 << v)) == 0) {\n                int cost = dist[u][v] + self(self, mask | (1 << v), v);\n                minCost = min(minCost, cost);\n            }\n        }\n        return memo[mask][u] = minCost;\n    };\n    return solve(solve, 1, 0);\n}"
+    },
+    "practice": {
+      "theory": [
+        "Explain how an integer acts as a set representation in Bitmask DP.",
+        "Why is Bitmask DP limited to N <= 20-25?"
+      ],
+      "coding": "Solve the Travelling Salesman Problem returning path details.",
+      "interview": "Derive states and transition steps for TSP bitmask calculations."
+    }
+  },
+  {
+    "id": "interval-dp",
+    "name": "Interval DP",
+    "category": "dp",
+    "complexity": {
+      "time": "O(N³)",
+      "space": "O(N²)"
+    },
+    "description": "Solves problems on intervals of a sequence by building answers for larger intervals from smaller sub-intervals, e.g. Burst Balloons or Optimal BST.",
+    "operations": ["defineSubIntervals", "findSplittingPivot", "evaluateIntervalTransition"],
+    "code": {
+      "javascript": "function intervalDP(arr) {\n  const n = arr.length;\n  const dp = Array.from({length: n}, () => Array(n).fill(0));\n  for (let len = 1; len <= n; len++) {\n    for (let i = 0; i <= n - len; i++) {\n      const j = i + len - 1;\n      if (i === j) { dp[i][j] = arr[i]; continue; }\n      dp[i][j] = Infinity;\n      for (let k = i; k < j; k++) {\n        dp[i][j] = Math.min(dp[i][j], dp[i][k] + dp[k + 1][j]);\n      }\n    }\n  }\n  return dp[0][n - 1];\n}",
+      "python": "def intervalDP(arr):\n    n = len(arr)\n    dp = [[0]*n for _ in range(n)]\n    for length in range(1, n+1):\n        for i in range(n - length + 1):\n            j = i + length - 1\n            if i == j:\n                dp[i][j] = arr[i]\n                continue\n            dp[i][j] = float('inf')\n            for k in range(i, j):\n                dp[i][j] = min(dp[i][j], dp[i][k] + dp[k+1][j])\n    return dp[0][n-1]",
+      "java": "public int intervalDP(int[] arr) {\n    int n = arr.length;\n    int[][] dp = new int[n][n];\n    for (int len = 1; len <= n; len++) {\n        for (int i = 0; i <= n - len; i++) {\n            int j = i + len - 1;\n            if (i == j) { dp[i][j] = arr[i]; continue; }\n            dp[i][j] = Integer.MAX_VALUE;\n            for (int k = i; k < j; k++) {\n                dp[i][j] = Math.min(dp[i][j], dp[i][k] + dp[k + 1][j]);\n            }\n        }\n    }\n    return dp[0][n - 1];\n}",
+      "cpp": "int intervalDP(vector<int>& arr) {\n    int n = arr.size(); vector<vector<int>> dp(n, vector<int>(n, 0));\n    for (int len = 1; len <= n; len++) {\n        for (int i = 0; i <= n - len; i++) {\n            int j = i + len - 1;\n            if (i == j) { dp[i][j] = arr[i]; continue; }\n            dp[i][j] = 1e9;\n            for (int k = i; k < j; k++) {\n                dp[i][j] = min(dp[i][j], dp[i][k] + dp[k + 1][j]);\n            }\n        }\n    }\n    return dp[0][n - 1];\n}"
+    },
+    "practice": {
+      "theory": [
+        "Explain how the length of the sub-interval dictates computation dependencies in Interval DP.",
+        "Contrast Interval DP with Partition DP."
+      ],
+      "coding": "Solve the Burst Balloons problem using Interval DP.",
+      "interview": "Derive states and transition steps for optimal binary search tree computations."
+    }
+  }
+]

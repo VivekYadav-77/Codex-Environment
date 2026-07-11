@@ -133,24 +133,24 @@
     "icon": "Network",
     "tier": "intermediate",
     "topics": [
-      { "id": "graph-representation", "title": "Graph Representation", "description": "Adjacency list vs adjacency matrix — tradeoffs in space and query time.", "type": "concept", "algorithmId": null },
-      { "id": "directed-undirected-weighted", "title": "Directed, Undirected & Weighted Graphs", "description": "Understand the three main types of graphs and when each applies.", "type": "concept", "algorithmId": null },
-      { "id": "graph-bfs", "title": "Graph BFS", "description": "Breadth-first search to explore all nodes level by level — finds shortest paths in unweighted graphs.", "type": "algorithm", "algorithmId": "bfs" },
-      { "id": "graph-dfs", "title": "Graph DFS", "description": "Depth-first search to explore as far as possible before backtracking.", "type": "algorithm", "algorithmId": "dfs" },
-      { "id": "connected-components", "title": "Connected Components", "description": "Find all groups of connected nodes using DFS or Union-Find.", "type": "algorithm", "algorithmId": null },
-      { "id": "flood-fill", "title": "Flood Fill", "description": "BFS/DFS to fill connected regions — used in image processing and island counting.", "type": "algorithm", "algorithmId": null },
-      { "id": "multi-source-bfs", "title": "Multi-Source BFS", "description": "Start BFS from multiple nodes simultaneously — efficient for distance-from-nearest problems.", "type": "pattern", "algorithmId": null },
-      { "id": "dijkstra", "title": "Dijkstra's Algorithm", "description": "Find shortest paths from a source in a weighted graph using a greedy priority queue.", "type": "algorithm", "algorithmId": "dijkstra" },
-      { "id": "bellman-ford", "title": "Bellman-Ford Algorithm", "description": "Shortest paths with negative weights — detects negative cycles.", "type": "algorithm", "algorithmId": "bellman-ford" },
-      { "id": "floyd-warshall", "title": "Floyd-Warshall Algorithm", "description": "All-pairs shortest paths in O(V³) — compact DP on adjacency matrix.", "type": "algorithm", "algorithmId": null },
-      { "id": "prims-algorithm", "title": "Prim's Algorithm", "description": "Grow a minimum spanning tree greedily by adding the cheapest edge connecting the tree to a new node.", "type": "algorithm", "algorithmId": "prims" },
-      { "id": "kruskal-algorithm", "title": "Kruskal's Algorithm", "description": "Build MST by sorting edges and adding them if they don't form a cycle — uses DSU.", "type": "algorithm", "algorithmId": "kruskal" },
-      { "id": "disjoint-set-union", "title": "Disjoint Set Union (DSU)", "description": "Union-Find with path compression and union by rank — O(α(n)) per operation.", "type": "algorithm", "algorithmId": "union-find" },
-      { "id": "topological-sort", "title": "Topological Sort", "description": "Order vertices of a DAG so every edge points forward — used in build systems and scheduling.", "type": "algorithm", "algorithmId": "topological-sort" },
-      { "id": "strongly-connected-components", "title": "Strongly Connected Components", "description": "Find SCCs using Kosaraju's or Tarjan's algorithm — critical for condensation graphs.", "type": "algorithm", "algorithmId": null },
-      { "id": "bridges-articulation-points", "title": "Bridges & Articulation Points", "description": "Find edges and vertices whose removal disconnects the graph.", "type": "algorithm", "algorithmId": null },
-      { "id": "bipartite-check", "title": "Bipartite Check", "description": "Determine if a graph can be 2-colored — equivalent to checking for odd cycles.", "type": "algorithm", "algorithmId": null },
-      { "id": "network-flow", "title": "Network Flow & Max Cut", "description": "Model flow in networks — Ford-Fulkerson, Edmonds-Karp, and the max-flow min-cut theorem.", "type": "algorithm", "algorithmId": null }
+      { "id": "graph-representation", "title": "Graph Representation", "description": "Adjacency list vs adjacency matrix — tradeoffs in space and query time.", "type": "concept", "algorithmId": "graph-representation", "category": "graphs" },
+      { "id": "directed-undirected-weighted", "title": "Directed, Undirected & Weighted Graphs", "description": "Understand the three main types of graphs and when each applies.", "type": "concept", "algorithmId": "graph-types", "category": "graphs" },
+      { "id": "graph-bfs", "title": "Graph BFS", "description": "Breadth-first search to explore all nodes level by level — finds shortest paths in unweighted graphs.", "type": "algorithm", "algorithmId": "graph-bfs", "category": "graphs" },
+      { "id": "graph-dfs", "title": "Graph DFS", "description": "Depth-first search to explore as far as possible before backtracking.", "type": "algorithm", "algorithmId": "graph-dfs", "category": "graphs" },
+      { "id": "connected-components", "title": "Connected Components", "description": "Find all groups of connected nodes using DFS or Union-Find.", "type": "algorithm", "algorithmId": "connected-components", "category": "graphs" },
+      { "id": "flood-fill", "title": "Flood Fill", "description": "BFS/DFS to fill connected regions — used in image processing and island counting.", "type": "algorithm", "algorithmId": "flood-fill", "category": "graphs" },
+      { "id": "multi-source-bfs", "title": "Multi-Source BFS", "description": "Start BFS from multiple nodes simultaneously — efficient for distance-from-nearest problems.", "type": "pattern", "algorithmId": "multi-source-bfs", "category": "graphs" },
+      { "id": "dijkstra", "title": "Dijkstra's Algorithm", "description": "Find shortest paths from a source in a weighted graph using a greedy priority queue.", "type": "algorithm", "algorithmId": "dijkstra", "category": "graphs" },
+      { "id": "bellman-ford", "title": "Bellman-Ford Algorithm", "description": "Shortest paths with negative weights — detects negative cycles.", "type": "algorithm", "algorithmId": "bellman-ford", "category": "graphs" },
+      { "id": "floyd-warshall", "title": "Floyd-Warshall Algorithm", "description": "All-pairs shortest paths in O(V³) — compact DP on adjacency matrix.", "type": "algorithm", "algorithmId": "floyd-warshall", "category": "graphs" },
+      { "id": "prims-algorithm", "title": "Prim's Algorithm", "description": "Grow a minimum spanning tree greedily by adding the cheapest edge connecting the tree to a new node.", "type": "algorithm", "algorithmId": "prims", "category": "graphs" },
+      { "id": "kruskal-algorithm", "title": "Kruskal's Algorithm", "description": "Build MST by sorting edges and adding them if they don't form a cycle — uses DSU.", "type": "algorithm", "algorithmId": "kruskal", "category": "graphs" },
+      { "id": "disjoint-set-union", "title": "Disjoint Set Union (DSU)", "description": "Union-Find with path compression and union by rank — O(α(n)) per operation.", "type": "algorithm", "algorithmId": "dsu", "category": "advanced" },
+      { "id": "topological-sort", "title": "Topological Sort", "description": "Order vertices of a DAG so every edge points forward — used in build systems and scheduling.", "type": "algorithm", "algorithmId": "topological-sort", "category": "graphs" },
+      { "id": "strongly-connected-components", "title": "Strongly Connected Components", "description": "Find SCCs using Kosaraju's or Tarjan's algorithm — critical for condensation graphs.", "type": "algorithm", "algorithmId": "scc", "category": "graphs" },
+      { "id": "bridges-articulation-points", "title": "Bridges & Articulation Points", "description": "Find edges and vertices whose removal disconnects the graph.", "type": "algorithm", "algorithmId": "bridges-articulation", "category": "graphs" },
+      { "id": "bipartite-check", "title": "Bipartite Check", "description": "Determine if a graph can be 2-colored — equivalent to checking for odd cycles.", "type": "algorithm", "algorithmId": "bipartite-check", "category": "graphs" },
+      { "id": "network-flow", "title": "Network Flow & Max Cut", "description": "Model flow in networks — Ford-Fulkerson, Edmonds-Karp, and the max-flow min-cut theorem.", "type": "algorithm", "algorithmId": "network-flow", "category": "graphs" }
     ]
   },
   {
@@ -161,15 +161,15 @@
     "icon": "RotateCcw",
     "tier": "intermediate",
     "topics": [
-      { "id": "call-stack", "title": "Call Stack", "description": "Understand how recursive calls are managed in the call stack and the risk of stack overflow.", "type": "concept", "algorithmId": null },
-      { "id": "recursive-tree", "title": "Recursive Tree", "description": "Visualize recursive calls as a tree to analyze time complexity and space usage.", "type": "concept", "algorithmId": null },
-      { "id": "backtracking-basics", "title": "Backtracking Basics", "description": "Explore all possibilities by building incrementally and abandoning invalid paths.", "type": "concept", "algorithmId": null },
-      { "id": "subsets", "title": "Subsets", "description": "Generate all 2^n subsets of a set using bit manipulation or recursive backtracking.", "type": "algorithm", "algorithmId": null },
-      { "id": "permutations", "title": "Permutations", "description": "Generate all n! arrangements of elements using backtracking with swaps.", "type": "algorithm", "algorithmId": null },
-      { "id": "n-queens", "title": "N-Queens Problem", "description": "Place N queens on an N×N chessboard so no two attack each other.", "type": "algorithm", "algorithmId": null },
-      { "id": "sudoku-solver", "title": "Sudoku Solver", "description": "Fill a 9×9 grid satisfying row, column, and box constraints using backtracking.", "type": "algorithm", "algorithmId": null },
-      { "id": "rat-in-maze", "title": "Rat in a Maze", "description": "Find paths from start to end in a grid — classic backtracking DFS problem.", "type": "algorithm", "algorithmId": null },
-      { "id": "word-search", "title": "Word Search", "description": "Search for a word in a 2D character grid using DFS with backtracking.", "type": "algorithm", "algorithmId": null }
+      { "id": "call-stack", "title": "Call Stack", "description": "Understand how recursive calls are managed in the call stack and the risk of stack overflow.", "type": "concept", "algorithmId": "call-stack", "category": "backtracking" },
+      { "id": "recursive-tree", "title": "Recursive Tree", "description": "Visualize recursive calls as a tree to analyze time complexity and space usage.", "type": "concept", "algorithmId": "recursive-tree", "category": "backtracking" },
+      { "id": "backtracking-basics", "title": "Backtracking Basics", "description": "Explore all possibilities by building incrementally and abandoning invalid paths.", "type": "concept", "algorithmId": "backtracking-basics", "category": "backtracking" },
+      { "id": "subsets", "title": "Subsets", "description": "Generate all 2^n subsets of a set using bit manipulation or recursive backtracking.", "type": "algorithm", "algorithmId": "subsets", "category": "backtracking" },
+      { "id": "permutations", "title": "Permutations", "description": "Generate all n! arrangements of elements using backtracking with swaps.", "type": "algorithm", "algorithmId": "permutations", "category": "backtracking" },
+      { "id": "n-queens", "title": "N-Queens Problem", "description": "Place N queens on an N×N chessboard so no two attack each other.", "type": "algorithm", "algorithmId": "n-queens", "category": "backtracking" },
+      { "id": "sudoku-solver", "title": "Sudoku Solver", "description": "Fill a 9×9 grid satisfying row, column, and box constraints using backtracking.", "type": "algorithm", "algorithmId": "sudoku-solver", "category": "backtracking" },
+      { "id": "rat-in-maze", "title": "Rat in a Maze", "description": "Find paths from start to end in a grid — classic backtracking DFS problem.", "type": "algorithm", "algorithmId": "rat-in-maze", "category": "backtracking" },
+      { "id": "word-search", "title": "Word Search", "description": "Search for a word in a 2D character grid using DFS with backtracking.", "type": "algorithm", "algorithmId": "word-search", "category": "backtracking" }
     ]
   },
   {
@@ -180,13 +180,13 @@
     "icon": "Zap",
     "tier": "intermediate",
     "topics": [
-      { "id": "greedy-strategy", "title": "Greedy Strategy", "description": "Learn when greedy works, why it fails, and how to prove greedy correctness.", "type": "concept", "algorithmId": null },
-      { "id": "interval-scheduling", "title": "Interval Scheduling", "description": "Maximize the number of non-overlapping events — the canonical greedy problem.", "type": "algorithm", "algorithmId": null },
-      { "id": "huffman-coding", "title": "Huffman Coding", "description": "Build an optimal prefix-free code using a priority queue — the basis of data compression.", "type": "algorithm", "algorithmId": null },
-      { "id": "fractional-knapsack", "title": "Fractional Knapsack", "description": "Maximize value by taking fractions of items greedily by value/weight ratio.", "type": "algorithm", "algorithmId": null },
-      { "id": "job-scheduling", "title": "Job Scheduling", "description": "Schedule jobs with deadlines and profits to maximize total gain.", "type": "algorithm", "algorithmId": null },
-      { "id": "activity-selection", "title": "Activity Selection", "description": "Select maximum non-conflicting activities — the foundational interval greedy problem.", "type": "algorithm", "algorithmId": null },
-      { "id": "merge-intervals", "title": "Merge Intervals", "description": "Collapse overlapping intervals into a minimal set — an interview and systems classic.", "type": "algorithm", "algorithmId": null }
+      { "id": "greedy-strategy", "title": "Greedy Strategy", "description": "Learn when greedy works, why it fails, and how to prove greedy correctness.", "type": "concept", "algorithmId": "greedy-strategy", "category": "greedy" },
+      { "id": "interval-scheduling", "title": "Interval Scheduling", "description": "Maximize the number of non-overlapping events — the canonical greedy problem.", "type": "algorithm", "algorithmId": "interval-scheduling", "category": "greedy" },
+      { "id": "huffman-coding", "title": "Huffman Coding", "description": "Build an optimal prefix-free code using a priority queue — the basis of data compression.", "type": "algorithm", "algorithmId": "huffman-coding", "category": "greedy" },
+      { "id": "fractional-knapsack", "title": "Fractional Knapsack", "description": "Maximize value by taking fractions of items greedily by value/weight ratio.", "type": "algorithm", "algorithmId": "fractional-knapsack", "category": "greedy" },
+      { "id": "job-scheduling", "title": "Job Scheduling", "description": "Schedule jobs with deadlines and profits to maximize total gain.", "type": "algorithm", "algorithmId": "job-scheduling", "category": "greedy" },
+      { "id": "activity-selection", "title": "Activity Selection", "description": "Select maximum non-conflicting activities — the foundational interval greedy problem.", "type": "algorithm", "algorithmId": "activity-selection", "category": "greedy" },
+      { "id": "merge-intervals", "title": "Merge Intervals", "description": "Collapse overlapping intervals into a minimal set — an interview and systems classic.", "type": "algorithm", "algorithmId": "merge-intervals", "category": "greedy" }
     ]
   },
   {
@@ -200,8 +200,8 @@
       { "id": "divide-and-conquer-binary-search", "title": "Binary Search (D&C view)", "description": "Binary search as a canonical divide-and-conquer algorithm.", "type": "algorithm", "algorithmId": "binary-search" },
       { "id": "divide-and-conquer-merge-sort", "title": "Merge Sort (D&C)", "description": "Recursively split and merge — the archetypal divide-and-conquer sorting algorithm.", "type": "algorithm", "algorithmId": "merge-sort" },
       { "id": "divide-and-conquer-quick-sort", "title": "Quick Sort (D&C)", "description": "Partition-based sorting using randomized pivots for average O(n log n).", "type": "algorithm", "algorithmId": "quick-sort" },
-      { "id": "closest-pair-of-points", "title": "Closest Pair of Points", "description": "Find the two nearest points in O(n log n) using divide-and-conquer.", "type": "algorithm", "algorithmId": null },
-      { "id": "inversion-count", "title": "Inversion Count", "description": "Count pairs where a[i] > a[j] with i < j by modifying merge sort.", "type": "algorithm", "algorithmId": null }
+      { "id": "closest-pair-of-points", "title": "Closest Pair of Points", "description": "Find the two nearest points in O(n log n) using divide-and-conquer.", "type": "algorithm", "algorithmId": "closest-pair-points", "category": "divide-and-conquer" },
+      { "id": "inversion-count", "title": "Inversion Count", "description": "Count pairs where a[i] > a[j] with i < j by modifying merge sort.", "type": "algorithm", "algorithmId": "inversion-count", "category": "divide-and-conquer" }
     ]
   },
   {
@@ -212,21 +212,21 @@
     "icon": "Layers",
     "tier": "advanced",
     "topics": [
-      { "id": "dp-memoization", "title": "Memoization (Top-Down DP)", "description": "Cache recursive call results to avoid redundant computation.", "type": "concept", "algorithmId": null },
-      { "id": "dp-tabulation", "title": "Tabulation (Bottom-Up DP)", "description": "Fill a DP table iteratively from base cases to the final answer.", "type": "concept", "algorithmId": null },
-      { "id": "dp-state-design", "title": "State Design", "description": "Learn to identify what information must be tracked to define a DP state uniquely.", "type": "concept", "algorithmId": null },
-      { "id": "dp-state-transition", "title": "State Transition", "description": "Express how the optimal substructure relates states to build up to the solution.", "type": "concept", "algorithmId": null },
-      { "id": "dp-fibonacci", "title": "Fibonacci (DP foundation)", "description": "The simplest DP — from exponential recursion to O(n) with memoization.", "type": "algorithm", "algorithmId": null },
-      { "id": "dp-knapsack", "title": "0/1 Knapsack", "description": "Classic DP: maximize value under a weight constraint by including or excluding items.", "type": "algorithm", "algorithmId": null },
-      { "id": "dp-lis", "title": "Longest Increasing Subsequence (LIS)", "description": "Find the longest subsequence where each element is strictly greater than the previous.", "type": "algorithm", "algorithmId": null },
-      { "id": "dp-lcs", "title": "Longest Common Subsequence (LCS)", "description": "Find the longest subsequence present in both strings — O(mn) classic DP.", "type": "algorithm", "algorithmId": null },
-      { "id": "dp-edit-distance", "title": "Edit Distance (Levenshtein)", "description": "Minimum insertions, deletions, and substitutions to transform one string into another.", "type": "algorithm", "algorithmId": null },
-      { "id": "dp-matrix-chain", "title": "Matrix Chain Multiplication", "description": "Find the optimal parenthesization to minimize scalar multiplications.", "type": "algorithm", "algorithmId": null },
-      { "id": "dp-partition", "title": "Partition DP", "description": "Partition a sequence into optimal parts — used in palindrome partitioning and burst balloons.", "type": "pattern", "algorithmId": null },
-      { "id": "dp-digit", "title": "Digit DP", "description": "Count numbers in a range satisfying digit-based constraints using DP on digits.", "type": "pattern", "algorithmId": null },
-      { "id": "dp-tree", "title": "Tree DP", "description": "Run DP on tree structures to solve subtree problems, rerooting, and diameter queries.", "type": "pattern", "algorithmId": null },
-      { "id": "dp-bitmask", "title": "Bitmask DP", "description": "Use bitmasks to represent subsets as DP states — exponential but powerful.", "type": "pattern", "algorithmId": null },
-      { "id": "dp-interval", "title": "Interval DP", "description": "Solve problems on intervals of a sequence — used in optimal BST and matrix chain problems.", "type": "pattern", "algorithmId": null }
+      { "id": "dp-memoization", "title": "Memoization (Top-Down DP)", "description": "Cache recursive call results to avoid redundant computation.", "type": "concept", "algorithmId": "dp-memoization", "category": "dp" },
+      { "id": "dp-tabulation", "title": "Tabulation (Bottom-Up DP)", "description": "Fill a DP table iteratively from base cases to the final answer.", "type": "concept", "algorithmId": "dp-tabulation", "category": "dp" },
+      { "id": "dp-state-design", "title": "State Design", "description": "Learn to identify what information must be tracked to define a DP state uniquely.", "type": "concept", "algorithmId": "dp-state-design", "category": "dp" },
+      { "id": "dp-state-transition", "title": "State Transition", "description": "Express how the optimal substructure relates states to build up to the solution.", "type": "concept", "algorithmId": "dp-state-transition", "category": "dp" },
+      { "id": "dp-fibonacci", "title": "Fibonacci (DP foundation)", "description": "The simplest DP — from exponential recursion to O(n) with memoization.", "type": "algorithm", "algorithmId": "fibonacci", "category": "dp" },
+      { "id": "dp-knapsack", "title": "0/1 Knapsack", "description": "Classic DP: maximize value under a weight constraint by including or excluding items.", "type": "algorithm", "algorithmId": "knapsack-01", "category": "dp" },
+      { "id": "dp-lis", "title": "Longest Increasing Subsequence (LIS)", "description": "Find the longest subsequence where each element is strictly greater than the previous.", "type": "algorithm", "algorithmId": "lis", "category": "dp" },
+      { "id": "dp-lcs", "title": "Longest Common Subsequence (LCS)", "description": "Find the longest subsequence present in both strings — O(mn) classic DP.", "type": "algorithm", "algorithmId": "lcs", "category": "dp" },
+      { "id": "dp-edit-distance", "title": "Edit Distance (Levenshtein)", "description": "Minimum insertions, deletions, and substitutions to transform one string into another.", "type": "algorithm", "algorithmId": "edit-distance", "category": "dp" },
+      { "id": "dp-matrix-chain", "title": "Matrix Chain Multiplication", "description": "Find the optimal parenthesization to minimize scalar multiplications.", "type": "algorithm", "algorithmId": "matrix-chain", "category": "dp" },
+      { "id": "dp-partition", "title": "Partition DP", "description": "Partition a sequence into optimal parts — used in palindrome partitioning and burst balloons.", "type": "pattern", "algorithmId": "partition-dp", "category": "dp" },
+      { "id": "dp-digit", "title": "Digit DP", "description": "Count numbers in a range satisfying digit-based constraints using DP on digits.", "type": "pattern", "algorithmId": "digit-dp", "category": "dp" },
+      { "id": "dp-tree", "title": "Tree DP", "description": "Run DP on tree structures to solve subtree problems, rerooting, and diameter queries.", "type": "pattern", "algorithmId": "tree-dp", "category": "dp" },
+      { "id": "dp-bitmask", "title": "Bitmask DP", "description": "Use bitmasks to represent subsets as DP states — exponential but powerful.", "type": "pattern", "algorithmId": "bitmask-dp", "category": "dp" },
+      { "id": "dp-interval", "title": "Interval DP", "description": "Solve problems on intervals of a sequence — used in optimal BST and matrix chain problems.", "type": "pattern", "algorithmId": "interval-dp", "category": "dp" }
     ]
   },
   {

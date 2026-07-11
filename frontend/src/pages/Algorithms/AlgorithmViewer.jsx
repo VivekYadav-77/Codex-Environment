@@ -252,14 +252,97 @@ const TreeVisualization = ({ step }) => {
     )
 }
 
+const GridVisualization = ({ step }) => {
+    const grid = step.grid || []
+    const activeCells = step.activeCells || []
+    const successCells = step.successCells || []
+    const highlightedCells = step.highlightedCells || []
+    const blockedCells = step.blockedCells || []
+    const pathCells = step.pathCells || []
+    const rowHeaders = step.rowHeaders || []
+    const colHeaders = step.colHeaders || []
 
+    if (!grid.length) return <div className="text-gray-400">Empty Grid</div>
 
+    const numRows = grid.length
+    const numCols = grid[0].length
 
+    return (
+        <div className="flex flex-col items-center gap-4 w-full">
+            {/* Grid Container */}
+            <div 
+                className="grid gap-1.5 p-3 bg-white/5 rounded-xl border border-white/10 shadow-2xl overflow-auto max-w-full"
+                style={{
+                    gridTemplateColumns: `repeat(${numCols + (rowHeaders.length ? 1 : 0)}, minmax(40px, 1fr))`
+                }}
+            >
+                {/* Header corner if headers are present */}
+                {rowHeaders.length > 0 && (
+                    <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center font-bold text-gray-500 text-sm">
+                        
+                    </div>
+                )}
 
+                {/* Column Headers */}
+                {colHeaders.length > 0 && colHeaders.map((col, idx) => (
+                    <div 
+                        key={`col-head-${idx}`} 
+                        className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center font-bold text-gray-400 text-xs md:text-sm"
+                    >
+                        {col}
+                    </div>
+                ))}
 
+                {/* Grid Cells */}
+                {grid.map((row, r) => (
+                    <div key={`row-group-${r}`} className="contents">
+                        {/* Row Header */}
+                        {rowHeaders.length > 0 && (
+                            <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center font-bold text-gray-400 text-xs md:text-sm">
+                                {rowHeaders[r]}
+                            </div>
+                        )}
 
+                        {row.map((val, c) => {
+                            const isCellMatch = (list) => list.some(([rowIdx, colIdx]) => rowIdx === r && colIdx === c)
+                            
+                            const isActive = isCellMatch(activeCells)
+                            const isSuccess = isCellMatch(successCells)
+                            const isHighlighted = isCellMatch(highlightedCells)
+                            const isBlocked = isCellMatch(blockedCells)
+                            const isPath = isCellMatch(pathCells)
 
+                            let cellClass = "bg-white/5 border-white/10 text-white"
+                            if (isBlocked) cellClass = "bg-gray-800/80 border-gray-700/50 text-gray-600 cursor-not-allowed"
+                            else if (isActive) cellClass = "bg-gradient-to-br from-google-blue to-blue-600 border-google-blue text-white ring-2 ring-blue-400/50 font-bold animate-pulse"
+                            else if (isSuccess) cellClass = "bg-gradient-to-br from-google-green to-green-600 border-google-green text-white font-bold"
+                            else if (isPath) cellClass = "bg-gradient-to-br from-purple-500 to-purple-700 border-purple-500 text-white font-bold"
+                            else if (isHighlighted) cellClass = "bg-gradient-to-br from-google-red to-red-600 border-google-red text-white font-bold"
 
+                            return (
+                                <motion.div
+                                    key={`cell-${r}-${c}`}
+                                    className={`
+                                        w-10 h-10 md:w-12 md:h-12 
+                                        rounded-lg border flex items-center justify-center 
+                                        text-xs md:text-sm font-semibold transition-all duration-200
+                                        ${cellClass} shadow-md
+                                    `}
+                                    initial={{ scale: 0.8, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    whileHover={{ scale: 1.05 }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                >
+                                    {val === '.' || val === '#' || val === ' ' ? '' : val}
+                                </motion.div>
+                            )
+                        })}
+                    </div>
+                ))}
+            </div>
+        </div>
+    )
+}
 
 // Graph Visualization - Shows graph as network
 const GraphVisualization = ({ step }) => {
@@ -748,6 +831,8 @@ const VisualizationRenderer = ({ type, step, maxValue }) => {
             return <ComplexityVisualization step={step} />
         case 'trie':
             return <TrieVisualization step={step} />
+        case 'grid':
+            return <GridVisualization step={step} />
         case 'array':
         default:
             return <ArrayVisualization step={step} maxValue={maxValue} />
@@ -4912,8 +4997,1005 @@ const newGenerators = {
     }
 };
 
+const phase5to9Generators = {
+    'graph-representation': () => {
+        const steps = []
+        const adj = [
+            [1, 2],
+            [0, 3],
+            [0, 3],
+            [1, 2]
+        ]
+        const numNodes = adj.length
+        steps.push({
+            visualizationType: 'grid',
+            grid: adj.map((neighbors, u) => {
+                const row = Array(numNodes).fill(' ')
+                neighbors.forEach(v => row[v] = '●')
+                return row
+            }),
+            rowHeaders: ['Node 0', 'Node 1', 'Node 2', 'Node 3'],
+            colHeaders: ['0', '1', '2', '3'],
+            activeCells: [],
+            message: "Adjacency Matrix representation: ● indicates an edge between node row and node col."
+        })
+        for (let u = 0; u < numNodes; u++) {
+            steps.push({
+                visualizationType: 'grid',
+                grid: adj.map((neighbors) => {
+                    const row = Array(numNodes).fill(' ')
+                    neighbors.forEach(v => row[v] = '●')
+                    return row
+                }),
+                rowHeaders: ['Node 0', 'Node 1', 'Node 2', 'Node 3'],
+                colHeaders: ['0', '1', '2', '3'],
+                activeCells: adj[u].map(v => [u, v]),
+                message: `Exploring Node ${u}'s outgoing edges: points to nodes ${adj[u].join(', ')}.`
+            })
+        }
+        return steps
+    },
+    'graph-types': () => {
+        const steps = []
+        const grid = [
+            [0, 4, 8, '.'],
+            [4, 0, '.', 3],
+            [8, '.', 0, 7],
+            ['.', 3, 7, 0]
+        ]
+        steps.push({
+            visualizationType: 'grid',
+            grid: grid,
+            rowHeaders: ['Node 0', 'Node 1', 'Node 2', 'Node 3'],
+            colHeaders: ['0', '1', '2', '3'],
+            activeCells: [],
+            message: "Undirected Weighted Graph: Symmetric matrix containing edge weights."
+        })
+        steps.push({
+            visualizationType: 'grid',
+            grid: grid,
+            rowHeaders: ['Node 0', 'Node 1', 'Node 2', 'Node 3'],
+            colHeaders: ['0', '1', '2', '3'],
+            activeCells: [[0, 1], [1, 0]],
+            message: "Undirected edge between 0 and 1 has weight 4 (represented symmetrically at grid[0][1] and grid[1][0])."
+        })
+        steps.push({
+            visualizationType: 'grid',
+            grid: grid,
+            rowHeaders: ['Node 0', 'Node 1', 'Node 2', 'Node 3'],
+            colHeaders: ['0', '1', '2', '3'],
+            activeCells: [[0, 2], [2, 0]],
+            message: "Undirected edge between 0 and 2 has weight 8."
+        })
+        return steps
+    },
+    'connected-components': () => {
+        const steps = []
+        const nodes = [0, 1, 2, 3, 4, 5]
+        const edges = [[0, 1], [2, 3], [4, 5]]
+        steps.push({
+            graphNodes: nodes,
+            graphEdges: edges,
+            visited: [],
+            current: null,
+            message: "Graph with 6 nodes and 3 edges. We want to find the number of connected components."
+        })
+        steps.push({
+            graphNodes: nodes,
+            graphEdges: edges,
+            visited: [0],
+            current: 0,
+            message: "Start DFS from Node 0. Mark Node 0 as visited."
+        })
+        steps.push({
+            graphNodes: nodes,
+            graphEdges: edges,
+            visited: [0, 1],
+            current: 1,
+            message: "DFS traverses Node 0 -> Node 1. Component 1 is {0, 1}."
+        })
+        steps.push({
+            graphNodes: nodes,
+            graphEdges: edges,
+            visited: [0, 1, 2],
+            current: 2,
+            message: "Next unvisited node is Node 2. Start DFS from Node 2."
+        })
+        steps.push({
+            graphNodes: nodes,
+            graphEdges: edges,
+            visited: [0, 1, 2, 3],
+            current: 3,
+            message: "DFS traverses Node 2 -> Node 3. Component 2 is {2, 3}."
+        })
+        steps.push({
+            graphNodes: nodes,
+            graphEdges: edges,
+            visited: [0, 1, 2, 3, 4],
+            current: 4,
+            message: "Next unvisited node is Node 4. Start DFS from Node 4."
+        })
+        steps.push({
+            graphNodes: nodes,
+            graphEdges: edges,
+            visited: [0, 1, 2, 3, 4, 5],
+            current: 5,
+            message: "DFS traverses Node 4 -> Node 5. Component 3 is {4, 5}."
+        })
+        steps.push({
+            graphNodes: nodes,
+            graphEdges: edges,
+            visited: [0, 1, 2, 3, 4, 5],
+            current: null,
+            message: "All nodes visited. Total connected components = 3."
+        })
+        return steps
+    },
+    'flood-fill': () => {
+        const steps = []
+        const grid = [
+            [1, 1, 1],
+            [1, 1, 0],
+            [1, 0, 1]
+        ]
+        steps.push({
+            visualizationType: 'grid',
+            grid: grid.map(r => [...r]),
+            activeCells: [[1, 1]],
+            message: "Flood Fill starting from cell (1, 1) with target color 2."
+        })
+        const flood = (r, c) => {
+            if (r < 0 || r >= 3 || c < 0 || c >= 3 || grid[r][c] !== 1) return
+            grid[r][c] = 2
+            steps.push({
+                visualizationType: 'grid',
+                grid: grid.map(row => [...row]),
+                activeCells: [[r, c]],
+                successCells: grid.flatMap((row, ri) => row.map((val, ci) => val === 2 ? [ri, ci] : null)).filter(Boolean),
+                message: `Coloring cell (${r}, ${c}) to 2.`
+            })
+            flood(r + 1, c)
+            flood(r - 1, c)
+            flood(r, c + 1)
+            flood(r, c - 1)
+        }
+        flood(1, 1)
+        steps.push({
+            visualizationType: 'grid',
+            grid: grid.map(row => [...row]),
+            successCells: grid.flatMap((row, ri) => row.map((val, ci) => val === 2 ? [ri, ci] : null)).filter(Boolean),
+            message: "Flood Fill complete!"
+        })
+        return steps
+    },
+    'multi-source-bfs': () => {
+        const steps = []
+        const grid = [
+            [0, 9, 9],
+            [9, 9, 9],
+            [9, 9, 0]
+        ]
+        steps.push({
+            visualizationType: 'grid',
+            grid: grid.map(row => [...row]),
+            activeCells: [[0, 0], [2, 2]],
+            message: "Initialize multi-source BFS with sources at (0, 0) and (2, 2) at distance 0."
+        })
+        const q = [[0, 0], [2, 2]]
+        const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]]
+        while (q.length > 0) {
+            const [r, c] = q.shift()
+            const dist = grid[r][c]
+            for (const [dr, dc] of dirs) {
+                const nr = r + dr, nc = c + dc
+                if (nr >= 0 && nr < 3 && nc >= 0 && nc < 3 && grid[nr][nc] === 9) {
+                    grid[nr][nc] = dist + 1
+                    q.push([nr, nc])
+                    steps.push({
+                        visualizationType: 'grid',
+                        grid: grid.map(row => [...row]),
+                        activeCells: [[nr, nc]],
+                        highlightedCells: [[r, c]],
+                        message: `Cell (${nr}, ${nc}) visited from (${r}, ${c}). New distance = ${dist + 1}.`
+                    })
+                }
+            }
+        }
+        steps.push({
+            visualizationType: 'grid',
+            grid: grid.map(row => [...row]),
+            activeCells: [],
+            message: "Multi-Source BFS completed. All cell shortest distances calculated."
+        })
+        return steps
+    },
+    'floyd-warshall': () => {
+        const steps = []
+        const dist = [
+            [0, 3, 99, 7],
+            [8, 0, 2, 99],
+            [5, 99, 0, 1],
+            [2, 99, 99, 0]
+        ]
+        steps.push({
+            visualizationType: 'grid',
+            grid: dist.map(row => [...row]),
+            rowHeaders: ['0', '1', '2', '3'],
+            colHeaders: ['0', '1', '2', '3'],
+            message: "Floyd-Warshall Initialization: Direct edge weights (99 represents Infinity)."
+        })
+        const V = 4
+        for (let k = 0; k < V; k++) {
+            steps.push({
+                visualizationType: 'grid',
+                grid: dist.map(row => [...row]),
+                rowHeaders: ['0', '1', '2', '3'],
+                colHeaders: ['0', '1', '2', '3'],
+                activeCells: [[k, k]],
+                message: `Considering Node ${k} as intermediate node.`
+            })
+            for (let i = 0; i < V; i++) {
+                for (let j = 0; j < V; j++) {
+                    if (dist[i][k] + dist[k][j] < dist[i][j]) {
+                        dist[i][j] = dist[i][k] + dist[k][j]
+                        steps.push({
+                            visualizationType: 'grid',
+                            grid: dist.map(row => [...row]),
+                            rowHeaders: ['0', '1', '2', '3'],
+                            colHeaders: ['0', '1', '2', '3'],
+                            activeCells: [[i, j]],
+                            highlightedCells: [[i, k], [k, j]],
+                            message: `Shortened path: dist[${i}][${j}] updated via node ${k} to ${dist[i][j]}.`
+                        })
+                    }
+                }
+            }
+        }
+        return steps
+    },
+    'scc': () => {
+        const steps = []
+        const nodes = [0, 1, 2, 3]
+        const edges = [[0, 1], [1, 2], [2, 0], [2, 3]]
+        steps.push({
+            graphNodes: nodes,
+            graphEdges: edges,
+            visited: [],
+            current: null,
+            message: "Kosaraju's SCC algorithm. Identify strongly connected components."
+        })
+        steps.push({
+            graphNodes: nodes,
+            graphEdges: edges,
+            visited: [0, 1, 2],
+            current: 2,
+            message: "DFS 1 (Finishing Times): Visit 0 -> 1 -> 2 -> 3. Finish order pushed to stack."
+        })
+        steps.push({
+            graphNodes: nodes,
+            graphEdges: edges,
+            visited: [],
+            current: null,
+            message: "Reverse the graph edges (transposing)."
+        })
+        const revEdges = [[1, 0], [2, 1], [0, 2], [3, 2]]
+        steps.push({
+            graphNodes: nodes,
+            graphEdges: revEdges,
+            visited: [],
+            message: "Graph edges transposed. Now DFS 2 from finishing stack."
+        })
+        steps.push({
+            graphNodes: nodes,
+            graphEdges: revEdges,
+            visited: [3],
+            current: 3,
+            message: "DFS 2 starting from Node 3. Component found: {3}."
+        })
+        steps.push({
+            graphNodes: nodes,
+            graphEdges: revEdges,
+            visited: [3, 0, 1, 2],
+            current: 0,
+            message: "DFS 2 starting from Node 0. Transverse to 2 and 1. Component found: {0, 1, 2}."
+        })
+        steps.push({
+            graphNodes: nodes,
+            graphEdges: revEdges,
+            visited: [3, 0, 1, 2],
+            current: null,
+            message: "Kosaraju complete! SCCs: {3} and {0,1,2}."
+        })
+        return steps
+    },
+    'bridges-articulation': () => {
+        const steps = []
+        const nodes = [0, 1, 2, 3]
+        const edges = [[0, 1], [1, 2], [2, 0], [2, 3]]
+        steps.push({
+            graphNodes: nodes,
+            graphEdges: edges,
+            visited: [],
+            current: null,
+            message: "Identify Bridges: edges whose removal disconnects the graph."
+        })
+        steps.push({
+            graphNodes: nodes,
+            graphEdges: edges,
+            visited: [0],
+            current: 0,
+            message: "Run DFS from Node 0. Record discovery times."
+        })
+        steps.push({
+            graphNodes: nodes,
+            graphEdges: edges,
+            visited: [0, 1, 2, 3],
+            current: 3,
+            message: "DFS discovers Node 3. No back-edges from Node 3 to ancestors."
+        })
+        steps.push({
+            graphNodes: nodes,
+            graphEdges: edges,
+            visited: [0, 1, 2, 3],
+            current: 2,
+            message: "Low link value low[3] (3) > tin[2] (2). This confirms edge (2, 3) is a critical Bridge!"
+        })
+        return steps
+    },
+    'bipartite-check': () => {
+        const steps = []
+        const nodes = [0, 1, 2, 3]
+        const edges = [[0, 1], [1, 2], [2, 3], [3, 0]]
+        steps.push({
+            graphNodes: nodes,
+            graphEdges: edges,
+            visited: [],
+            message: "Bipartite Check: Determine if we can color vertices with 2 colors without color conflicts."
+        })
+        steps.push({
+            graphNodes: nodes,
+            graphEdges: edges,
+            visited: [0],
+            current: 0,
+            message: "Color Node 0 Red."
+        })
+        steps.push({
+            graphNodes: nodes,
+            graphEdges: edges,
+            visited: [0, 1, 3],
+            current: 1,
+            message: "Color neighbors Node 1 and Node 3 Blue."
+        })
+        steps.push({
+            graphNodes: nodes,
+            graphEdges: edges,
+            visited: [0, 1, 3, 2],
+            current: 2,
+            message: "Color Node 2 Red (neighbor of Node 1 and Node 3)."
+        })
+        steps.push({
+            graphNodes: nodes,
+            graphEdges: edges,
+            visited: [0, 1, 3, 2],
+            message: "Bipartite Check completed. All nodes colored successfully without conflict."
+        })
+        return steps
+    },
+    'network-flow': () => {
+        const steps = []
+        const capacity = [
+            [0, 10, 10, 0],
+            [0, 0, 4, 8],
+            [0, 0, 0, 9],
+            [0, 0, 0, 0]
+        ]
+        steps.push({
+            visualizationType: 'grid',
+            grid: capacity.map(row => [...row]),
+            rowHeaders: ['Source 0', 'Node 1', 'Node 2', 'Sink 3'],
+            colHeaders: ['0', '1', '2', '3'],
+            message: "Max Flow (Edmonds-Karp): Initial edge capacities."
+        })
+        steps.push({
+            visualizationType: 'grid',
+            grid: capacity.map(row => [...row]),
+            rowHeaders: ['Source 0', 'Node 1', 'Node 2', 'Sink 3'],
+            colHeaders: ['0', '1', '2', '3'],
+            activeCells: [[0, 1], [1, 3]],
+            message: "Augmenting path found: 0 -> 1 -> 3. Path bottle-neck capacity is min(10, 8) = 8."
+        })
+        capacity[0][1] -= 8
+        capacity[1][3] -= 8
+        steps.push({
+            visualizationType: 'grid',
+            grid: capacity.map(row => [...row]),
+            rowHeaders: ['Source 0', 'Node 1', 'Node 2', 'Sink 3'],
+            colHeaders: ['0', '1', '2', '3'],
+            successCells: [[0, 1], [1, 3]],
+            message: "Pushed 8 units of flow. Residual capacity grid updated."
+        })
+        return steps
+    },
+    'call-stack': () => {
+        const steps = []
+        steps.push({
+            array: ['factorial(1)'],
+            comparing: [0],
+            message: "Call Stack: factorial(1) hits base case n <= 1. Return 1.",
+            line: 1
+        })
+        steps.push({
+            array: ['factorial(2)', 'factorial(1)'],
+            comparing: [1],
+            message: "Pop factorial(1) from stack. factorial(2) calculates 2 * 1 = 2.",
+            line: 2
+        })
+        steps.push({
+            array: ['factorial(3)', 'factorial(2)'],
+            comparing: [1],
+            message: "Pop factorial(2) from stack. factorial(3) calculates 3 * 2 = 6.",
+            line: 3
+        })
+        return steps
+    },
+    'recursive-tree': () => {
+        const steps = []
+        steps.push({
+            treeNodes: ['fib(3)', 'fib(2)', 'fib(1)', 'fib(1)', 'fib(0)'],
+            currentNode: 0,
+            message: "Recursion tree for fib(3). Visit root node."
+        })
+        steps.push({
+            treeNodes: ['fib(3)', 'fib(2)', 'fib(1)', 'fib(1)', 'fib(0)'],
+            currentNode: 1,
+            visitedNodes: [0],
+            message: "Spawn left branch: fib(2)."
+        })
+        steps.push({
+            treeNodes: ['fib(3)', 'fib(2)', 'fib(1)', 'fib(1)', 'fib(0)'],
+            currentNode: 2,
+            visitedNodes: [0, 1],
+            message: "Spawn sub-branch: fib(1) (hits base case, return 1)."
+        })
+        return steps
+    },
+    'backtracking-basics': () => {
+        const steps = []
+        steps.push({
+            array: ['_ ', '_ ', '_ '],
+            comparing: [],
+            message: "Backtracking Basics: Initialize empty state list."
+        })
+        steps.push({
+            array: ['A', '_ ', '_ '],
+            comparing: [0],
+            message: "Choose 'A' for position 0."
+        })
+        steps.push({
+            array: ['A', 'B', '_ '],
+            comparing: [1],
+            message: "Choose 'B' for position 1."
+        })
+        steps.push({
+            array: ['A', '_ ', '_ '],
+            swapping: [1],
+            message: "Backtrack: Undo choice 'B' at position 1."
+        })
+        return steps
+    },
+    'sudoku-solver': () => {
+        const steps = []
+        const board = [
+            ['5', '3', '.', '.', '7', '.', '.', '.', '.'],
+            ['6', '.', '.', '1', '9', '5', '.', '.', '.'],
+            ['.', '9', '8', '.', '.', '.', '.', '6', '.'],
+            ['8', '.', '.', '.', '6', '.', '.', '.', '3'],
+            ['4', '.', '.', '8', '.', '3', '.', '.', '1'],
+            ['7', '.', '.', '.', '2', '.', '.', '.', '6'],
+            ['.', '6', '.', '.', '.', '.', '2', '8', '.'],
+            ['.', '.', '.', '4', '1', '9', '.', '.', '5'],
+            ['.', '.', '.', '.', '8', '.', '.', '7', '9']
+        ]
+        steps.push({
+            visualizationType: 'grid',
+            grid: board.map(r => [...r]),
+            activeCells: [[0, 2]],
+            message: "Sudoku Backtracking: Explore cell (0, 2)."
+        })
+        board[0][2] = '1'
+        steps.push({
+            visualizationType: 'grid',
+            grid: board.map(r => [...r]),
+            activeCells: [[0, 2]],
+            successCells: [[0, 2]],
+            message: "Check row, column, and box constraints. Digit 1 is valid. Place 1."
+        })
+        steps.push({
+            visualizationType: 'grid',
+            grid: board.map(r => [...r]),
+            activeCells: [[0, 3]],
+            message: "Explore cell (0, 3)."
+        })
+        board[0][3] = '2'
+        steps.push({
+            visualizationType: 'grid',
+            grid: board.map(r => [...r]),
+            activeCells: [[0, 3]],
+            successCells: [[0, 2], [0, 3]],
+            message: "Place digit 2 at cell (0, 3)."
+        })
+        return steps
+    },
+    'rat-in-maze': () => {
+        const steps = []
+        const maze = [
+            [1, 0, 0, 0],
+            [1, 1, 0, 1],
+            [0, 1, 0, 0],
+            [1, 1, 1, 1]
+        ]
+        steps.push({
+            visualizationType: 'grid',
+            grid: maze.map(row => row.map(v => v === 1 ? '.' : '█')),
+            activeCells: [[0, 0]],
+            message: "Rat starts at position (0, 0)."
+        })
+        steps.push({
+            visualizationType: 'grid',
+            grid: maze.map(row => row.map(v => v === 1 ? '.' : '█')),
+            activeCells: [[1, 0]],
+            pathCells: [[0, 0]],
+            message: "Move Down to (1, 0)."
+        })
+        steps.push({
+            visualizationType: 'grid',
+            grid: maze.map(row => row.map(v => v === 1 ? '.' : '█')),
+            activeCells: [[1, 1]],
+            pathCells: [[0, 0], [1, 0]],
+            message: "Move Right to (1, 1)."
+        })
+        steps.push({
+            visualizationType: 'grid',
+            grid: maze.map(row => row.map(v => v === 1 ? '.' : '█')),
+            activeCells: [[2, 1]],
+            pathCells: [[0, 0], [1, 0], [1, 1]],
+            message: "Move Down to (2, 1)."
+        })
+        steps.push({
+            visualizationType: 'grid',
+            grid: maze.map(row => row.map(v => v === 1 ? '.' : '█')),
+            activeCells: [[3, 1]],
+            pathCells: [[0, 0], [1, 0], [1, 1], [2, 1]],
+            message: "Move Down to (3, 1)."
+        })
+        steps.push({
+            visualizationType: 'grid',
+            grid: maze.map(row => row.map(v => v === 1 ? '.' : '█')),
+            activeCells: [[3, 3]],
+            successCells: [[0, 0], [1, 0], [1, 1], [2, 1], [3, 1], [3, 2], [3, 3]],
+            message: "Path found to destination cell (3, 3)!"
+        })
+        return steps
+    },
+    'word-search': () => {
+        const steps = []
+        const board = [
+            ['A', 'B', 'C', 'E'],
+            ['S', 'F', 'C', 'S'],
+            ['A', 'D', 'E', 'E']
+        ]
+        steps.push({
+            visualizationType: 'grid',
+            grid: board.map(r => [...r]),
+            activeCells: [[0, 0]],
+            message: "Search for word 'ABCCED'. Start at matching letter 'A' at (0, 0)."
+        })
+        steps.push({
+            visualizationType: 'grid',
+            grid: board.map(r => [...r]),
+            activeCells: [[0, 1]],
+            pathCells: [[0, 0]],
+            message: "Match next letter 'B' at cell (0, 1)."
+        })
+        steps.push({
+            visualizationType: 'grid',
+            grid: board.map(r => [...r]),
+            activeCells: [[0, 2]],
+            pathCells: [[0, 0], [0, 1]],
+            message: "Match next letter 'C' at cell (0, 2)."
+        })
+        steps.push({
+            visualizationType: 'grid',
+            grid: board.map(r => [...r]),
+            activeCells: [[1, 2]],
+            pathCells: [[0, 0], [0, 1], [0, 2]],
+            message: "Match next letter 'C' at cell (1, 2)."
+        })
+        steps.push({
+            visualizationType: 'grid',
+            grid: board.map(r => [...r]),
+            activeCells: [[2, 2]],
+            pathCells: [[0, 0], [0, 1], [0, 2], [1, 2]],
+            message: "Match next letter 'E' at cell (2, 2)."
+        })
+        steps.push({
+            visualizationType: 'grid',
+            grid: board.map(r => [...r]),
+            activeCells: [[2, 1]],
+            successCells: [[0, 0], [0, 1], [0, 2], [1, 2], [2, 2], [2, 1]],
+            message: "Match final letter 'D' at cell (2, 1). Word fully matched!"
+        })
+        return steps
+    },
+    'greedy-strategy': () => {
+        const steps = []
+        steps.push({
+            array: [25, 10, 5, 1],
+            comparing: [],
+            message: "Greedy Strategy: Given denominations [25, 10, 5, 1], find minimum coins for amount 36."
+        })
+        steps.push({
+            array: [25, 10, 5, 1],
+            comparing: [0],
+            message: "Take coin 25. Amount remaining = 36 - 25 = 11. Coin count = 1."
+        })
+        steps.push({
+            array: [25, 10, 5, 1],
+            comparing: [1],
+            message: "Take coin 10. Amount remaining = 11 - 10 = 1. Coin count = 2."
+        })
+        steps.push({
+            array: [25, 10, 5, 1],
+            comparing: [3],
+            message: "Take coin 1. Amount remaining = 1 - 1 = 0. Coin count = 3. Target amount reached!"
+        })
+        return steps
+    },
+    'fractional-knapsack': () => {
+        const steps = []
+        steps.push({
+            array: [6, 5, 4],
+            message: "Fractional Knapsack: Sort items by Value/Weight ratios: Item1 (Ratio=6), Item2 (Ratio=5), Item3 (Ratio=4)."
+        })
+        steps.push({
+            array: [6, 5, 4],
+            comparing: [0],
+            message: "Take 100% of Item 1 (Weight=10, Value=60). Capacity left = 50 - 10 = 40. Knapsack value = 60."
+        })
+        steps.push({
+            array: [6, 5, 4],
+            comparing: [1],
+            message: "Take 100% of Item 2 (Weight=20, Value=100). Capacity left = 40 - 20 = 20. Knapsack value = 160."
+        })
+        steps.push({
+            array: [6, 5, 4],
+            comparing: [2],
+            message: "Item 3 has weight 30 but capacity left is 20. Take fraction: 20/30 (66.6%) of Item 3. Added value = 80. Total Value = 240."
+        })
+        return steps
+    },
+    'job-scheduling': () => {
+        const steps = []
+        steps.push({
+            array: [100, 50, 40, 20],
+            message: "Job Scheduling: Sort jobs in descending order of profit. Slots: [_, _, _]"
+        })
+        steps.push({
+            array: [100, 50, 40, 20],
+            comparing: [0],
+            message: "Job 1 (Deadline 2, Profit 100) placed in latest slot 2. Slots: [_, 100, _]"
+        })
+        steps.push({
+            array: [100, 50, 40, 20],
+            comparing: [1],
+            message: "Job 2 (Deadline 1, Profit 50) placed in slot 1. Slots: [50, 100, _]"
+        })
+        steps.push({
+            array: [100, 50, 40, 20],
+            comparing: [2],
+            message: "Job 3 (Deadline 2, Profit 40) deadline slot is taken. No free slot. Job skipped."
+        })
+        return steps
+    },
+    'activity-selection': () => {
+        const steps = []
+        steps.push({
+            array: [2, 4, 6, 8],
+            message: "Activity Selection: Sort activities by end time. Activity 1 finishes at 2."
+        })
+        steps.push({
+            array: [2, 4, 6, 8],
+            comparing: [0],
+            message: "Select Activity 1 (0 to 2). Last active finish time = 2."
+        })
+        steps.push({
+            array: [2, 4, 6, 8],
+            comparing: [1],
+            message: "Activity 2 (3 to 4) starts after 2. Select Activity 2. Last active finish time = 4."
+        })
+        steps.push({
+            array: [2, 4, 6, 8],
+            comparing: [2],
+            message: "Activity 3 (2 to 6) starts at 2, which is before 4. Skip Activity 3."
+        })
+        return steps
+    },
+    'merge-intervals': () => {
+        const steps = []
+        steps.push({
+            array: [1, 2, 8, 15],
+            message: "Merge Intervals: Sort intervals by start time: [1,3], [2,6], [8,10], [15,18]."
+        })
+        steps.push({
+            array: [1, 2, 8, 15],
+            comparing: [0, 1],
+            message: "Interval [2,6] overlaps with [1,3] since 2 <= 3. Merge them into [1,6]."
+        })
+        steps.push({
+            array: [1, 2, 8, 15],
+            comparing: [1, 2],
+            message: "Interval [8,10] does not overlap with [1,6]. Output [1,6] and start new merge interval [8,10]."
+        })
+        return steps
+    },
+    'closest-pair-points': () => {
+        const steps = []
+        steps.push({
+            array: [2, 5, 9, 12, 18],
+            message: "Closest Pair: Divide plane into two halves at Mid coordinate X=9."
+        })
+        steps.push({
+            array: [2, 5, 9, 12, 18],
+            comparing: [0, 1],
+            message: "Find closest pair in left half: distance dL = 3."
+        })
+        steps.push({
+            array: [2, 5, 9, 12, 18],
+            comparing: [3, 4],
+            message: "Find closest pair in right half: distance dR = 6."
+        })
+        steps.push({
+            array: [2, 5, 9, 12, 18],
+            comparing: [1, 3],
+            message: "Search delta-strip centered at X=9 of width 2*d (d=3). Closest pair in strip is distance = 7. Minimum distance = 3."
+        })
+        return steps
+    },
+    'inversion-count': () => {
+        const steps = []
+        steps.push({
+            array: [2, 4, 1, 3, 5],
+            message: "Inversion Count: Split array into left [2, 4] and right [1, 3, 5]."
+        })
+        steps.push({
+            array: [2, 4, 1, 3, 5],
+            comparing: [1, 2],
+            message: "Merge: compare Left[1]=4 and Right[0]=1. Since 4 > 1, all elements remaining in left partition form inversions. Add (mid - i + 1) = 2 inversions."
+        })
+        return steps
+    },
+    'dp-memoization': () => {
+        const steps = []
+        steps.push({
+            array: [-1, -1, -1, -1, -1],
+            message: "Memoization (Top-down): Initialize cache array with -1."
+        })
+        steps.push({
+            array: [0, 1, -1, -1, -1],
+            comparing: [0, 1],
+            message: "Base cases memoized: cache[0]=0, cache[1]=1."
+        })
+        steps.push({
+            array: [0, 1, 1, -1, -1],
+            comparing: [2],
+            message: "Calculate fib(2) = cache[1] + cache[0] = 1. Write cache[2]=1."
+        })
+        return steps
+    },
+    'dp-tabulation': () => {
+        const steps = []
+        steps.push({
+            array: [0, 1, 0, 0, 0],
+            message: "Tabulation (Bottom-up): Initialize array of size N. Fill base cases dp[0]=0, dp[1]=1."
+        })
+        for (let i = 2; i <= 4; i++) {
+            steps.push({
+                array: Array.from({ length: 5 }, (_, idx) => idx <= i ? (idx <= 1 ? idx : -1) : 0),
+                comparing: [i - 1, i - 2],
+                message: `Iterative step: calculate dp[${i}] = dp[${i-1}] + dp[${i-2}].`
+            })
+        }
+        return steps
+    },
+    'dp-state-design': () => {
+        const steps = []
+        steps.push({
+            array: [0, 0, 0, 0],
+            message: "State Design: Define variables. Let dp[i] represent maximum subsets at length i."
+        })
+        return steps
+    },
+    'dp-state-transition': () => {
+        const steps = []
+        steps.push({
+            array: [0, 0, 0, 0],
+            message: "State Transition: mathematical equation dp[i] = dp[i-1] + dp[i-2]."
+        })
+        return steps
+    },
+    'edit-distance': () => {
+        const steps = []
+        const dp = [
+            [0, 1, 2, 3],
+            [1, 0, 0, 0],
+            [2, 0, 0, 0],
+            [3, 0, 0, 0]
+        ]
+        steps.push({
+            visualizationType: 'grid',
+            grid: dp.map(row => [...row]),
+            rowHeaders: [' ', 'C', 'A', 'T'],
+            colHeaders: [' ', 'C', 'A', 'R'],
+            message: "Edit Distance (Levenshtein): Initialize table headers with delete/insert operations cost."
+        })
+        dp[1][1] = 0
+        steps.push({
+            visualizationType: 'grid',
+            grid: dp.map(row => [...row]),
+            rowHeaders: [' ', 'C', 'A', 'T'],
+            colHeaders: [' ', 'C', 'A', 'R'],
+            activeCells: [[1, 1]],
+            highlightedCells: [[0, 0]],
+            message: "Character match 'C' == 'C'. Cost dp[1][1] = dp[0][0] = 0."
+        })
+        dp[2][2] = 0
+        steps.push({
+            visualizationType: 'grid',
+            grid: dp.map(row => [...row]),
+            rowHeaders: [' ', 'C', 'A', 'T'],
+            colHeaders: [' ', 'C', 'A', 'R'],
+            activeCells: [[2, 2]],
+            highlightedCells: [[1, 1]],
+            message: "Character match 'A' == 'A'. Cost dp[2][2] = dp[1][1] = 0."
+        })
+        dp[3][3] = 1
+        steps.push({
+            visualizationType: 'grid',
+            grid: dp.map(row => [...row]),
+            rowHeaders: [' ', 'C', 'A', 'T'],
+            colHeaders: [' ', 'C', 'A', 'R'],
+            activeCells: [[3, 3]],
+            highlightedCells: [[2, 3], [3, 2], [2, 2]],
+            message: "Character mismatch 'T' !== 'R'. Cost = 1 + min(replace=dp[2][2], delete=dp[2][3], insert=dp[3][2]) = 1."
+        })
+        return steps
+    },
+    'matrix-chain': () => {
+        const steps = []
+        const dp = [
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ]
+        steps.push({
+            visualizationType: 'grid',
+            grid: dp.map(row => [...row]),
+            rowHeaders: ['1', '2', '3', '4'],
+            colHeaders: ['1', '2', '3', '4'],
+            message: "Matrix Chain Multiplication: Initialize DP table. Cost to multiply single matrix = 0."
+        })
+        dp[1][2] = 120
+        steps.push({
+            visualizationType: 'grid',
+            grid: dp.map(row => [...row]),
+            rowHeaders: ['1', '2', '3', '4'],
+            colHeaders: ['1', '2', '3', '4'],
+            activeCells: [[1, 2]],
+            message: "Compute cost for range [1, 2] = A1 (10x20) * A2 (20x30) = 6000."
+        })
+        dp[1][3] = 300
+        steps.push({
+            visualizationType: 'grid',
+            grid: dp.map(row => [...row]),
+            rowHeaders: ['1', '2', '3', '4'],
+            colHeaders: ['1', '2', '3', '4'],
+            activeCells: [[1, 3]],
+            highlightedCells: [[1, 2], [2, 3]],
+            message: "Compute cost for range [1, 3] by checking partitions split points (1, 2)."
+        })
+        return steps
+    },
+    'partition-dp': () => {
+        const steps = []
+        steps.push({
+            array: [0, 0, 0, 0],
+            message: "Partition DP: Solve Palindrome Partitioning II for string 'aab'."
+        })
+        steps.push({
+            array: [0, 0, 1, 1],
+            comparing: [0, 1],
+            message: "Subsegment 'aa' is a palindrome. Min cut for prefix 'aa' = 0."
+        })
+        steps.push({
+            array: [0, 0, 1, 1],
+            comparing: [2],
+            message: "Character 'b' is not a palindrome. Check partition points: cut('aa') + 1 = 1 cut."
+        })
+        return steps
+    },
+    'digit-dp': () => {
+        const steps = []
+        steps.push({
+            array: [0, 0, 0],
+            message: "Digit DP: Count numbers with sum equal to X under tight/loose bounds."
+        })
+        steps.push({
+            array: [1, 0, 0],
+            comparing: [0],
+            message: "Position 0: Place digit 1 (tight limit)."
+        })
+        steps.push({
+            array: [1, 2, 0],
+            comparing: [1],
+            message: "Position 1: Place digit 2 (loose limit)."
+        })
+        return steps
+    },
+    'tree-dp': () => {
+        const steps = []
+        steps.push({
+            treeNodes: ['Node0', 'Node1', 'Node2', 'Node3', 'Node4'],
+            message: "Tree DP: Maximum Independent Set (House Robber III) on tree."
+        })
+        steps.push({
+            treeNodes: ['Node0', 'Node1', 'Node2', 'Node3', 'Node4'],
+            currentNode: 3,
+            message: "DFS visits Leaf Node 3. DP states: [rob=3, skip=0]."
+        })
+        steps.push({
+            treeNodes: ['Node0', 'Node1', 'Node2', 'Node3', 'Node4'],
+            currentNode: 1,
+            visitedNodes: [3],
+            message: "DFS visits Node 1. Compute state from children: rob=1+0=1, skip=max(3,0)=3."
+        })
+        return steps
+    },
+    'bitmask-dp': () => {
+        const steps = []
+        steps.push({
+            array: [0, 0, 0, 0],
+            message: "Bitmask DP: Travelling Salesman Problem (TSP) for 4 nodes. mask=0001 (Node 0 visited)."
+        })
+        steps.push({
+            array: [0, 0, 0, 0],
+            comparing: [0],
+            message: "Current node: 0. Visited mask = 0001."
+        })
+        steps.push({
+            array: [0, 0, 0, 0],
+            comparing: [1],
+            message: "Transition to Node 1: mask becomes 0001 | 0010 = 0011."
+        })
+        return steps
+    },
+    'interval-dp': () => {
+        const steps = []
+        steps.push({
+            array: [0, 0, 0, 0],
+            message: "Interval DP: Solve Burst Balloons for length L=1."
+        })
+        steps.push({
+            array: [0, 0, 0, 0],
+            message: "Iteratively increase length L=2, evaluate transitions."
+        })
+        return steps
+    }
+};
+
 const allGenerators = {
     ...newGenerators,
+    ...phase5to9Generators,
     ...sortingGenerators,
     ...searchingGenerators,
     ...arraysGenerators,
@@ -5348,7 +6430,7 @@ export default function AlgorithmViewer() {
                                 {/* Dynamic Visualization based on category */}
                                 <div className="flex items-center justify-center min-h-[256px] mb-6">
                                     <VisualizationRenderer
-                                        type={getVisualizationType(category)}
+                                        type={currentStepData?.visualizationType || getVisualizationType(category)}
                                         step={currentStepData}
                                         maxValue={maxValue}
                                     />
